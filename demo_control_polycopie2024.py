@@ -5,7 +5,7 @@
 import os
 os.environ.setdefault('OPENBLAS_NUM_THREADS', '1')
 import matplotlib.pyplot
-import numpy
+import numpy 
 import scipy.sparse.linalg
 
 

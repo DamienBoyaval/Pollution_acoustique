@@ -15,6 +15,8 @@ par 1.1 et reduction par 2. L'arret sur stabilisation de chi utilise 1e-6.
 - `essai_niveaux_fractals.py` : niveaux 0, 1 et 2, les deux materiaux et
   les deux sources, avant/apres optimisation, a quantite totale identique.
   Par defaut : 500 Hz, N=64. Voir RESULTATS_NIVEAUX.md pour les essais N=128.
+- `essai_fractal_resonateur.py` : quatre geometries (plat, fractale, resonateur, mix), deux frequences cibles puis diagnostic des pics 500-900 Hz.
+- `plot_pics_hybrides.py` : retracer le balayage spectral local a partir des densites sauvegardees.
 - `etudes.py` : etudes parametrables historiques, voir son aide `--help`.
 
 La source par defaut est l'onde plane imposee en haut (`f_dir[0,:]=1`).
@@ -42,6 +44,8 @@ d'onde. Le calcul complet de 1000 frequences est plus long qu'un essai a 500 Hz.
 - COMPARAISON_MATERIAUX.md : methode de comparaison spectrale et limites.
 - README_GAUSSIENNE.md : configuration de la source gaussienne.
 - README_NIVEAUX_FRACTALS.md : essais des geometries et quantite commune.
+- README_HYBRIDE.md et RESULTATS_HYBRIDE.md : protocole du mix et valeurs observees.
+- CONCLUSIONS_PROVISOIRES.md : choix candidats et limites.
 - RESULTATS_NIVEAUX.md : resultats effectifs N=64 et N=128 et interpretation.
 
 Les programmes sauvegardent leurs figures, CSV, JSON et densites NPZ dans
@@ -52,7 +56,7 @@ Alpha=10-10j restent des demonstrations historiques.
 ## Verification
 
 ```text
-python -m unittest -v test_validation.py test_material_alpha.py test_comparaison_materiaux.py test_gaussienne.py test_niveaux_fractals.py
+python -m unittest -v test_validation.py test_material_alpha.py test_comparaison_materiaux.py test_gaussienne.py test_niveaux_fractals.py test_hybride.py
 ```
 
 Ces tests verifient notamment le gradient adjoint contre differences finies,
