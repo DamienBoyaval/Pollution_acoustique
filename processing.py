@@ -322,7 +322,7 @@ def compute_robin_condition(domain, space_step, f_rob, alpha_rob, beta_rob, beta
 
 def solve_helmholtz(domain, space_step, omega,
                     f, f_dir, f_neu, f_rob,
-                    beta_pde, alpha_pde, alpha_dir, beta_neu, beta_rob, alpha_rob):
+                    beta_pde, alpha_pde, alpha_dir, beta_neu, beta_rob, alpha_rob,return_system=False):
     """
     :param domain:
     :param space_step:
@@ -420,6 +420,9 @@ def solve_helmholtz(domain, space_step, omega,
             row = i * N + j
             if is_in_interior_domain(domain[i, j]):
                 u[i, j] = sol[row]
+
+    if return_system:
+        return u, mat, rhs
 
     return u
 
