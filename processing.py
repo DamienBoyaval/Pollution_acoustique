@@ -322,7 +322,7 @@ def compute_robin_condition(domain, space_step, f_rob, alpha_rob, beta_rob, beta
 
 def solve_helmholtz(domain, space_step, omega,
                     f, f_dir, f_neu, f_rob,
-                    beta_pde, alpha_pde, alpha_dir, beta_neu, beta_rob, alpha_rob,return_system=False):
+                    beta_pde, alpha_pde, alpha_dir, beta_neu, beta_rob, alpha_rob, return_system=False):
     """
     :param domain:
     :param space_step:
@@ -403,7 +403,7 @@ def solve_helmholtz(domain, space_step, omega,
     # -- set robin boundary conditions
     mat, rhs = compute_robin_condition(domain, space_step, f_rob, alpha_rob, beta_rob, beta_pde, mat, rhs)
 
-    print(mat.shape[:])
+    mat = mat.tocsr()
 
     # -- solve linear system
     sol = scipy.sparse.linalg.spsolve(mat, rhs)
@@ -423,7 +423,6 @@ def solve_helmholtz(domain, space_step, omega,
 
     if return_system:
         return u, mat, rhs
-
     return u
 
 

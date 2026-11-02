@@ -59,6 +59,10 @@ def _set_rhs_of_pde(M, N):
 
 
 def _set_geometry_of_domain(M, N, level=0):
+    if level < 0 or int(level) != level or N < 4 or N % (4**level):
+        raise ValueError('Use an integer level >= 0 and N divisible by 4**level (N >= 4).')
+    if M < 2*N:
+        raise ValueError('Use M >= 2*N to contain the fractal and the exterior seed.')
     # -- define geometry
     domain_omega = numpy.zeros((M, N), dtype=numpy.int64)
     # # attention version pour les fractales
@@ -185,8 +189,10 @@ def create_fractal_coordinates(nodes, domain):
     current_node = [[a[k], b[k]] for k in range(len(nodes))]
     l = []
     for k in range(0, len(current_node) - 1):
-        n = (nodes[k + 1][0] - nodes[k][0]).item()
-        m = (nodes[k + 1][1] - nodes[k][1]).item()
+        # Integer grid coordinates avoid one-element array conversions and
+        # roundoff in rotations (e.g. int(3.999999999) would leave a gap).
+        n = current_node[k + 1][0] - current_node[k][0]
+        m = current_node[k + 1][1] - current_node[k][1]
         if n > 0:
             for o in range(0, int(n) + 1):
                 a = [[current_node[k][0] + o], [current_node[k][1]]]
@@ -247,6 +253,7 @@ def partition_domain(domain, seed):
     (M, N) = numpy.shape(domain)
     Neighbours = [seed]
     Visited = []
+    Visited_set = set()  # same traversal; faster membership on fine meshes
 
     if is_on_boundary(domain[seed[0], seed[1]]) == 'BOUNDARY':
         return 'Error: choose another point for seed'
@@ -364,15 +371,16 @@ def partition_domain(domain, seed):
             domain[i, j] = _env.NODE_COMPLEMENTARY
             Neighbours.pop(0)
             Visited.append([i, j])
+            Visited_set.add((i, j))
             count += 1
 
-            if a == 'NOT BOUNDARY' and north not in Visited and north not in Neighbours:
+            if a == 'NOT BOUNDARY' and tuple(north) not in Visited_set and north not in Neighbours:
                 Neighbours.append(north)
-            if b == 'NOT BOUNDARY' and south not in Visited and south not in Neighbours:
+            if b == 'NOT BOUNDARY' and tuple(south) not in Visited_set and south not in Neighbours:
                 Neighbours.append(south)
-            if c == 'NOT BOUNDARY' and east not in Visited and east not in Neighbours:
+            if c == 'NOT BOUNDARY' and tuple(east) not in Visited_set and east not in Neighbours:
                 Neighbours.append(east)
-            if d == 'NOT BOUNDARY' and west not in Visited and west not in Neighbours:
+            if d == 'NOT BOUNDARY' and tuple(west) not in Visited_set and west not in Neighbours:
                 Neighbours.append(west)
             if count > M * N:
                 return Neighbours, Visited
