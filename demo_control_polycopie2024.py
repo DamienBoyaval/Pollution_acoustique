@@ -2,19 +2,18 @@
 
 
 # Python packages
-import os
-os.environ.setdefault('OPENBLAS_NUM_THREADS', '1')
 import matplotlib.pyplot
-import numpy 
+import numpy
+import os
 import scipy.sparse.linalg
 
 
 # MRG packages
 import _env
+import geometrie
 import preprocessing
 import processing
 import postprocessing
-import material_alpha
 #import solutions
 
 
@@ -196,12 +195,6 @@ def your_compute_objective_function(domain_omega, u, spacestep):
 
 
 if __name__ == '__main__':
-    # Choose 'un_materiau' to reproduce the previous single-frequency run.
-    mode = 'comparaison'
-    if mode == 'comparaison':
-        from comparaison_materiaux import run_comparison
-        run_comparison(length_m=1.0, sound_speed=340.0, max_iter=100)
-        raise SystemExit(0)
 
     # ----------------------------------------------------------------------
     # -- Fell free to modify the function call in this cell.
@@ -209,41 +202,18 @@ if __name__ == '__main__':
     # -- set parameters of the geometry
     N = 200  # number of points along x-axis
     M = 2 * N  # number of points along y-axis
-    level = 2 # level of the fractal
-    # forme de la paroi : 'koch', 'plat', 'minkowski', 'creneaux', 'resonateur', 'resonateur_fractal',
-    # 'deux_resonateurs'
-    forme = 'minkowski'
-    f_resonateurs = (110.0, 190.0)  # fréquences visées (Hz) par les deux résonateurs ('deux_resonateurs')
+    level = 1 # level of the fractal
+    # forme de la paroi (cf. geometrie.py) : 'plat', 'koch', 'minkowski', 'creneaux', 'resonateurs'
+    forme = 'resonateurs'
     spacestep = 1.0 / N  # mesh size
 
-    # -- coefficients calculated by the team (exact table index, no interpolation)
-    material = 'ROCK_WOOL'  # or 'RECYCLED_RUBBER'
-    frequency_index = 0  # 0..999: first entry is 500 Hz, last entry is 4000 Hz
-    length_m = 1.0  # physical length scale L, physical grid step = L/N
-    sound_speed = 340.0
-    # même conversion que le solveur : k = omega L / c = 2 pi f L / c
-    k_resonateurs = tuple(2 * numpy.pi * fr * length_m / sound_speed for fr in f_resonateurs)
-    if forme == 'deux_resonateurs':
-        print('Resonateurs : ' + ', '.join(f'{fr:g} Hz (k = {kr:.2f})'
-                                           for fr, kr in zip(f_resonateurs, k_resonateurs)))
-    omega_table, Alpha_table, error_table = material_alpha.load_material(material)
-    omega_physical = omega_table[frequency_index]
-
     # -- set parameters of the partial differential equation
-    kx = -1.0
-    ky = -1.0
-    wavenumber = numpy.sqrt(kx**2 + ky**2)  # wavenumber
-    wavenumber, Alpha_material = material_alpha.solver_parameters(
-        omega_physical, Alpha_table[frequency_index], length_m, sound_speed)
-    wavenumber = float(wavenumber)
-    if wavenumber * spacestep > 2 * numpy.pi / 10:
-        raise ValueError('Mesh too coarse: increase N to keep at least 10 points per wavelength.')
-    print('Materiau :', material)
-    print(f'Pulsation : {omega_physical:.8f} rad/s')
-    print(f'Frequence : {omega_physical / (2 * numpy.pi):.8f} Hz')
-    print(f'Nombre d\'onde du solveur : {wavenumber:.8f}')
-    print(f'Echelle physique L : {length_m:g} m ; c : {sound_speed:g} m/s')
-    print(f'Erreur d\'ajustement fournie : {error_table[frequency_index]:.6e}')
+    c = 340.0  # vitesse du son (m/s) ; le domaine fait 1 m de large
+    f_source = 600.0  # fréquence de la source (Hz)
+    wavenumber = 2 * numpy.pi * f_source / c  # wavenumber
+    # forme 'resonateurs' : un résonateur par nombre d'onde visé, ici réglé sur la source
+    k_resonateurs = (wavenumber,)
+    print(f'Source : {f_source:g} Hz, k = {wavenumber:.4f}')
 
     # ----------------------------------------------------------------------
     # -- Do not modify this cell, these are the values that you will be assessed against.
@@ -255,7 +225,7 @@ if __name__ == '__main__':
     f, f_dir, f_neu, f_rob = preprocessing._set_rhs_of_pde(M, N)
 
     # -- set geometry of domain
-    domain_omega, x, y, _, _ = preprocessing._set_geometry_of_domain(M, N, level, forme, k_resonateurs)
+    domain_omega, x, y = geometrie.creer_domaine(M, N, forme, level, k_resonateurs)
 
     # ----------------------------------------------------------------------
     # -- Fell free to modify the function call in this cell.
@@ -274,10 +244,9 @@ if __name__ == '__main__':
     # -- define material density matrix
     chi = preprocessing._set_chi(M, N, x, y)
     chi = preprocessing.set2zero(chi, domain_omega)
-    chi[domain_omega == _env.NODE_ROBIN] = 1.0  # matériau sur toute la paroi
 
     # -- define absorbing material
-    Alpha = complex(Alpha_material)  # coefficient supplied for this material and omega
+    Alpha = 10.0 - 10.0 * 1j
     # -- this is the function you have written during your project
     #import compute_alpha
     #Alpha = compute_alpha.compute_alpha(...)
