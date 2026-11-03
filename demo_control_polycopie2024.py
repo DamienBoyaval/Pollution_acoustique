@@ -16,8 +16,9 @@ import processing
 import postprocessing
 import geometrie
 import train_source
-#import solutions
 
+#import solutions
+import material_alpha
 
 def your_optimization_procedure(domain_omega, spacestep, omega, f, f_dir, f_neu, f_rob,
                                 beta_pde, alpha_pde, alpha_dir, beta_neu, beta_rob, alpha_rob,
