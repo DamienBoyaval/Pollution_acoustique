@@ -48,10 +48,10 @@ d'onde. Le calcul complet de 1000 frequences est plus long qu'un essai a 500 Hz.
 - CONCLUSIONS_PROVISOIRES.md : choix candidats et limites.
 - RESULTATS_NIVEAUX.md : resultats effectifs N=64 et N=128 et interpretation.
 
-Les programmes sauvegardent leurs figures, CSV, JSON et densites NPZ dans
-leurs dossiers de resultats. Les NPZ et sauvegardes locales ne sont pas
-necessaires pour versionner les resultats legers. Les anciens resultats a
-Alpha=10-10j restent des demonstrations historiques.
+Les programmes regenerent leurs figures, CSV, JSON et densites NPZ dans
+leurs dossiers de resultats. Ces sorties sont locales et ignorees par Git ;
+relancer les scripts correspondants pour les obtenir. Les tables de materiaux
+dans data_alpha/ et les documents de reference sont conserves dans le depot.
 
 ## Verification
 

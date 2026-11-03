@@ -33,8 +33,6 @@ def your_optimization_procedure(domain_omega, spacestep, omega, f, f_dir, f_neu,
     sinon zeta_n / 2, zeta_n / 4, ... jusqu'a ce que J_rel(chi_{n+1}) < J_rel(chi_n).
     """
 
-    if not isinstance(max_iter, (int, numpy.integer)) or max_iter < 0:
-        raise ValueError('max_iter doit etre un entier positif ou nul.')
     numb_iter = max_iter
     tolerance_chi = 1e-6      # seuil du critere d'arret ||chi_{n+1} - chi_n|| < delta
     mu_min = 1e-5             # plus petit pas accepte par la recherche lineaire
@@ -55,8 +53,6 @@ def your_optimization_procedure(domain_omega, spacestep, omega, f, f_dir, f_neu,
 
     # normalisation : J0 = energie initiale (absolue)
     J0 = your_compute_objective_function(domain_omega, u, spacestep)
-    if not J0 > 0:
-        raise ValueError("Energie initiale nulle ou non definie : impossible de normaliser.")
     energy[0, 0] = 1.0
 
 
@@ -153,11 +149,7 @@ def your_project_density(values, domain_omega, V_obj):
     # Euclidean projection onto 0 <= chi <= 1, sum(chi) = V_obj*S.
     masque = domain_omega == _env.NODE_ROBIN
     S = numpy.count_nonzero(masque)
-    if S == 0 or not numpy.isfinite(V_obj) or not 0 <= V_obj <= 1:
-        raise ValueError('A nonempty Robin boundary and 0 <= V_obj <= 1 are required.')
     z = numpy.asarray(values, dtype=float)[masque]
-    if not numpy.all(numpy.isfinite(z)):
-        raise ValueError('Non-finite density.')
     chi = numpy.zeros(domain_omega.shape, dtype=float)
     if V_obj == 0 or V_obj == 1:
         chi[masque] = V_obj
@@ -226,8 +218,6 @@ if __name__ == '__main__':
     wavenumber, Alpha_material = material_alpha.solver_parameters(
         omega_physical, Alpha_table[frequency_index], length_m, sound_speed)
     wavenumber = float(wavenumber)
-    if wavenumber * spacestep > 2 * numpy.pi / 10:
-        raise ValueError('Mesh too coarse: increase N to keep at least 10 points per wavelength.')
     print('Materiau :', material)
     print(f'Pulsation : {omega_physical:.8f} rad/s')
     print(f'Frequence : {omega_physical / (2 * numpy.pi):.8f} Hz')

@@ -18,15 +18,6 @@ def spectral_amplitudes(frequency_hz, speed_kmh=300., reference_speed_kmh=300.,
     fc et width sont des choix de scenario, fixes quand V varie.
     """
     frequency = np.asarray(frequency_hz, dtype=float)
-    positive = [reference_speed_kmh, rolling_peak_hz, aero_peak_hz,
-                rolling_width_octaves, aero_width_octaves]
-    if not np.all(np.isfinite(frequency)) or np.any(frequency <= 0):
-        raise ValueError('La frequence en Hz doit etre finie et strictement positive.')
-    if not np.all(np.isfinite(positive)) or np.any(np.asarray(positive) <= 0):
-        raise ValueError('Vitesse de reference, centres et largeurs doivent etre positifs et finis.')
-    nonnegative = np.asarray([speed_kmh, rolling_gain, aero_gain])
-    if not np.all(np.isfinite(nonnegative)) or np.any(nonnegative < 0):
-        raise ValueError('Vitesse et gains doivent etre positifs ou nuls et finis.')
 
     ratio = speed_kmh / reference_speed_kmh
     rolling = rolling_gain * ratio**1.5 * np.exp(
@@ -45,13 +36,7 @@ def gaussian_train_source(domain, spacestep, frequency_hz, speed_kmh=300.,
     Les positions et la largeur restent fixes lors d'un raffinement de grille.
     La somme coherente conserve l'hypothese du programme d'origine.
     """
-    if not np.isfinite(spacestep) or spacestep <= 0 or not np.isfinite(sigma) or sigma <= 0:
-        raise ValueError('Pas spatial et sigma doivent etre positifs et finis.')
-    if np.ndim(frequency_hz) != 0:
-        raise ValueError('Un champ source correspond a une seule frequence.')
     centers = np.asarray([rolling_center, aero_center], dtype=float)
-    if centers.shape != (2, 2) or not np.all(np.isfinite(centers)):
-        raise ValueError('Deux centres finis (x, y) sont requis.')
     amplitudes = spectral_amplitudes(frequency_hz, speed_kmh, **spectral_parameters)
     y, x = np.indices(domain.shape) * spacestep
     source = np.zeros(domain.shape, dtype=complex)
