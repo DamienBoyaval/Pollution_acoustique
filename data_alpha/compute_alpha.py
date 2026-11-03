@@ -30,12 +30,14 @@ class Memoize:
         return self.memo[args]
 
 
-def compute_alpha(omega, material, porosity, resistivity, tortuosity):
+def compute_alpha(omega, material):
     """
     .. warning: $w = 2 \pi f$
     w is called circular frequency
     f is called frequency
     """
+
+    porosity, resistivity, tortuosity = materials_data[material]
 
     # Birch LT
     phi = 0.529  # porosity
@@ -45,6 +47,7 @@ def compute_alpha(omega, material, porosity, resistivity, tortuosity):
     alpha_h = 1.37  # tortuosity
     c_0 = 340.0
 
+    # parameters material
     phi = porosity
     gamma_p = 7.0 / 5.0
     sigma = resistivity
@@ -178,12 +181,14 @@ def compute_alpha(omega, material, porosity, resistivity, tortuosity):
     return temp_alpha, temp_error
 
 
-def run_compute_alpha(material, porosity, resistivity, tortuosity):
+def run_compute_alpha(material):
+    porosity, resistivity, tortuosity = materials_data[material]
+
     print('Computing alpha...')
     numb_omega = 1000  # 1000
     # omegas = numpy.logspace(numpy.log10(600), numpy.log10(30000), num=numb_omega)
     omegas = numpy.linspace(2.0 * numpy.pi * 500, 2.0 * numpy.pi * 4000, num=numb_omega)
-    temp = [compute_alpha(omega, material, porosity, resistivity, tortuosity) for omega in omegas]
+    temp = [compute_alpha(omega, material) for omega in omegas]
     print("temp:", "------", temp)
     alphas, errors = map(list, zip(*temp))
     alphas = numpy.array(alphas)
@@ -205,6 +210,50 @@ def run_compute_alpha(material, porosity, resistivity, tortuosity):
     # scipy.io.mmwrite(output_filename, errors.reshape(errors.shape[0], 1), field='complex', symmetry='general')
 
     output_filename = 'dta_alpha_' + str(material) + '.csv'
+    header = "Frequency,Alpha_Real,Alpha_Imaginary,Error"
+    
+    numpy.savetxt(
+        output_filename,
+        combined_data,
+        delimiter=",",
+        header=header,
+        comments=""
+    )
+
+    print(f'File saved as {output_filename}.')
+    
+    return
+
+
+def run_compute_alpha_omegas(material, omegas):
+    porosity, resistivity, tortuosity = materials_data[material]
+
+    print('Computing alpha...')
+    # numb_omega = 1000  # 1000
+    # omegas = numpy.logspace(numpy.log10(600), numpy.log10(30000), num=numb_omega)
+    # omegas = numpy.linspace(2.0 * numpy.pi * 500, 2.0 * numpy.pi * 4000, num=numb_omega)
+    temp = [compute_alpha(omega, material) for omega in omegas]
+    print("temp:", "------", temp)
+    alphas, errors = map(list, zip(*temp))
+    alphas = numpy.array(alphas)
+    errors = numpy.array(errors)
+
+    combined_data = numpy.zeros((len(omegas), 4))
+
+    combined_data[:, 0] = numpy.real(omegas)
+    combined_data[:, 1] = numpy.real(alphas)
+    combined_data[:, 2] = numpy.imag(alphas)
+    combined_data[:, 3] = numpy.real(errors)
+
+    print('Writing alpha...')
+    # output_filename = 'dta_omega_' + str(material) + '.mtx'
+    # scipy.io.mmwrite(output_filename, omegas.reshape(alphas.shape[0], 1), field='complex', symmetry='general')
+    # output_filename = 'dta_alpha_' + str(material) + '.mtx'
+    # scipy.io.mmwrite(output_filename, alphas.reshape(alphas.shape[0], 1), field='complex', symmetry='general')
+    # output_filename = 'dta_error_' + str(material) + '.mtx'
+    # scipy.io.mmwrite(output_filename, errors.reshape(errors.shape[0], 1), field='complex', symmetry='general')
+
+    output_filename = 'dta_alpha_omegas_' + str(material) + '.csv'
     header = "Frequency,Alpha_Real,Alpha_Imaginary,Error"
     
     numpy.savetxt(
@@ -270,30 +319,38 @@ def run_plot_alpha(material):
 
 
 def run():
-    materials_data = [
-        # (Material Name, Porosity phi, Resistivity sigma, Tortuosity alpha_h)
-        ('RECYCLED_RUBBER', 0.42, 18000.0, 1.95),
-        ('POROUS_CONCRETE', 0.38, 15000.0, 2.10),
-        ('ROCK_WOOL', 0.96, 32000.0, 1.02),
-        ('ALUMINIUM_FOAM', 0.78, 10000.0, 1.40),
-        ('WOOD_WOOL', 0.65, 12000.0, 1.75),
-        ('MELANINE_FOAM', 0.98, 11000.0, 1.02),
-        ('POROUS_ASPHALT', 0.25, 12000.0, 2.50),
-        ('RECYCLED_GLASS', 0.48, 19000.0, 1.85),
-        ('POLYESTER_FIBER', 0.95, 20000.0, 1.02),
-        ('HEMP_CONCRETE', 0.74, 8000.0, 1.80)
-    ]
 
-    for (material, phi, sigma, alpha_h) in materials_data:
+    for material in materials_data.keys():
         path = 'dta_alpha_' + str(material) + '.csv'
 
         if not os.path.isfile(path):
             print(f'Running alpha for {material}...')
-            run_compute_alpha(material, phi, sigma, alpha_h)
+            run_compute_alpha(material)
             #run_plot_alpha(material)
+
+    omega_example = 2.0 * numpy.pi * 1000
+    omegas = [omega_example]  # CHANGE HERE FOR CRITICAL FREQUENCIES
+
+    for material in materials_data.keys():
+        print(f'Running {material} alpha for critical frequencies...')
+        run_compute_alpha_omegas(material, omegas)
+        #run_plot_alpha(material)
 
     return
 
+materials_data = {
+    # (Material Name, Porosity phi, Resistivity sigma, Tortuosity alpha_h)
+    'RECYCLED_RUBBER': (0.42, 18000.0, 1.95),
+    'POROUS_CONCRETE': (0.38, 15000.0, 2.10),
+    'ROCK_WOOL': (0.96, 32000.0, 1.02),
+    'ALUMINIUM_FOAM': (0.78, 10000.0, 1.40),
+    'WOOD_WOOL': (0.65, 12000.0, 1.75),
+    'MELANINE_FOAM': (0.98, 11000.0, 1.02),
+    'POROUS_ASPHALT': (0.25, 12000.0, 2.50),
+    'RECYCLED_GLASS': (0.48, 19000.0, 1.85),
+    'POLYESTER_FIBER': (0.95, 20000.0, 1.02),
+    'HEMP_CONCRETE': (0.74, 8000.0, 1.80)
+}
 
 if __name__ == '__main__':
     run()
