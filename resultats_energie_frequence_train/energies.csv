@@ -1,0 +1,2 @@
+frequency_hz,energy_initial,energy_optimized,energy_binary,ratio_optimized,ratio_binary,fraction_initial,fraction_optimized,fraction_binary,accepted_iterations,amplitude_rolling,amplitude_aero
+499.99999999999994,1.0613607052292802e-06,6.099265097959397e-07,7.760191200220854e-07,0.5746646797746111,0.7311549374295387,0.3,0.29999999999999993,0.21875,100,0.7788007830714048,1.0
