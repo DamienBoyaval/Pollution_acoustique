@@ -19,105 +19,120 @@ import material_alpha
 
 
 def your_optimization_procedure(domain_omega, spacestep, omega, f, f_dir, f_neu, f_rob,
-                           beta_pde, alpha_pde, alpha_dir, beta_neu, beta_rob, alpha_rob,
-                           Alpha, mu, chi, V_obj):
-    """This function return the optimized density.
+                                beta_pde, alpha_pde, alpha_dir, beta_neu, beta_rob, alpha_rob,
+                                Alpha, mu, chi, V_obj):
+    """Descente de gradient projete (pulsation omega fixee, volume V_obj fixe).
 
-    Parameter:
-        cf solvehelmholtz's remarks
-        Alpha: complex, it corresponds to the absorbtion coefficient;
-        mu: float, it is the initial step of the gradient's descent;
-        V_obj: float, it characterizes the volume constraint on the density chi.
+    On minimise l'energie RELATIVE J_rel(chi) = J(chi) / J(chi_0), de sorte que
+    J_rel et son gradient soient en O(1) (J seul vaut ~1e-6 ici, ce qui rendait
+    le pas mu = 5 et l'increment 0.001 completement inadaptes).
+
+    chi_{n+1} = P(chi_n - zeta_n * grad J_rel(chi_n))
+    zeta_{n+1} = zeta_n + 0.001 si l'energie J_rel diminue,
+    sinon zeta_n / 2, zeta_n / 4, ... jusqu'a ce que J_rel(chi_{n+1}) < J_rel(chi_n).
     """
 
-    k = 0
-    (M, N) = numpy.shape(domain_omega)
     numb_iter = 100
-    tolerance_chi = 1e-6
-    chi_stabilise = False
-    energy = numpy.zeros((numb_iter+1, 1), dtype=numpy.float64)
-    chi = your_project_density(chi, domain_omega, V_obj)
-    grad = numpy.zeros((M, N), dtype=numpy.float64)
-    print(f"Coefficient Alpha utilise : {Alpha}")
-    print(f"Quantite de materiau imposee : {V_obj * numpy.count_nonzero(domain_omega == _env.NODE_ROBIN):.8f}")
-    while k < numb_iter and mu > 10**(-2):
-        print('---- iteration number = ', k)
-        print('1. computing solution of Helmholtz problem, i.e., u')
-        u, mat, rhs = processing.solve_helmholtz(
+    tolerance_chi = 1e-6      # seuil du critere d'arret ||chi_{n+1} - chi_n|| < delta
+    mu_min = 1e-5             # plus petit pas accepte par la recherche lineaire
+    mu_increase = 0.001       # increment du pas : zeta_{n+1} = zeta_n + 0.001 si succes
+
+    (M, N) = numpy.shape(domain_omega)
+    energy = numpy.zeros((numb_iter + 1, 1), dtype=numpy.float64)  # energie relative J/J0
+
+    def solve(chi_loc):
+        return processing.solve_helmholtz(
             domain_omega, spacestep, omega, f, f_dir, f_neu, f_rob,
             beta_pde, alpha_pde, alpha_dir, beta_neu, beta_rob,
-            Alpha * chi, return_system=True)
-        print('2. computing solution of adjoint problem, i.e., p')
+            Alpha * chi_loc, return_system=True)
+
+    # initialisation : projection de chi_0 dans l'ensemble admissible U_ad(V_obj)
+    chi = your_project_density(chi, domain_omega, V_obj)
+    u, mat, _ = solve(chi)
+
+    # normalisation : J0 = energie initiale (absolue)
+    J0 = your_compute_objective_function(domain_omega, u, spacestep)
+    if not J0 > 0:
+        raise ValueError("Energie initiale nulle ou non definie : impossible de normaliser.")
+    energy[0, 0] = 1.0
+
+    print(f"Coefficient Alpha utilise : {Alpha}")
+    print(f"Quantite de materiau imposee : {V_obj * numpy.count_nonzero(domain_omega == _env.NODE_ROBIN):.8f}")
+    print(f"Energie initiale absolue J0 : {J0:.6e}")
+
+    variation_chi = numpy.inf
+    k = 0
+    while k < numb_iter and mu > mu_min:
+        print('---- numero d\'iteration = ', k)
+        print('1-2. probleme adjoint, i.e., p')
         p = your_compute_adjoint(domain_omega, u, spacestep, mat)
-        print('3. computing objective function, i.e., energy')
-        energy[k, 0] = your_compute_objective_function(domain_omega, u, spacestep)
-        print(f"   Energie actuelle : {energy[k, 0]:.12f}")
-        print('4. computing parametric gradient')
+        print('3. gradient parametrique')
         grad = your_compute_gradient(domain_omega, u, p, spacestep,
-                                     f_rob, beta_pde, beta_rob, Alpha, chi)
-        print(f"   Norme de l'adjoint : {numpy.linalg.norm(p):.6e}")
-        print(f"   Norme du gradient : {numpy.linalg.norm(grad):.6e}")
+                                     f_rob, beta_pde, beta_rob, Alpha, chi) / J0
+        print(f"   Energie relative actuelle : {energy[k, 0]:.12f}")
+        print(f"   Norme du gradient (normalise) : {numpy.linalg.norm(grad):.6e}")
+
+        # Recherche lineaire : division du pas par 2 tant que l'energie ne diminue pas
         ene = energy[k, 0]
-        bool_a = False
-        while ene >= energy[k, 0] and mu > 10 ** -5:
-            print('    a. computing gradient descent')
-            chi_test = chi - mu * grad
-            print('    b. computing projected gradient')
-            chi_test = your_project_density(chi_test, domain_omega, V_obj)
-            print('    c. computing solution of Helmholtz problem, i.e., u')
-            u_test = processing.solve_helmholtz(
-                domain_omega, spacestep, omega, f, f_dir, f_neu, f_rob,
-                beta_pde, alpha_pde, alpha_dir, beta_neu, beta_rob, Alpha * chi_test)
-            print('    d. computing objective function, i.e., energy (E)')
-            ene = your_compute_objective_function(domain_omega, u_test, spacestep)
-            print(f"   Pas teste : {mu:.8g} | Energie testee : {ene:.12f}")
-            print(f"   Variation de chi : {numpy.linalg.norm(chi_test - chi):.6e}")
-            bool_a = numpy.isfinite(ene) and ene < energy[k, 0]
-            print("   Essai accepte" if bool_a else "   Essai refuse : reduction du pas")
-            if bool_a:
-                # Evaluate the accepted change before replacing the current density.
+        while ene >= energy[k, 0] and mu > mu_min:
+            chi_test = your_project_density(chi - mu * grad, domain_omega, V_obj)
+            u_test, mat_test, _ = solve(chi_test)
+            ene = your_compute_objective_function(domain_omega, u_test, spacestep) / J0
+            print(f"   Pas teste : {mu:.8g} | Energie relative testee : {ene:.12f}")
+
+            if ene < energy[k, 0]:
                 variation_chi = numpy.linalg.norm(chi_test - chi)
-                chi_stabilise = variation_chi < tolerance_chi
-                chi = chi_test
-                u = u_test
-                # The step is increased if the energy decreased
-                mu = mu * 1.1
+                chi, u, mat = chi_test, u_test, mat_test
+                mu = mu + mu_increase
             else:
-                # The step is decreased is the energy increased
                 mu = mu / 2
-                ene = energy[k, 0]  # force another trial, also for non-finite energy
-        if not bool_a:
-            break  # no rejected trial may replace the last accepted density
+
+        # Arret si le pas est devenu trop petit sans ameliorer l'energie
+        if ene >= energy[k, 0]:
+            break
+
         k += 1
         energy[k, 0] = ene
-        if chi_stabilise:
-            break  # keep this accepted state and its energy in the history
+        print(f"   Essai accepte | variation de chi : {variation_chi:.6e}")
 
-    print('end. computing solution of Helmholtz problem, i.e., u')
-    u, mat, rhs = processing.solve_helmholtz(
-        domain_omega, spacestep, omega, f, f_dir, f_neu, f_rob,
-        beta_pde, alpha_pde, alpha_dir, beta_neu, beta_rob,
-        Alpha * chi, return_system=True)
-    energy[k, 0] = your_compute_objective_function(domain_omega, u, spacestep)
+        if variation_chi < tolerance_chi:
+            print(f"   Arret : stabilisation de chi ({variation_chi:.6e} < {tolerance_chi:.1e})")
+            break
+
+    # -- calcul du gradient pour la densite finale (retourne pour le post-traitement)
     p = your_compute_adjoint(domain_omega, u, spacestep, mat)
     grad = your_compute_gradient(domain_omega, u, p, spacestep,
-                                 f_rob, beta_pde, beta_rob, Alpha, chi)
+                                 f_rob, beta_pde, beta_rob, Alpha, chi) / J0
+
     print("\nBILAN DE L'OPTIMISATION")
     print(f"Iterations acceptees : {k}")
-    print(f"Energie initiale : {energy[0, 0]:.12f}")
-    print(f"Energie finale : {energy[k, 0]:.12f}")
-    if energy[0, 0] > 0:
-        print(f"Reduction : {100 * (1 - energy[k, 0] / energy[0, 0]):.4f} %")
+    print(f"Energie initiale (absolue) : {J0:.12e}")
+    print(f"Energie finale (absolue) : {J0 * energy[k, 0]:.12e}")
+    print(f"Energie finale relative J/J0 : {energy[k, 0]:.12f}")
+    print(f"Reduction : {100 * (1 - energy[k, 0]):.4f} %")
     print(f"Quantite de materiau finale : {numpy.sum(chi):.8f}")
     print(f"Dernier pas : {mu:.8g}")
-    if chi_stabilise:
-        print(f"Arret : stabilisation de chi ({variation_chi:.6e} < {tolerance_chi:.1e})")
-    elif k == numb_iter:
-        print("Arret : limite d'iterations atteinte")
-    else:
-        print("Arret : pas inferieur au seuil de la boucle")
-    return chi, energy[:k+1], u, grad
 
+    # energy = historique de J/J0 (1 -> valeur finale), grad = gradient de J/J0
+    return chi, energy[:k + 1], u, grad
+
+def binarize_chi_threshold(chi, domain_omega, threshold=0.5):
+    """
+    Transforme chi en fonction binaire {0, 1} avec un seuil explicite.
+    """
+    M, N = chi.shape
+    chi_bin = numpy.zeros((M, N), dtype=numpy.float64)
+
+    for i in range(M):
+        for j in range(N):
+            # On ne modifie que les points situés sur la frontière de Robin
+            if domain_omega[i, j] == _env.NODE_ROBIN:
+                if chi[i, j] >= threshold:
+                    chi_bin[i, j] = 1.0
+                else:
+                    chi_bin[i, j] = 0.0
+
+    return chi_bin
 
 def your_compute_adjoint(domain_omega, u, spacestep, mat):
     # Discrete adjoint: A^H p = h^2 u on the interior, zero elsewhere.
@@ -197,7 +212,7 @@ def your_compute_objective_function(domain_omega, u, spacestep):
 
 if __name__ == '__main__':
     # Choose 'un_materiau' to reproduce the previous single-frequency run.
-    mode = 'comparaison'
+    mode = 'un_materiau'
     if mode == 'comparaison':
         from comparaison_materiaux import run_comparison
         run_comparison(length_m=1.0, sound_speed=340.0, max_iter=100)
@@ -307,9 +322,15 @@ if __name__ == '__main__':
     # -- initialize
     alpha_rob[:, :] = - wavenumber * 1j
 
+    # -- set parameters for optimization
+    S = numpy.count_nonzero(domain_omega == _env.NODE_ROBIN)
+    V_0 = 1  # initial volume of the domain
+    V_obj = 0.3  # constraint on the density (30% of the Robin boundary)
+
     # -- define material density matrix
     chi = preprocessing._set_chi(M, N, x, y)
     chi = preprocessing.set2zero(chi, domain_omega)
+    chi = your_project_density(chi, domain_omega, V_obj)
 
     # -- define absorbing material
     Alpha = complex(Alpha_material)  # coefficient supplied for this material and omega
@@ -318,14 +339,6 @@ if __name__ == '__main__':
     #Alpha = compute_alpha.compute_alpha(...)
     alpha_rob = Alpha * chi
 
-    # -- set parameters for optimization
-    S = 0  # surface of the fractal
-    for i in range(0, M):
-        for j in range(0, N):
-            if domain_omega[i, j] == _env.NODE_ROBIN:
-                S += 1
-    V_0 = 1  # initial volume of the domain
-    V_obj = numpy.sum(numpy.sum(chi)) / S  # constraint on the density
     mu = 5  # initial gradient step
     mu1 = 10**(-5)  # parameter of the volume functional
 
