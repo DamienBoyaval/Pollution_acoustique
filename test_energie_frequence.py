@@ -23,7 +23,7 @@ import train_source
 import demo_control_polycopie2024 as demo
 
 
-def run(fmin=500., fmax=1000., points=100, N=None, max_iter=100,
+def run(fmin=500., fmax=1000., points=5, N=None, max_iter=100,
         material='ROCK_WOOL', level=0, fraction=.3, speed=300.,
         threshold=.5, output='resultats_energie_frequence_train'):
     omega, alpha, _ = material_alpha.load_material(material)
@@ -55,6 +55,11 @@ def run(fmin=500., fmax=1000., points=100, N=None, max_iter=100,
     fd[:] = 0.
     chi0 = demo.your_project_density(pre.set2zero(pre._set_chi(M,N,x,y), d), d, fraction)
     boundary_count = np.count_nonzero(d == _env.NODE_ROBIN)
+
+    # Paroi entierement absorbante (chi = 1 sur toute la frontiere de Robin)
+    chi_full = np.zeros((M, N), dtype=float)
+    chi_full[d == _env.NODE_ROBIN] = 1.0
+
     config = dict(material=material, N=N, level=level, max_iter=max_iter,
                   fraction=fraction, threshold=threshold, speed_kmh=speed,
                   length_m=1., sound_speed=340., source='train_source defaults; coherent',
@@ -88,15 +93,18 @@ def run(fmin=500., fmax=1000., points=100, N=None, max_iter=100,
             final_energy = energy(u)  # history contient J/J0, pas l'energie absolue.
             chi_binary = demo.binarize_chi_threshold(chi,d,threshold)
             binary_energy = energy(solve(chi_binary))
-            if not np.all(np.isfinite([initial_energy,final_energy,binary_energy])) or initial_energy <= 0:
+            full_energy = energy(solve(chi_full))
+            if not np.all(np.isfinite([initial_energy,final_energy,binary_energy,full_energy])) or initial_energy <= 0:
                 raise RuntimeError(f'Energie invalide a {frequency} Hz.')
             np.testing.assert_allclose(final_energy/initial_energy,history[-1,0],rtol=1e-8)
             if final_energy > initial_energy*(1+1e-10):
                 raise RuntimeError('L optimisation continue a augmente l energie.')
             row = dict(frequency_hz=frequency, energy_initial=initial_energy,
                        energy_optimized=final_energy, energy_binary=binary_energy,
+                       energy_full=full_energy,
                        ratio_optimized=final_energy/initial_energy,
                        ratio_binary=binary_energy/initial_energy,
+                       ratio_full=full_energy/initial_energy,
                        fraction_initial=float(chi0.sum()/boundary_count),
                        fraction_optimized=float(chi.sum()/boundary_count),
                        fraction_binary=float(chi_binary.sum()/boundary_count),
@@ -112,8 +120,8 @@ def run(fmin=500., fmax=1000., points=100, N=None, max_iter=100,
             continuous_densities.append(chi.copy())
             binary_densities.append(chi_binary.copy())
             print(f'[{number}/{points}] {frequency:.2f} Hz : initial={initial_energy:.4e}, '
-                  f'binaire={binary_energy:.4e}',flush=True)
-    np.savez_compressed(out/'densites.npz', domain=d, chi_initial=chi0,
+                  f'binaire={binary_energy:.4e}, full={full_energy:.4e}',flush=True)
+    np.savez_compressed(out/'densites.npz', domain=d, chi_initial=chi0, chi_full=chi_full,
                         frequency_hz=frequencies[indices],
                         chi_optimized=np.array(continuous_densities), chi_binary=np.array(binary_densities))
     plot_results(rows,out,material)
@@ -121,23 +129,22 @@ def run(fmin=500., fmax=1000., points=100, N=None, max_iter=100,
     return rows, config
 
 
-def plot_results(rows,out,material):
+def plot_results(rows, out, material):
     frequency = [r['frequency_hz'] for r in rows]
-    fig, axes = plt.subplots(2,1,figsize=(10,8),sharex=True,layout='constrained')
-    for key,label,color in [('initial','Frontiere initiale','#687386'),
-                            ('binary','Apres seuillage binaire','#be5c20')]:
-        axes[0].semilogy(frequency,[r['energy_'+key] for r in rows],'.-',label=label,color=color)
-    axes[0].set_ylabel('Energie absolue du champ (unites du modele)')
-    axes[0].legend()
-    for key,label,color in [('binary','Binaire / initiale','#be5c20')]:
-        axes[1].plot(frequency,[r['ratio_'+key] for r in rows],'.-',label=label,color=color)
-    axes[1].axhline(1.,color='#687386',linestyle='--',label='Energie initiale')
-    axes[1].set(xlabel='Frequence (Hz)',ylabel='Rapport a l energie initiale')
-    axes[1].legend()
-    for ax in axes:
-        ax.grid(True,alpha=.25)
+    fig, ax = plt.subplots(figsize=(10, 5), layout='constrained')
+    
+    for key, label, color in [('initial', 'Frontiere initiale', '#687386'),
+                              ('binary', 'Apres seuillage binaire', '#be5c20'),
+                              ('full', 'Paroi entierement absorbante (100%)', '#2b8a3e')]:
+        ax.semilogy(frequency, [r['energy_' + key] for r in rows], '.-', label=label, color=color)
+        
+    ax.set_xlabel('Frequence (Hz)')
+    ax.set_ylabel('Energie absolue du champ (unites du modele)')
+    ax.legend()
+    ax.grid(True, alpha=0.25)
+    
     fig.suptitle(f'Source train - {material}\nOptimisation independante a chaque frequence (chi different)')
-    fig.savefig(out/'energie_avant_apres.png',dpi=160)
+    fig.savefig(out / 'energie_avant_apres.png', dpi=160)
     plt.close(fig)
 
 
@@ -145,7 +152,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--fmin',type=float,default=500.)
     parser.add_argument('--fmax',type=float,default=1000.)
-    parser.add_argument('--points',type=int,default=100)
+    parser.add_argument('--points',type=int,default=5)
     parser.add_argument('--N',type=int,default=None)
     parser.add_argument('--max-iter',type=int,default=100)
     parser.add_argument('--material',choices=material_alpha.MATERIALS,default='ROCK_WOOL')
