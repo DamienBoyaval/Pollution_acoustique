@@ -33,8 +33,6 @@ def your_optimization_procedure(domain_omega, spacestep, omega, f, f_dir, f_neu,
     sinon zeta_n / 2, zeta_n / 4, ... jusqu'a ce que J_rel(chi_{n+1}) < J_rel(chi_n).
     """
 
-    if not isinstance(max_iter, (int, numpy.integer)) or max_iter < 0:
-        raise ValueError('max_iter doit etre un entier positif ou nul.')
     numb_iter = max_iter
     tolerance_chi = 1e-6      # seuil du critere d'arret ||chi_{n+1} - chi_n|| < delta
     mu_min = 1e-5             # plus petit pas accepte par la recherche lineaire

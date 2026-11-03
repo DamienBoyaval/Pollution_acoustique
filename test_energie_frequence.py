@@ -113,7 +113,7 @@ def run(fmin=500., fmax=1000., points=5, N=None, max_iter=100,
             continuous_densities.append(chi.copy())
             binary_densities.append(chi_binary.copy())
             print(f'[{number}/{points}] {frequency:.2f} Hz : initial={initial_energy:.4e}, '
-                  f'binaire={binary_energy:.4e}, full={full_energy:.4e}',flush=True)
+                  f'optimale={final_energy:.4e}, binaire={binary_energy:.4e}, full={full_energy:.4e}',flush=True)
     np.savez_compressed(out/'densites.npz', domain=d, chi_initial=chi0, chi_full=chi_full,
                         frequency_hz=frequencies[indices],
                         chi_optimized=np.array(continuous_densities), chi_binary=np.array(binary_densities))
@@ -123,13 +123,14 @@ def run(fmin=500., fmax=1000., points=5, N=None, max_iter=100,
 
 
 def plot_results(rows, out, material):
-    frequency = [r['frequency_hz'] for r in rows]
+    frequency = [float(r['frequency_hz']) for r in rows]
     fig, ax = plt.subplots(figsize=(10, 5), layout='constrained')
     
     for key, label, color in [('initial', 'Frontiere initiale', '#687386'),
+                              ('optimized', 'Repartition optimale', '#1971c2'),
                               ('binary', 'Apres seuillage binaire', '#be5c20'),
                               ('full', 'Paroi entierement absorbante (100%)', '#2b8a3e')]:
-        ax.semilogy(frequency, [r['energy_' + key] for r in rows], '.-', label=label, color=color)
+        ax.semilogy(frequency, [float(r['energy_' + key]) for r in rows], '.-', label=label, color=color)
         
     ax.set_xlabel('Frequence (Hz)')
     ax.set_ylabel('Energie absolue du champ (unites du modele)')
@@ -139,6 +140,24 @@ def plot_results(rows, out, material):
     fig.suptitle(f'Source train - {material}\nOptimisation independante a chaque frequence (chi different)')
     fig.savefig(out / 'energie_avant_apres.png', dpi=160)
     plt.close(fig)
+
+
+def replot(output='resultats_energie_frequence_train', material=None):
+    out = Path(output).resolve()
+    csv_path = out / 'energies.csv'
+    if not csv_path.exists():
+        raise FileNotFoundError(f'{csv_path} introuvable.')
+    if material is None:
+        cfg_path = out / 'configuration.json'
+        if cfg_path.exists():
+            with cfg_path.open('r', encoding='utf-8') as f:
+                material = json.load(f).get('material', 'ROCK_WOOL')
+        else:
+            material = 'ROCK_WOOL'
+    with csv_path.open('r', encoding='utf-8') as f:
+        rows = list(csv.DictReader(f))
+    plot_results(rows, out, material)
+    print(f'Graphe mis a jour dans : {out / "energie_avant_apres.png"}', flush=True)
 
 
 if __name__ == '__main__':
@@ -154,4 +173,9 @@ if __name__ == '__main__':
     parser.add_argument('--speed',type=float,default=300.)
     parser.add_argument('--threshold',type=float,default=.5)
     parser.add_argument('--output',default='resultats_energie_frequence_train')
-    run(**vars(parser.parse_args()))
+    parser.add_argument('--replot',action='store_true',help='Re-tracer le graphe depuis le CSV existant')
+    args = vars(parser.parse_args())
+    if args.pop('replot'):
+        replot(args['output'], args['material'])
+    else:
+        run(**args)
