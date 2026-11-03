@@ -266,7 +266,7 @@ if __name__ == '__main__':
     sigma = 0.03  # 1.5 mailles pour N=50 ; largeur fixe si le maillage change
     spectral_parameters = dict(
         reference_speed_kmh=V_ref,
-        rolling_peak_hz=1000.0, aero_peak_hz=500.0,
+        rolling_peak_hz=train_source.ROLLING_PEAK_HZ, aero_peak_hz=train_source.AERO_PEAK_HZ,
         rolling_width_octaves=1.0, aero_width_octaves=1.0,
         rolling_gain=1.0, aero_gain=1.0)
     f, (A_roul, A_aero) = train_source.gaussian_train_source(

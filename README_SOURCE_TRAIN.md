@@ -54,14 +54,17 @@ mesurees, ni un ajustement valide sur un TGV particulier.**
 
 | Parametre | Roulement | Aerodynamique |
 |---|---:|---:|
-| Centre de l'enveloppe (Hz) | 1000 | 500 |
+| Centre de l'enveloppe (Hz) | 2250 | 1425 |
 | Largeur b en octaves | 1 | 1 |
 | Exposant quadratique n | 3 | 6 |
 | Gain au centre, a Vref | 1 | 1 |
 
 Les deux centres distincts permettent un essai de sensibilite du placement de
-chi a la repartition du bruit entre les deux positions. Le centre aero a 500 Hz
-est un choix exploratoire, pas une frequence universelle de pantographe.
+chi a la repartition du bruit entre les deux positions. Les centres sont les milieux arithmetiques des bandes 2000-2500 Hz (roues)
+et 1250-1600 Hz (contribution aerodynamique de la motrice) observees sur TGV Duplex :
+Mellet et al. (2006), section 2.1, https://doi.org/10.1016/j.jsv.2005.08.069.
+Ce choix ne calibre ni les amplitudes ni les largeurs. Le premier pic de roulement
+(voie, 800-1000 Hz) n'est pas represente par une enveloppe distincte.
 Vref=300 km/h est une normalisation, pas une vitesse prouvee d'egalite des bruits.
 Les centres ne se deplacent pas avec V dans cette approximation.
 
@@ -96,16 +99,16 @@ Les anciens resultats du dossier n'ont pas ete recalcules avec cette source.
 
 ## Comparaison de l'energie avant/apres suivant la frequence
 
-`python test_energie_frequence.py` trace 15 frequences des tables entre 500 et
-1000 Hz, avec 100 iterations maximum par frequence, la laine de roche et une
+`python test_energie_frequence.py` trace 5 frequences des tables entre 500 et
+3000 Hz, avec 100 iterations maximum par frequence, la laine de roche et une
 fraction initiale de 30 %. Le maillage est choisi pour toute la plage.
 Le programme recalcule les sources du train et Alpha a chaque frequence.
 
 Test court :
 `python test_energie_frequence.py --fmax 600 --points 3 --N 50 --max-iter 8 --output resultats_energie_frequence_train_test`
 
-Bande etendue (calcul plus long) :
-`python test_energie_frequence.py --fmax 4000 --points 40`
+Echantillonnage plus dense (calcul plus long) :
+`python test_energie_frequence.py --fmax 3000 --points 40`
 
 Chaque point repart du meme chi initial et optimise son propre chi ; il ne
 s'agit pas du spectre d'une seule frontiere optimisee puis fixee. La reference
@@ -120,3 +123,9 @@ Le dossier de sortie contient `energie_avant_apres.png`, `energies.csv`,
 Les fichiers d'un meme dossier de sortie sont remplaces lors d'une relance.
 Les points traces sont les frequences exactes selectionnees dans les tables ;
 les lignes entre ces points ne prouvent pas l'absence de pics intermediaires.
+
+Les bornes par defaut et centres spectraux sont centralises dans train_source.py.
+La selection conserve les frequences exactes des tables : la derniere frequence
+inferieure a 3000 Hz est environ 2997,998 Hz. Le maillage automatique est N=96
+pour cette bande au niveau 0. Les anciens CSV/NPZ ne sont pas recalcules :
+leurs configurations historiques restent celles du calcul d'origine.

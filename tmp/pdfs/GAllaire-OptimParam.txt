@@ -1,0 +1,2029 @@
+
+PAGE 1
+5
+Optimisation paramétrique
+5.1 Introduction
+5.1.1 Modélisation
+Dans ce chapitre nous considérons des problèmes d’optimisation para-
+métrique de formes où le domaine de référenceΩ, dans lequel est évalué l’état
+de la structure, ne varie pas. La variation de la forme est, dans cette situa-
+tion, prise en compte à travers un paramètre d’épaisseur, de courbure, etc., qui
+intervient dans les coeﬃcients de l’équation. Nous présentons la démarche gé-
+nérale de l’optimisation paramétrique sur l’exemple de la membrane, introduit
+à la Sous-section 1.2.1, mais la plupart des résultats s’étendent à des modèles
+plus complexes (en particulier, dans la Section 5.6 nous considérons une plaque
+élastique).
+On cherche donc à optimiser l’épaisseur d’une membrane élastique défor-
+mée par une force extérieuref et ﬁxée sur son contour. Au repos la membrane
+occupe un ouvert borné Ω de RN (le modèle est réaliste pour N =2 mais
+les idées se généralisent en dimensions supérieures). On suppose qu’il est pos-
+sible de faire varier l’épaisseur de la membrane, notéeh(x), entre deux valeurs
+extrêmes hmax ≥ hmin > 0. Le coeﬃcient d’élasticité de la membrane est pro-
+portionnel à cette épaisseurh. Le comportement de la membrane est modélisé
+par { −div (h∇u)= f dans Ω
+u =0 sur ∂Ω, (5.1)
+où u est le déplacement vertical de la membrane. Si f ∈ L2(Ω),l eT h é o -
+rème 2.16 nous dit qu’il existe une unique solution u ∈ H1
+0 (Ω). On cherche
+à optimiser la membrane en faisant varier son épaisseurh(x) dans l’ensemble
+admissible déﬁni par
+Uad =
+{
+h ∈ L∞ (Ω) tel que hmax ≥ h(x) ≥ hmin > 0 dans Ω,∫
+Ω h(x)dx = h0|Ω |
+}
+, (5.2)
+
+PAGE 2
+78 5 Optimisation paramétrique
+avec hmax >h 0 >h min. Remarquons qu’à partir du moment où la fonction
+h(x) est mesurable, le fait que h est bornée par hmin et hmax entraîne au-
+tomatiquement qu’elle appartient à L∞ (Ω); le choix de cet espace est donc
+naturel et n’est pas une contrainte supplémentaire. Pour l’instant on n’impose
+aucune contrainte de régularité à l’épaisseur h qui peut être discontinue. On
+déﬁnit une fonction coût
+J(h)=
+∫
+Ω
+j
+(
+x, u(x)
+⎫
+dx, (5.3)
+où u est la solution de (5.1) (et donc dépend de h)e t j(x, u) est une fonction
+de Ω × R dans R que l’on suppose continue (ou même seulement mesurable)
+par rapport à x et de classe C1 par rapport à u, telle que |j(x, u)|≤ C(u2 +1)
+et |j′(x, u)|≤ C(|u| +1 ) pour tout x ∈ Ω et u ∈ R où j′ désigne la dérivée
+partielle de j par rapport à u (d’autres hypothèses sur j sont possibles, mais
+on choisit celles-ci par souci de simplicité). Dans la suite, pour alléger la
+présentation on omettra la variable x et on écrira juste j(u).L ep r o b l è m e
+d’optimisation s’écrit
+inf
+h∈Uad
+J(h). (5.4)
+Comme exemples de fonction j, on peut prendre j(u)= fu, c’est-à-dire que
+l’on veut minimiser la compliance ou le travail des forces extérieures (ce qui
+revient à maximiser la rigidité de la membrane), ou bienj(u)= |u−u0|2 si l’on
+veut que le déplacement u soit proche d’un déplacement désiré u0 ∈ L2(Ω).
+5.1.2 Continuité de la fonction coût
+Avant d’étudier l’existence d’une épaisseur optimale nous montrons que la
+fonction coût est continue.
+Proposition 5.1. On suppose que la fonction j est continue de R dans R et
+vériﬁe |j(u)|≤ C(u2 +1 ). Alors la fonction
+h → J(h)=
+∫
+Ω
+j(u)dx avec u solution de (5.1)
+est continue de {h ∈ L∞ (Ω) ,h (x) ≥ hmin > 0 dans Ω } dans R.
+Démonstration. Par composition d’applications continues la proposition est
+vraie au vu des Lemmes 5.2 et 5.3. ⊓⊔
+Lemme 5.2. Soit une fonction j continue de R dans R qui vériﬁe |j(u)|≤
+C(u2 +1 ). Alors la fonction
+u →
+∫
+Ω
+j(u)dx
+est continue de L2(Ω) dans R.
+
+PAGE 3
+5.1 Introduction 79
+Démonstration. Soit un une suite qui converge vers u dans L2(Ω), i.e.
+lim
+n→ +∞
+∫
+Ω
+|un(x) − u(x)|2dx =0 .
+Un résultat classique [28] aﬃrme qu’il existe une sous-suiteun′ et une fonction
+v ∈ L2(Ω) telles que
+un′ (x) → u(x) et |un′ (x)|≤ v(x) presque partout dans Ω.
+On peut donc appliquer le théorème de convergence dominée de Lebesgue à
+j(un′ ) pour obtenir
+lim
+n→ +∞
+∫
+Ω
+j(un′ )dx =
+∫
+Ω
+j(u)dx. (5.5)
+On a ainsi obtenu le résultat de continuité pour une sous-suite. En fait la
+continuité est vraie pour toute la suite un car, s’il existe une sous-suite pour
+laquelle la convergence (5.5) n’a pas lieu, on obtient une contradiction pour
+une sous-suite de cette sous-suite par l’argument ci-dessus. ⊓⊔
+Lemme 5.3. Soit une suite hn ∈{ h ∈ L∞ (Ω) ,h (x) ≥ hmin > 0 dans Ω }
+qui converge vers une limite h∞ pour la norme de L∞ (Ω).S o i tun (respecti-
+vement u∞ ) la solution unique dans H1
+0 (Ω) de l’équation (5.1) associée àhn
+(respectivement à h∞ ). Alors, on a
+lim
+n→∞
+∥un − u∞ ∥H1
+0 (Ω ) =0 .
+Démonstration. Soit un la solution de (5.1) pour l’épaisseurhn, c’est-à-dire
+la solution dans H1
+0 (Ω) de la formulation variationnelle
+∫
+Ω
+hn∇un ·∇ φd x=
+∫
+Ω
+fφdx ∀φ ∈ H1
+0 (Ω).
+En prenant φ = un dans cette formulation variationnelle, on obtient d’abord
+hmin∥∇un∥2
+L2(Ω ) ≤
+∫
+Ω
+hn∇un ·∇ un dx =
+∫
+Ω
+fun dx ≤∥ un∥L2(Ω )∥f ∥L2(Ω ).
+En utilisant l’inégalité de Poincaré (voir la Proposition 2.9) on en déduit
+∥∇un∥L2(Ω ) ≤ C
+hmin
+∥f ∥L2(Ω ),
+c’est-à-dire que la suite un est bornée dans H1
+0 (Ω). D’autre part, en sous-
+trayant la formulation variationnelle deum à celle de un on trouve
+∫
+Ω
+hn∇(un − um) ·∇ φd x=
+∫
+Ω
+(hm − hn)∇um ·∇ φd x ∀φ ∈ H1
+0 (Ω).
+
+PAGE 4
+80 5 Optimisation paramétrique
+En choisissant φ = un − um on en déduit
+hmin∥∇(un − um)∥2
+L2(Ω ) ≤
+∫
+Ω
+hn|∇(un − um)|2dx
+=
+∫
+Ω
+(hm − hn)∇um ·∇ (un − um)dx
+≤∥ hm − hn∥L∞ (Ω )∥∇um∥L2(Ω )∥∇(un − um)∥L2(Ω ),
+ce qui donne
+∥∇(un − um)∥L2(Ω ) ≤ C
+h2
+min
+∥f ∥L2(Ω )∥hm − hn∥L∞ (Ω ). (5.6)
+Comme Ω est borné, on déduit de la Proposition 2.9 sur l’inégalité de Poincaré
+que ∥∇φ∥L2(Ω ) est une norme sur H1
+0 (Ω) équivalente à la norme usuelle. Par
+conséquent, (5.6) implique le résultat désiré. ⊓⊔
+Remarque 5.4. Nous avons montré que la fonction coûth → J(h) est continue
+pour la topologie de la convergence (forte) dans L∞ (Ω). Par conséquent, si
+l’ensemble des épaisseurs admissiblesUad, déﬁni par (5.2), était (relativement)
+compact pour cette même topologie, il serait facile de montrer l’existence d’une
+épaisseur optimale, solution de (5.4). Malheureusement, cela n’est pas le cas
+car L∞ (Ω) est un espace de dimension inﬁnie ! Tout ce que l’on peut aﬃrmer,
+et cela ne suﬃt pas pour conclure, c’est que Uad est relativement compact
+pour la convergence faible dans L∞ (Ω) (voir [28] pour cette notion). •
+5.2 Théories d’existence
+La question de l’existence d’une solution au problème (5.4) est loin d’être
+simple (aucun des résultats du Chapitre 3 ne s’applique directement; par
+exemple, J(h) n’est généralement pas une fonction convexe). En fait, en toute
+généralité et en l’absence d’hypothèses supplémentaires (sur l’ensemble admis-
+sible ou sur la fonction objectif) il n’existe pas de solution au problème
+d’optimisation (5.4). Des contre-exemples généraux ont été trouvés par F. Mu-
+rat [131]. Numériquement, ce phénomène de non-existence se manifeste par
+des diﬃcultés sérieuses du type : non convergence de la forme optimale calculée
+lorsque le maillage est raﬃné, instabilité de la forme optimale calculée lorsque
+l’initialisation de l’algorithme est changée (voir l’exemple de la Sous-section
+5.6.3). Curieusement, la première mise en évidence de cette instabilité nu-
+mérique [44] est postérieure aux contre-exemples théoriques. La Sous-section
+5.2.1 est consacré à un contre-exemple très intuitif (à défaut d’être très simple)
+de non-existence d’épaisseur optimale.
+Néanmoins, nous allons voir qu’il est possible d’obtenir plusieurs résultats
+d’existence si l’on rajoute des hypothèses variées. Dans les autres sous-sections
+
+PAGE 5
+5.2 Théories d’existence 81
+qui suivent on modiﬁe la déﬁnition (5.2) de l’ensemble admissible Uad (en le
+restreignant à un sous-ensemble plus petit) pour pouvoir démontrer l’existence
+d’une épaisseur optimale. Chacune de ses restrictions ou hypothèses supplé-
+mentaires s’interprète très naturellement d’un point de vue numérique et a son
+propre intérêt. Par ailleurs, nous verrons un cas particulier important, celui
+de la compliance, à la Section 5.4, pour lequel il y a existence d’une forme
+optimale sans condition additionnelle.
+5.2.1 Contre-exemple de non-existence d’épaisseur optimale
+12
+Fig. 5.1. Deux chargements appliqués au carré Ω =]0, 1[2.
+Pour simpliﬁer on se place en dimension d’espace N =2 (mais le raison-
+nement qui suit s’étend en dimension supérieure). On considère le domaine
+carré Ω =]0,1[2 occupé par une membrane d’épaisseur h ∈U ad, déﬁni par
+(5.2). On soumet cette membrane à deux chargements distincts, l’un horizon-
+tal et l’autre vertical (voir la Figure 5.1). Autrement dit, on considère deux
+équations d’état, et non une seule comme d’habitude, qui sont
+{ −div (h∇u1)=0 dans Ω,
+h∇u1 · n = e1 · n sur ∂Ω,
+{ −div (h∇u2)=0 dans Ω,
+h∇u2 · n = e2 · n sur ∂Ω, (5.7)
+où e1,e2 est la base canonique de R2. Il est facile de vériﬁer que ces deux
+problèmes admettent, chacun, une solution unique, à une constante additive
+près. On déﬁnit alors une fonction objectif qui est la diﬀérence des deux com-
+pliances
+J(h)=
+∫
+∂Ω
+e1 · nu1 ds −
+∫
+∂Ω
+e2 · nu2 ds. (5.8)
+En termes mécaniques, lorsque l’on minimise (5.8) on veut que la membrane
+soit solide pour le chargement horizontal (on minimise la compliance dans la
+direction e1), et soit faible pour le chargement vertical (on maximise la com-
+pliance dans la direction e2). Cette “contradiction” dans la fonction objectif
+rend le problème mal posé au sens suivant.
+
+PAGE 6
+82 5 Optimisation paramétrique
+Proposition 5.5. Soit Uad déﬁni par (5.2) et J déﬁni par (5.8). Il n’existe
+pas de solution optimale au problème
+inf
+h∈Uad
+J(h). (5.9)
+Avant de donner une démonstration rigoureuse de la Proposition 5.5,
+nous expliquons intuitivement le mécanisme de ce contre-exemple d’existence.
+Supposons que l’épaisseur soit constante dans Ω. Comme, par déﬁnition, le
+matériau qui constitue la membrane est isotrope, le domaine Ω est lui aussi
+isotrope, c’est-à-dire qu’il oﬀre la même résistance mécanique dans les deux
+directions e1,e2. Il s’agit clairement d’une situation non optimale puisque l’on
+veut que la membrane soit plus solide dans la direction e1 que dans la di-
+rection e2. Par conséquent, l’épaisseur h(x) ne doit pas être uniforme si l’on
+veut minimiser J(h). Au contraire, elle doit varier beaucoup aﬁn de créer
+de l’anisotropie, c’est-à-dire de renforcer la direction horizontale mais pas la
+direction verticale. Clairement on a intérêt à créer des renforts d’épaisseur
+maximale alignés horizontalement : ils transmettront facilement les eﬀorts
+dans la direction e1. D’autre part, comme ces bandes d’épaisseur maximale
+devront nécessairement alterner avec d’autres bandes d’épaisseur minimale
+pour respecter la contrainte de poids ﬁxé (voir la Figure 5.2), les eﬀorts ver-
+ticaux devront traverser obligatoirement ces zones faibles : par conséquent la
+structure ainsi créée sera peu solide dans la direction verticale. Sur ce prin-
+cipe on construit une suite minimisante pour (5.9). En eﬀet, plus ces bandes
+horizontales sont ﬁnes (et donc nombreuses), plus il est facile aux eﬀorts ho-
+rizontaux de se répartir uniformément sur l’épaisseur maximale, alors que
+les eﬀorts verticaux auront toujours la même proportion d’épaisseur faible
+à traverser. À la limite, cette suite minimisante “ressemble” à un matériau
+composite anisotrope qui est solide dans la direction horizontale et mou dans
+la direction verticale. Il s’agit précisément d’un phénomèned’homogénéisa-
+tion que nous étudierons en détail au Chapitre 7. Évidemment, ce matériau
+composite, étant anisotrope, ne peut pas appartenir à la classe des épaisseurs
+isotropes. Le minimum de J(h) n’est donc pas atteint dans l’ensemble admis-
+sible Uad.
+Remarque 5.6. Pour obtenir le contre-exemple de la Proposition 5.5 nous
+avons utilisé deux équations d’état mais il s’agit d’une simple commodité. Le
+même type de contre-exemple peut s’obtenir avec une seule équation d’état.
+De même, ce contre-exemple n’est pas spéciﬁque au modèle de membrane. En
+eﬀet, il est aussi valable, mutatis mutandis,p o u ru nm o d è l ed ep l a q u eé l a s -
+tique. En particulier, nous renvoyons à l’exemple numérique de la Sous-section
+5.6.3. •
+Démonstration de la Proposition 5.5. Elle est un peu technique (et peut
+donc être omise en première lecture) mais est caractéristique du phénomène
+de non-existence de solution optimale. On commence par établir une borne
+
+PAGE 7
+5.2 Théories d’existence 83
+h
+h
+max
+min
+Fig. 5.2. Suite minimisante pour (5.9) (microstructure laminée).
+inférieure de (5.9). Pour cela on utilise le principe de minimisation de l’éner-
+gie pour le deuxième chargement et le principe de minimisation de l’énergie
+complémentaire pour le premier chargement. D’après la Proposition 2.18 la
+compliance s’écrit
+−
+∫
+∂Ω
+e2 · nu2 ds = min
+v∈H1(Ω )
+{ ∫
+Ω
+h|∇v|2dx − 2
+∫
+∂Ω
+e2 · nvd s
+}
+. (5.10)
+Le minimum dans (5.10) est bien sûr atteint par la solutionu2 de (5.7). D’après
+le Théorème 2.22 la compliance s’écrit
+∫
+∂Ω
+e1 · nu1 ds = min
+σ∈A
+∫
+Ω
+h−1σ · σd x , (5.11)
+où l’espace aﬃne A est déﬁni par
+A =
+{
+σ ∈ L2(Ω)2 tel que divσ =0 dans Ω
+σ · n = e1 · n sur ∂Ω
+}
+.
+Le minimum dans (5.11) est évidemment atteint par le vecteur des contraintes
+σ1 = h∇u1 où u1 est la solution de (5.7). Le problème d’optimisation de formes
+(5.9) peut donc se réécrire
+inf
+h∈Uad
+inf
+v∈H1(Ω )
+inf
+σ∈A
+∫
+Ω
+h−1σ · σd x+
+∫
+Ω
+h|∇v|2dx − 2
+∫
+∂Ω
+e2 · nvd s , (5.12)
+et l’ordre des trois minimisations peut être changé comme bon nous semble.
+Pour obtenir une borne inférieure de (5.12) nous utilisons une propriété de
+convexité fournie par le Lemme 5.8 ci-dessous. Tout d’abord, en vertu de ce
+lemme, pour tout x ∈ Ω,o na
+h−1(x)|σ(x)|2 ≥ h−1
+0 |σ0|2 − (h(x) − h0)
+h2
+0
+|σ0|2 + 2
+h0
+σ0 · (σ(x) − σ0), (5.13)
+où h0 est la moyenne de h(x) sur Ω et σ0 est la moyenne de σ(x) sur Ω.E n
+intégrant sur Ω, les deux derniers termes de (5.13) disparaissent puisqu’ils
+sont de moyenne nulle. Donc
+
+PAGE 8
+84 5 Optimisation paramétrique
+∫
+Ω
+h−1σ · σd x≥ h−1
+0 |σ0|2. (5.14)
+Or on remarque que, pour n’importe quelσ ∈A , sa moyenneσ0 est seulement
+déterminée par la condition aux limites constante, c’est-à-dire que σ0 = e1.
+En eﬀet, puisque (σ − e1) · n =0 sur ∂Ω, une intégration par parties
+conduit à
+0=
+∫
+Ω
+div (σ(x) − e1) xidx = −
+∫
+Ω
+(σ(x) − e1) · eidx,
+où xi est la i-ème composante de x. Puis, pour minorer le deuxième terme
+dans (5.12) on utilise encore le Lemme 5.8 avec a = h−1 et τ = ∇v.P l u s
+précisément on a pour tout x ∈ Ω
+(
+(h−1(x)
+⎫−1
+|∇v(x)|2 ≥
+(
+h−1
+−
+⎫−1
+|ξ0|2 − (h−1(x) − h−1
+− )
+h−2
+−
+|ξ0|2
++ 2
+h−1
+−
+ξ0 · (∇v(x) − ξ0),
+(5.15)
+où h−1
+− est la moyenne de h−1(x) sur Ω et ξ0 est la moyenne de ∇v(x) sur Ω.
+Autrement dit, h− est la moyenne harmonique de h(x)
+h− =
+(∫
+Ω
+h−1(x)dx
+⎫ −1
+alors que h0 =
+∫
+Ω h(x)dx est la moyenne arithmétique de h(x).E ni n t é -
+grant sur Ω, les deux derniers termes de (5.15) disparaissent puisqu’ils sont
+de moyenne nulle. Donc
+∫
+Ω
+h|∇v|2dx − 2
+∫
+∂Ω
+e2 · nvd s ≥ h− |ξ0|2 − 2e2 · ξ0. (5.16)
+car
+∫
+∂Ω e2 ·nvd s =
+∫
+Ω e2 ·∇ vd x. Il est facile de minimiser (5.16) par rapport
+à ξ0 ∈ R2 et par rapport à h− . Le minimum est atteint pour la plus petite
+moyenne harmonique possible, c’est-à-dire (h− )−1 = θh−1
+max +( 1− θ)h−1
+min où
+θ ∈]0; 1[est l’unique proportion telle queh0 = θhmax +(1 − θ)hmin (rappelons
+que, par hypothèse, h0 ∈]hmin;hmax[), et pour ξ0 = e2/h− . On obtient ainsi,
+pour tout v ∈ H1(Ω),
+∫
+Ω
+h|∇v|2dx − 2
+∫
+∂Ω
+e2 · nvd s ≥−
+(
+θh−1
+max +( 1 − θ)h−1
+min
+⎫
+. (5.17)
+En regroupant (5.14) et (5.17) on en déduit une borne inférieure de (5.12), et
+donc de (5.9),
+inf
+h∈Uad
+J(h) ≥ (θhmax +( 1 − θ)hmin)−1 −
+(
+θh−1
+max +( 1 − θ)h−1
+min
+⎫
+. (5.18)
+Cette borne inférieure ne peut pas être atteinte exactement, autrement dit il
+n’existe aucun h ∈U ad telle que
+
+PAGE 9
+5.2 Théories d’existence 85
+J(h)=( θhmax +( 1 − θ)hmin)−1 −
+(
+θh−1
+max +( 1 − θ)h−1
+min
+⎫
+,
+car, si cela était le cas, les inégalités (5.13) et (5.15) seraient en fait des
+égalités, et on aurait nécessairement h(x)= h0 = h− . Or, comme θ ∈]0; 1[,
+les moyennes arithmétique et harmonique de h(x) sont forcément distinctes,
+ce qui conduit à une contradiction.
+Pour ﬁnir il nous reste à montrer que cette borne inférieure est en fait
+la valeur inﬁmum, c’est-à-dire qu’il y a égalité dans (5.18), ce qui établit le
+contre-exemple. Pour cela nous construisons une suite minimisante (suivant
+la Figure 5.2), pour tout k ∈ N∗,
+hk(x)= h(kx2),
+où h(x2) est une fonction périodique, de période 1, déﬁnie par
+h(x2)=
+{
+hmax si 0 ≤ x2 <θ
+hmin si θ ≤ x2 < 1 ,
+qui est de moyenne précisément égale à h0. On utilise alors le Théorème 7.5
+d’homogénéisation et le Lemme 7.9 sur les matériaux composites, dits laminés
+simples. Ces résultats aﬃrment que la suite minimisantehk converge “au sens
+de l’homogénéisation” vers un tenseur eﬀectif anisotrope
+A∗ =
+(
+h0 0
+0 h−
+⎫
+,
+ce qui implique, en particulier, que la suite des compliances pourhk converge
+vers les compliances homogénéisées pour A∗
+lim
+k→ +∞
+∫
+∂Ω
+ei · nu k,i ds =
+∫
+∂Ω
+ei · nu ∗,i ds pour i =1 ,2,
+où u∗,i est la solution du problème
+{
+−div (A∗∇u∗,i)=0 dans Ω
+A∗∇u∗,i · n = ei · n sur ∂Ω. (5.19)
+Or, comme A∗ est constant, (5.19) admet comme solution évidente u∗,i =
+(A∗)−1ei · x, c’est-à-dire u∗,1 = x1/h0 et u∗,2 = x2/h− . On en déduit le
+résultat désiré, limk→ +∞ J(hk)= h−1
+0 − h−1
+− =i n fh∈Uad J(h). ⊓⊔
+Remarque 5.7. La suite minimisante que nous venons de construire dans la
+démonstration de la Proposition 5.5 n’est pas un simple artiﬁce mathé-
+matique. En général les suites minimisantes, même lorsqu’elles ne convergent
+pas, contiennent beaucoup d’informations (physiques aussi bien que mathé-
+matiques) utiles pour la compréhension du problème de minimisation. Dans
+le cas présent, la suite minimisante de la Figure 5.2 nous indique d’une part
+que les matériaux composites sont “meilleurs” que les constituants d’origine,
+et d’autre part qu’il est essentiel de développer une anisotropie dans la
+microstructure pour être optimal (plus grande rigidité dans la direction e1
+que e2). •
+
+PAGE 10
+86 5 Optimisation paramétrique
+Lemme 5.8. La fonction φ(a, τ), déﬁnie de R+ × RN dans R par
+φ(a, τ)= a−1|τ|2,
+est convexe et vériﬁe
+φ(a, τ)= φ(a0,τ0)+ φ′(a0,τ0) · (a − a0,τ − τ0)+ φ(a, τ− a
+a0
+τ0), (5.20)
+où la dérivée φ′ est donnée par
+φ′(a0,τ0) · (b, η)= − b
+a2
+0
+|τ0|2 + 2
+a0
+τ0 · η.
+Démonstration. La formule (5.20) est un calcul simple : il s’agit juste d’un
+développement de Taylor à l’ordre 1 avec reste exact. Comme φ(a, τ− a
+a0
+τ0)
+est positif ou nul par déﬁnition, on en déduit que φ est toujours au dessus de
+son hyperplan tangent, et donc est convexe (voir la Proposition 3.13). ⊓⊔
+5.2.2 Existence pour un modèle discrétisé
+Si on impose aux épaisseurs admissibles d’être, non pas des fonctions,
+mais des constantes sur une partition ﬁxée du domaine (comme on l’a fait à
+la Remarque 1.1), alors on peut démontrer un résultat d’existence puisqu’on
+s’est ainsi placé en dimension ﬁnie (égale au nombre de sous-domaines).
+Soit donc une partition (ωi)1≤i≤n du domaine Ω, qui vériﬁe
+Ω =
+n⋃
+i=1
+ωi,ω i
+⋂
+ωj = ∅pour i ̸= j.
+On introduit le sous-espace Un
+ad de Uad déﬁni par
+Un
+ad = {h ∈U ad ,h (x)= hi dans ωi, 1 ≤ i ≤ n} . (5.21)
+Toute fonctionh(x), étant égale à une constantehi dans chaque sous-domaine
+ωi, est représentée de manière unique par un vecteur(hi)1≤i≤n ∈ Rn.A i n s i ,o n
+peut identiﬁer Un
+ad à un sous-espace de Rn (qui vériﬁe aussi les contraintes de
+bornes min et max et de poids total ﬁxé). Le fait que la variable d’optimisation
+soit désormais un vecteur deRn, et non plus une fonction, simpliﬁe nettement
+l’analyse mais, bien sûr, cela camouﬂe les éventuelles diﬃcultés qui surgissent
+lorsque n est très grand.
+Théorème 5.9. Le problème d’optimisation
+inf
+h∈Un
+ad
+J(h)
+admet au moins une solution optimale.
+
+PAGE 11
+5.2 Théories d’existence 87
+Démonstration. On remarque que Un
+ad est un sous-espace compact deRn et
+comme J(h) est une fonction continue surUn
+ad par la Proposition 5.1, on peut
+appliquer le Théorème 3.3 qui donne l’existence d’un point de minimum deJ
+sur Un
+ad. ⊓⊔
+Remarque 5.10. L’argument de la démonstration du Théorème 5.9 est spéci-
+ﬁque à la dimension ﬁnie. En fait, le résultat est, en général, faux si on rem-
+place Un
+ad par Uad (espace de dimension inﬁnie). Les diﬃcultés se manifestent
+en pratique de deux manières (au moins) lorsque n est grand. D’une part, il
+existe de nombreux points de minimumlocaux (la plupart des méthodes nu-
+mériques déterministes d’optimisation ne font pas la diﬀérence entre minima
+locaux ou globaux, hélas). D’autre part, même si on a pu calculer un opti-
+mum global, la fonction h(x) obtenue par reconstruction à partir du vecteur
+(hi)1≤i≤n ∈ Rn est très “chahutée” ou oscillante, et ceci de plus en plus, au fur
+et à mesure que n est grand, de telle manière qu’il n’y a pas de limite claire
+quand on passe du discret au continu (i.e. n → +∞ ). •
+5.2.3 Existence pour un modèle avec contrainte de régularité
+Dans cette sous-section on impose aux épaisseurs admissibles d’être régu-
+lières, et plus encore d’être uniformément régulières. Rappelons que dans
+la Sous-section 1.2.1 nous avons dit que de telles contraintes de régularité
+permettent de prendre en compte la nature du procédé de fabrication de la
+membrane. Par exemple, une fabrication par emboutissage exige que la pente
+h′(x) soit bornée, tandis qu’une fabrication par usinage prohibe les petits
+rayons de courbure (reliés à la dérivée secondeh′′(x)). Par souci de simplicité
+nous n’allons considérer que le cas de fonctions d’épaisseur h(x) dérivables.
+Nous aurons besoin de l’espace des fonctions lipschitziennes, déﬁni par
+W1,∞ (Ω)=
+{
+h ∈ L∞ (Ω) tel que ∂h
+∂xi
+∈ L∞ (Ω),1 ≤ i ≤ N
+}
+, (5.22)
+où L∞ (Ω) est l’espace des fonctions mesurables, essentiellement bornées sur
+Ω (voir les déﬁnitions (2.2) et (2.6)).
+Remarque 5.11. On sait que W1,∞ (Ω) est un espace de Banach (espace vec-
+toriel normé complet) pour la norme∥h∥W1,∞ (Ω ) = ∥h∥L∞ (Ω ) + ∥∇h∥L∞ (Ω )N .
+De plus, selon la Remarque 2.13, les fonctions de W1,∞ (Ω) sont continues
+(par contre leurs dérivées peuvent être discontinues). Tous les résultats de
+cette section sont aussi valables si on remplace W1,∞ (Ω) par C1(Ω). •
+On se ﬁxe a priori une constanteR> 0, et on introduit le sous-espaceUreg
+ad
+de Uad déﬁni par
+Ureg
+ad =
+{
+h ∈U ad ∩ W1,∞ (Ω) , ∥h∥W1,∞ (Ω ) ≤ R
+}
+. (5.23)
+
+PAGE 12
+88 5 Optimisation paramétrique
+Théorème 5.12. Le problème d’optimisation
+inf
+h∈Ureg
+ad
+J(h) (5.24)
+admet au moins une solution optimale.
+Démonstration. On considère une suite minimisante (hn)n≥1 de (5.24),
+c’est-à-dire que
+lim
+n→∞
+J(hn)=
+(
+inf
+h∈Ureg
+ad
+J(h)
+⎫
+.
+Par déﬁnition, la suite hn est bornée (uniformément en n) dans l’espace
+W1,∞ (Ω). On applique alors la généralisation du Théorème de Rellich 2.10
+(voir la Remarque 2.11) qui aﬃrme qu’on peut extraire de cette suite une sous-
+suite (que l’on note toujourshn par simplicité) qui converge dansL∞ (Ω) vers
+une fonction limite h∞ (de plus h∞ ∈ W1,∞ (Ω)). De la Proposition 5.1 on en
+déduit que
+lim
+n→∞
+J(hn)= J(h∞ ),
+ce qui prouve que h∞ est un point de minimum global de J dans Ureg
+ad . ⊓⊔
+Remarque 5.13. Le résultat du Théorème 5.12 paraît très satisfaisant, mais il
+n’en est rien ! En eﬀet, comment choisir la constanteR qui intervient dans la
+déﬁnition (5.23) de Ureg
+ad ? En général, la solution optimale dépend fortement
+de cette constante R et il n’est pas clair que la suite de solutions (associée
+à une suite de constantes) converge quand R tend vers l’inﬁni (c’est-à-dire
+quand on “oublie” la contrainte de régularité). D’un point de vue pratique,
+on ne sait pas facilement prendre en compte numériquement cette contrainte
+de régularité. De plus, il peut exister de très nombreux minima locaux de
+(5.24) (éventuellement très éloignés d’un minimum global), et les algorithmes
+numériques peuvent rester “coincés” dans ces “mauvais” minima locaux. •
+Remarque 5.14. Une variante de (5.24) consiste à ajouter la contrainte de
+régularité à la fonction objectif plutôt que la forcer dans l’appartenance à
+Ureg
+ad . On parle alors de régularisation au sens de Tikhonov. Plus précisément,
+pour un paramètre α> 0, on veut résoudre
+inf
+h∈Uad
+(
+J(h)+ α∥h∥W1,∞ (Ω )
+⎫
+,
+qui admet une solution optimale par une facile adaptation de la preuve du
+Théorème 5.12. Le paramètre de régularisation α est en quelque sorte l’in-
+verse du paramètre R dans la déﬁnition (5.23) de Ureg
+ad ,e ts ad é t e r m i n a t i o n
+numérique est toute aussi délicate. •
+
+PAGE 13
+5.3 Méthode de gradient 89
+5.3 Méthode de gradient
+Dans cette section nous allons calculer le gradient de la fonction objec-
+tif J(h). Cela nous permettra d’une part d’établir des conditions nécessaires
+d’optimalité des formes optimales, et d’autre part de mettre en oeuvre un
+algorithme numérique de calcul de formes optimales. Un outil essentiel dans
+la suite sera la notion de Lagrangien et d’état adjoint. C’est pourquoi on
+appelle souvent cette approche “méthode adjointe”.
+5.3.1 Calcul du gradient continu
+Rappelons que la fonction objectif J(h), dont nous voulons calculer la
+dérivée, n’est pas déﬁnie explicitement comme une fonction de l’épaisseur h
+mais implicitement, comme une fonction de l’état u qui lui-même dépend
+de h (voir la formule (5.3)). Par conséquent, nous allons utiliser une règle
+de dérivation composée et commencer par calculer la dérivée de l’état u.O n
+peut déﬁnir cette dérivée sur un ensemble beaucoup plus grand que l’ensemble
+admissible Uad. C’est pourquoi, on introduit l’espace
+U = {h ∈ L∞ (Ω) , ∃h1 > 0 tel que h(x) ≥ h1 dans Ω }. (5.25)
+Soit f ∈ L2(Ω). On déﬁnit l’application h → u(h) qui à h ∈U fait corres-
+pondre la solution u(h) ∈ H1
+0 (Ω) de
+{ −div (h∇u(h)) = f dans Ω
+u(h)=0 sur ∂Ω. (5.26)
+On sait déjà, par le Lemme 5.3, que cette application est continue.
+Lemme 5.15. L’application h → u(h) est diﬀérentiable sur U et la dérivée
+directionnelle en h ∈U dans la direction k ∈ L∞ (Ω) est donnée par
+⟨u′(h),k ⟩ = v,
+où v est l’unique solution dans H1
+0 (Ω) de
+{
+−div (h∇v)=d i v(k∇u) dans Ω
+v =0 sur ∂Ω. (5.27)
+Démonstration. Commençons par calculer formellement la dérivée direc-
+tionnelle de u(h).S o i th ∈U et une direction k ∈ L∞ (Ω). Pour tout t> 0
+suﬃsamment petit, l’épaisseurh(t)= h+tk appartient à U.O np e u td o n cd é ﬁ -
+nir ˆu(t)= u(h(t)), solution de (5.26) pourh = h(t). On dérive alors l’équation
+(5.26) par rapport à t
+{
+−div (h(t)∇ ˆu′(t)) = div (h′(t)∇ ˆu(t)) dans Ω
+ˆu′(t)=0 sur ∂Ω,
+
+PAGE 14
+90 5 Optimisation paramétrique
+ce qui, pour t =0 , donne bien (5.27) car h′(0) = k et ˆu′(0) = ⟨u′(h),k ⟩ = v.
+Ce calcul n’est que formel car il présuppose la dérivabilité de ˆu(t) et il ignore
+que les solutions de (5.26) sont déﬁnies au sens variationnel. Justiﬁons le donc
+proprement en montrant que l’applicationh → u(h) est diﬀérentiable au sens
+de Fréchet. Tout d’abord, la solution v de (5.27) existe et est unique dans
+H1
+0 (Ω) grâce au Théorème de Lax-Milgram 2.14 appliqué à la formulation
+variationnelle
+∫
+Ω
+h∇v ·∇ φd x= −
+∫
+Ω
+k∇u ·∇ φd x ∀φ ∈ H1
+0 (Ω). (5.28)
+On combine alors (5.28) avec la formulation variationnelle suivante pourˆu(t)
+∫
+Ω
+h(t)∇ ˆu(t) ·∇ φd x=
+∫
+Ω
+fφdx ∀φ ∈ H1
+0 (Ω),
+et en remarquant queˆu(1) = u(h+k) et ˆu(0) = u(h), on obtient par diﬀérence
+∫
+Ω
+h∇ (u(h + k) − u(h) − v) ·∇ φd x= −
+∫
+Ω
+k∇ (u(h + k) − u(h)) ·∇ φd x .
+En prenant φ = u(h + k) − u(h) − v on en déduit l’estimation
+∥∇ (u(h + k) − u(h) − v) ∥L2(Ω )N ≤ C∥k∥L∞ (Ω )∥∇ (u(h + k) − u(h)) ∥L2(Ω )N .
+(5.29)
+Or l’inégalité (5.6) du Lemme 5.3 aﬃrme que
+∥∇ (u(h + k) − u(h)) ∥L2(Ω )N ≤ C∥k∥L∞ (Ω ),
+ce qui entraîne avec (5.29)
+u(h + k)= u(h)+ v + o(k) avec lim
+∥k∥→ 0
+∥o(k)∥H1
+0 (Ω )
+∥k∥L∞ (Ω )
+=0 ,
+c’est-à-dire la diﬀérentiabilité au sens de Fréchet car, au vu de (5.28), l’appli-
+cation k → v est linéaire continue de L∞ (Ω) dans H1
+0 (Ω). ⊓⊔
+Remarque 5.16. Dans la démonstration ci-dessus, on a pris un luxe de précau-
+tions en justiﬁant (par passage à la formulation variationnelle) la dérivation
+formelle de l’équation, ce qui peut paraître exagéré et inutile en pratique.
+Cependant, nous verrons plus loin que dans des situations plus compliquées
+on peut facilement faire des erreurs dans la dérivation formelle et que seule
+la dérivation de la formulation variationnelle permet de trouver, à coup sûr,
+le “bon” résultat. On voit aussi que la diﬀérentiabilité au sens de Fréchet est
+un peu plus compliquée à établir que la dérivabilité directionnelle (qui suﬃt
+pour les applications pratiques). •
+
+PAGE 15
+5.3 Méthode de gradient 91
+Lemme 5.17. Pour h ∈U ,s o i tu(h) la solution dans H1
+0 (Ω) de (5.26) et
+J(h)=
+∫
+Ω
+j
+(
+u(h)
+⎫
+dx,
+où j est une fonction de classe C1 de R dans R telle que |j(u)|≤ C(u2 +1 )
+et |j′(u)|≤ C(|u| +1 ) pour tout u ∈ R. L’application J(h),d e U dans R,e s t
+diﬀérentiable et la dérivée directionnelle en h dans la direction k ∈ L∞ (Ω)
+est donnée par
+⟨J′(h),k ⟩ =
+∫
+Ω
+j′(
+u(h)
+⎫
+vd x , (5.30)
+où v = ⟨u′(h),k ⟩ est l’unique solution dans H1
+0 (Ω) de (5.27).
+Démonstration. Formellement, la formule (5.30) s’obtient par simple com-
+position des dérivations. Pour la justiﬁer il n’y a qu’à vériﬁer que tous les
+termes ont bien un sens. Tout d’abord, l’hypothèse|j(u)|≤ C(u2 +1) montre
+que l’intégrale
+∫
+Ω j
+(
+u(h)
+⎫
+dx est bien déﬁnie puisque u(h) ∈ H1
+0 (Ω) ⊂ L2(Ω).
+Enﬁn, l’autre hypothèse |j′(u)|≤ C(|u| +1 ) montre que j′(
+u(h)
+⎫
+∈ L2(Ω),
+et comme v ∈ H1
+0 (Ω) ⊂ L2(Ω), la déﬁnition (5.30) de J′(h) ab i e nu ns e n s
+puisque l’intégrale de droite est ﬁnie. ⊓⊔
+Remarque 5.18. La formule (5.30) est inexploitable en pratique , car on
+ne peut pas en déduire une expression simple de J′(h).E ne ﬀ e t ,v est une
+fonction linéaire de k non explicite ! Autrement dit, pour chaque incrément
+ou direction de dérivation k il faut calculer la solution v de (5.27). Quand on
+discrétise, c’est-à-dire si on remplace U par un sous-espace Un de dimension
+ﬁnie n,i lf a u tc a l c u l e rn solutions de (5.27) pour avoir toutes les compo-
+santes du gradient dans cette base : c’est, bien sûr, beaucoup trop coûteux en
+pratique. •
+Comme on l’a appris de la théorie du contrôle optimal au Chapitre 4, pour
+obtenir une formule pratique de la dérivéeJ′(h),o ni n t r o d u i tu nétat adjoint
+p déﬁni comme l’unique solution dans H1
+0 (Ω) de
+{
+−div (h∇p)= −j′(u) dans Ω
+p =0 sur ∂Ω. (5.31)
+Théorème 5.19. Le gradient de la fonction coût J(h) est
+J′(h)= ∇u ·∇ p. (5.32)
+Si h ∈U ad est un minimum local deJ sur Uad, il vériﬁe la condition nécessaire
+d’optimalité ∫
+Ω
+∇u ·∇ p (k − h)dx ≥ 0 (5.33)
+pour tout k ∈U ad.
+
+PAGE 16
+92 5 Optimisation paramétrique
+Démonstration. Pour rendre explicite J′(h) à partir de la formule (5.30), il
+faut éliminer v = ⟨u′(h),k ⟩. On utilise l’état adjoint pour cela : on multiplie
+(5.27) par p et (5.31) par v et on intègre par parties
+∫
+Ω
+h∇p ·∇ vd x= −
+∫
+Ω
+j′(u)vd x
+∫
+Ω
+h∇v ·∇ pd x= −
+∫
+Ω
+k∇u ·∇ pd x
+Par comparaison de ces deux égalités on en déduit que
+⟨J′(h),k ⟩ =
+∫
+Ω
+j′(u)vd x=
+∫
+Ω
+k∇u ·∇ pd x ,
+et ceci, pour tout k ∈ L∞ (Ω). Comme ∇u ·∇ p appartient à L1(Ω), l’applica-
+tion k →
+∫
+Ω k∇u ·∇ pd x est bien une forme linéaire continue sur L∞ (Ω),e t
+on en déduit la formule (5.32).
+Pour obtenir la condition d’optimalité (5.33), il suﬃt alors d’appliquer le
+Théorème 3.19 puisque Uad est un fermé convexe non vide de L∞ (Ω). ⊓⊔
+Remarque 5.20. Pour trouver l’équation satisfaite par l’état adjoint, la “recet-
+te” est toujours la même (voir la Déﬁnition 4.10). On introduit un multiplica-
+teur de Lagrange pour la contrainte (5.26), reliant u = u(h) à h, qui est une
+fonction p ∈ H1
+0 (Ω) (voir la Remarque 3.24). On déﬁnit donc le Lagrangien
+L(ˆh, ˆu, ˆp)=
+∫
+Ω
+j(ˆu)dx +
+∫
+Ω
+ˆp
+(
+−div
+(
+ˆh∇ ˆu
+⎫
+− f
+⎫
+dx,
+pour des variables indépendantes (ˆh, ˆu, ˆp) ∈ L∞ (Ω) × H1
+0 (Ω) × H1
+0 (Ω).P a r
+intégration par parties (i.e. en faisant apparaître la formulation variationnelle
+de (5.26)) on a aussi
+L(ˆh, ˆu, ˆp)=
+∫
+Ω
+j(ˆu)dx +
+∫
+Ω
+(
+ˆh∇ ˆp ·∇ ˆu − f ˆp
+⎫
+dx, (5.34)
+La dérivée partielle de L par rapport à u dans la direction φ ∈ H1
+0 (Ω) est
+⟨∂L
+∂u(ˆh, ˆu, ˆp),φ⟩ =
+∫
+Ω
+j′(ˆu)φd x+
+∫
+Ω
+(
+ˆh∇ ˆp ·∇ φ
+⎫
+dx,
+qui, lorsqu’elle s’annule, n’est rien d’autre que la formulation variationnelle
+de l’équation adjointe (5.31). De même, la dérivé partielle de L par rapport
+à p donne “par déﬁnition” la formulation variationnelle de l’équation d’état.
+Enﬁn, la dérivée partielle de L par rapport à h est tout simplement J′(h).E n
+eﬀet, pour tout ˆp ∈ H1
+0 (Ω),o na
+L(h, u,ˆp)= J(h)
+
+PAGE 17
+5.3 Méthode de gradient 93
+puisque u vériﬁe la formulation variationnelle de l’équation d’état (5.26).
+Comme u dépend de h, mais pas ˆp, en dérivant cette relation et en utilisant
+le théorème des dérivées composées, il vient
+⟨J′(h),k ⟩ = ⟨∂L
+∂h(h, u,ˆp),k ⟩ + ⟨∂L
+∂u(h, u,ˆp), ∂u
+∂h(k)⟩.
+En prenant alors ˆp = p solution de l’équation adjointe (5.31), le dernier terme
+s’annule et on obtient
+⟨J′(h),k ⟩ = ⟨∂L
+∂h(h, u, p),k ⟩ =
+∫
+Ω
+k ∇p ·∇ ud x .
+•
+Remarque 5.21 (Interprétation physique de l’état adjoint). On vient de voir
+que l’état adjointp est le multiplicateur de Lagrange pour la contrainte qu’est
+l’équation d’état dans la déﬁnition (5.34) du Lagrangien. On peut chercher
+une interprétation mécanique plus parlante de l’état adjoint au point de
+minimum, interprétation qui dépend du problème considéré comme on l’a
+dit à la Remarque 4.14. Dans le cadre qui nous intéresse ici (optimisation de
+l’épaisseur d’une membrane), l’état adjoint s’interprète comme lasensibilité
+de la valeur minimum du coût par rapport à la force f. En eﬀet, supposons
+que le minimum soit atteint (ce qui est le cas au moins pour l’exemple de la
+compliance, voir la Section 5.4) et que nous ayons le droit de dériver comme
+nous allons le faire (ce qui est vrai si le point de minimum est unique). Pour
+une force f donnée, on déﬁnit la valeur minimum
+m(f)= J(h∗) = min
+h∈Uad
+{
+J(h)=
+∫
+Ω
+j(u)dx
+}
+où u ≡ u(h) est la solution de (5.26). On note h∗ l’épaisseur optimale et
+u∗ ≡ u(h∗) l’état correspondant. On calcule la dérivée de la valeur m(f) par
+rapport à f dans la direction θ
+⟨m′(f),θ⟩ =
+∫
+Ω
+m′(f)θd x=
+∫
+Ω
+j′(u∗)wd x
+où l’on a noté w = ⟨(u∗)′(f),θ⟩ la dérivée de u∗ par rapport à f dans la
+direction θ. On note aussi d = ⟨(h∗)′(f),θ⟩ la dérivée de h∗ par rapport à
+f dans la direction θ. L’équation satisfaite par w et d s’obtient en dérivant
+(5.26) par rapport à f
+{ −div (h∗∇w) − div (d∇u∗)= θ dans Ω
+w =0 sur ∂Ω. (5.35)
+On multiplie l’équation (5.35) parp et l’équation adjointe (5.31) parw et par
+comparaison on en déduit
+
+PAGE 18
+94 5 Optimisation paramétrique
+∫
+Ω
+j′(u∗)wd x=
+∫
+Ω
+θpd x−
+∫
+Ω
+d∇u∗ ·∇ pd x . (5.36)
+Or, en prenant k égale à l’épaisseur optimale pour la force f + tθ dans la
+condition d’optimalité (5.33), en divisant part> 0 et en faisant tendre t vers
+0, la condition d’optimalité de l’épaisseur h∗ donne
+−
+∫
+Ω
+d∇u∗ ·∇ pd x ≥ 0. (5.37)
+Si on changeθen −θ, le même raisonnement conduit encore à l’inégalité (5.37)
+mais avec la dérivée opposée,−d, de l’épaisseur. Par conséquent, (5.37) est en
+fait une égalité ! On peut donc éliminer la dernière intégrale dans (5.36) qui
+est nulle. On a donc démontré que
+p = m′(f),
+c’est-à-dire que p est la sensibilité (ou la dérivée) de la valeur minimum de la
+fonction objectif par rapport à des variations de la force f. Autrement dit, là
+où la fonction p(x) est grande en valeur absolue, une variation locale de f(x)
+donnera une grande variation du minimum (le contraire sip(x) est petit). On
+peut donc ainsi vériﬁer la stabilité de l’optimum à des petites ﬂuctuations des
+forces appliquées. •
+5.3.2 Algorithme numérique
+Une fois que l’on a obtenu l’expression analytique du gradient de la fonction
+coût J(h) il est naturel et assez facile de mettre en oeuvre une méthode de
+gradient pour minimiser numériquement J(h) et calculer ainsi une épaisseur
+optimale. À cause de la contrainte sur le poids de la membrane et des bornes
+minimale et maximale sur l’épaisseur on utilise un algorithme de gradient à
+pas ﬁxe avec projection (voir la Sous-section 3.4.2). Écrivons cet algorithme
+dans le cadre qui nous intéresse. Soitµ> 0 un pas de descente ﬁxé. On calcule
+une suite hn ∈U ad par la récurrence suivante.
+1. Initialisation de l’épaisseur h0 ∈U ad (par exemple, une fonction constante
+qui satisfait les contraintes).
+2. Itérations jusqu’à convergence, pour n ≥ 0 :
+hn+1 = PUad
+(
+hn − µJ′(hn)
+⎫
+, (5.38)
+où PUad est l’opérateur de projection sur le convexe ferméUad et la dérivée
+est donnée par
+J′(hn)= ∇un ·∇ pn
+avec un la solution de l’équation (5.1) et pn celle de l’équation adjointe
+(5.31) (associées à l’épaisseur hn).
+
+PAGE 19
+5.3 Méthode de gradient 95
+Pour que cet algorithme soit entièrement explicite, il nous faut préciser
+ce qu’est l’opérateur de projection PUad . L’ensemble admissible Uad contient
+deux contraintes : tout d’abord une contrainte de poids total
+∫
+Ω
+h(x)dx = h0|Ω |, (5.39)
+puis une contrainte de bornes locales
+hmax ≥ h(x) ≥ hmin > 0 dans Ω. (5.40)
+Il est facile de construire un opérateur de projection pour chacune de ces
+contraintes prises séparément. Pour la contrainte (5.40) l’opérateur de projec-
+tion est une simple troncature (voir (3.47))
+(
+P(h)
+⎫
+(x) = max (hmin,min (hmax,h(x))) ,
+tandis que pour la contrainte (5.39) l’opérateur de projection est
+(
+P(h)
+⎫
+(x)= h(x)+ ℓ
+où ℓ ∈ R est la constante telle que
+∫
+Ω P(h)dx = h0|Ω |. On interprète ℓ
+comme le multiplicateur de Lagrange associé à la contrainte (5.39). On peut
+alors combiner ces deux projections pour obtenir
+(
+PUad (h)
+⎫
+(x) = max (hmin,min (hmax,h(x)+ ℓ)) (5.41)
+où ℓ est l’unique multiplicateur de Lagrange tel que
+∫
+Ω
+PUad (h)dx = h0|Ω |.
+La détermination de la constante ℓ n’est plus explicite : il faut utiliser un
+algorithme itératif en utilisant la propriété que la fonction
+ℓ →V (ℓ)=
+∫
+Ω
+max (hmin,min (hmax,h(x)+ ℓ)) dx
+est strictement croissante sur l’intervalle[ℓ− ,ℓ+], image réciproque du segment
+[hmin|Ω |,hmax|Ω |]. Grâce à cette propriété de monotonie, l’algorithme itératif
+est simple : on commence par déterminer un encadrement [ℓ1,ℓ2] tel que
+V(ℓ1) ≤ h0|Ω |≤V (ℓ2),
+puis on procède par dichotomie pour trouver ℓ.
+Remarque 5.22. Le gradient J′(hn)= ∇un ·∇ pn appartient à L1(Ω) mais,
+a priori, pas à L∞ (Ω). Par conséquent, la somme hn − µJ′(hn) n’appartient
+qu’à L1(Ω) (rappelons que Ω est borné). Heureusement, après application de
+l’opérateur de projection PUad on obtient une fonction de L∞ (Ω). •
+
+PAGE 20
+96 5 Optimisation paramétrique
+En pratique, on utilise plutôt un algorithme de gradient projeté à pas
+variable (mais non optimal) qui garantit la décroissance de la fonctionnelleJ.
+1. Initialisation de l’épaisseur h0 ∈U ad.
+2. Itérations jusqu’à convergence, pour n ≥ 0 :
+a) Calcul de l’état un et de l’état adjoint pn, solutions respectives de
+(5.1) et (5.31), à l’aide de l’épaisseur précédente hn.
+b) Mise à jour de l’épaisseur :
+hn+1 = max (hmin,min (hmax,hn − µnJ′(hn)+ ℓn)) ,
+où ℓn est un multiplicateur de Lagrange pour la contrainte de poids (5.39),
+ajusté itérativement, et µn > 0 est un pas de descente tel que J(hn+1) <
+J(hn).
+Un pas de descente optimalµn peut se calculer par un algorithme de type
+“line search” [27], mais le coût en temps de calcul est rédhibitoire car chaque
+évaluation requiert un calcul par éléments ﬁnis de l’état. En pratique, on se
+contente d’une seule évaluation par itération si J(hn+1) <J (hn) :o np e u t
+alors augmenter le pas µn pour les itérations suivantes (aﬁn de converger
+plus vite) ; si par contreJ(hn+1) ≥ J(hn) on recommence en divisant µn par
+2. Remarquons que l’essentiel du temps de calcul est consacré au calcul des
+solutions un et pn par éléments ﬁnis. Si la résolution des systèmes linéaires
+s’eﬀectue grâce à une méthode directe de type factorisation de Cholesky, le
+surcoût engendré par le calcul de l’état adjoint est très faible : il suﬃt de
+calculer un nouveau second membre, en utilisant la solution du problème
+direct, et de résoudre le système linéaire avec ce nouveau second membre, la
+matrice de rigidité (déjà factorisée) étant inchangée.
+On détecte la convergence lorsque la condition d’optimalité (3.44) est
+satisfaite, c’est-à-dire lorsque
+h = max (hmin,min (hmax,h − µJ′(h)+ ℓ)) .
+En pratique, on introduit un seuilϵ> 0 (typiquement 10−3)e to nd é c l a r eq u e
+l’algorithme a convergé si
+|hn − max (hmin,min (hmax,hn − µnJ′(hn)+ ℓn))|≤ ϵµnhmax.
+Le problème principal d’un tel algorithme de gradient est évidemment sa
+lenteur relative. On peut l’accélérer par une méthode de quasi-Newton, qui
+est cependant plus délicate à implémenter.
+Nous renvoyons à la Section 5.6 pour la mise en oeuvre de cet algorithme
+dans le cas d’une plaque-console élastique.
+5.4 Le cas auto-adjoint : la compliance
+Lorsque j(u)= fu, on trouve que p = −u puisque j′(u)= f.C ec a s
+particulier est dit auto-adjoint, et il jouit d’un certain nombre de propriétés
+
+PAGE 21
+5.4 Le cas auto-adjoint : la compliance 97
+remarquables, y compris un résultat d’existence assez simple. Cela explique
+en partie pourquoi l’utilisation de la compliance comme fonction objectif est
+aussi populaire.
+Remarquons au passage que dans le cas auto-adjoint la dérivée de la com-
+pliance J(h)=
+∫
+Ω fudx est
+J′(h)= −|∇ u|2
+qui s’interprète mécaniquement de manière très simple. En eﬀet, au vu de
+la formule (5.38) dans l’algorithme de gradient, on voit qu’il faut augmenter
+l’épaisseur là où les déformations (ou contraintes) sont les plus grandes, et qu’il
+faut la diminuer là où elles sont les plus faibles. Il est rassurant de voir que
+cette condition d’optimalité est tout à fait conforme à l’intuition mécanique !
+5.4.1 Un résultat d’existence
+On utilise le Théorème 2.22 sur l’énergie complémentaire qui aﬃrme que
+∫
+Ω
+fudx = min
+τ ∈L2(Ω )N
+−divτ = f dans Ω
+∫
+Ω
+h−1|τ|2dx. (5.42)
+On peut alors réécrire le problème d’optimisation (5.4) comme une double
+minimisation
+inf
+h∈Uad
+min
+τ ∈L2(Ω )N
+−divτ = f dans Ω
+∫
+Ω
+h−1|τ|2dx.
+L’ordre des deux minimisations est sans importance : on peut les échanger
+ou les combiner en une seule minimisation sur le couple (h, τ). On écrit donc
+(5.4) sous la forme
+inf
+(h,τ)∈Uad×H
+∫
+Ω
+h−1|τ|2dx. (5.43)
+avec H = {τ ∈ L2(Ω)N , −divτ = f dans Ω }.O nr e m a r q u eq u eUad ×
+H est un ensemble fermé convexe non vide. L’intérêt de (5.43) est que la
+fonction à minimiser est aussi convexe comme l’aﬃrme le Lemme 5.8. On
+peut alors obtenir l’existence d’une forme optimale sans aucune hypothèse
+supplémentaire.
+Théorème 5.23. Il existe une solution optimale au problème de minimisation
+(5.43).
+Démonstration. E nv e r t ud uL e m m e5 . 8l af o n c t i o n
+φ(h, τ)=
+∫
+Ω
+h−1|τ|2dx
+
+PAGE 22
+98 5 Optimisation paramétrique
+est convexe de Uad × H dans R. Elle est aussi “inﬁnie à l’inﬁni” (en fait, Uad
+est borné et elle tend bien vers l’inﬁni quand la norme deτ tend vers l’inﬁni).
+On peut donc appliquer le Théorème d’existence 3.8. Remarquons aussi que
+tout minimum local est en fait un minimum global. ⊓⊔
+Remarque 5.24. Malheureusement, cette fonctionφ(h, τ) n’est pas strictement
+convexe, et on ne peut donc rien dire de l’unicité de la solution optimale. •
+5.4.2 Conditions d’optimalité
+Le Lemme 5.8 donne aussi le gradient de la fonctionφ(h, τ) dont l’intégrale
+est minimisée dans (5.43). On peut donc appliquer un algorithme de gradient
+pour minimiser (5.43) conjointement en (h, τ). Il se trouve que l’on peut faire
+mieux en trouvant des conditions d’optimalité précises qui conduisent à un
+algorithme numérique plus performant qu’une simple méthode de gradient.
+L’idée essentielle est d’échanger les deux minimisations dans (5.43),
+ce qui ne change pas le problème, pour obtenir
+inf
+τ ∈L2(Ω )N
+−divτ = f dans Ω
+inf
+h∈Uad
+∫
+Ω
+h−1|τ|2dx .
+Il se trouve qu’à τ ﬁxé, il est facile d’eﬀectuer la minimisation en h dans Uad.
+Lemme 5.25. Soit τ ∈ L2(Ω)N . Le problème
+min
+h∈Uad
+∫
+Ω
+h−1|τ|2dx
+admet un point de minimum h(τ) dans Uad donné par
+h(τ)(x)=
+⎧
+⎨
+⎩
+h∗(x) si hmin <h ∗(x) <h max
+hmin si h∗(x) ≤ hmin
+hmax si h∗(x) ≥ hmax
+avec h∗(x)= |τ(x)|√
+ℓ
+, (5.44)
+où ℓ ∈ R+ est l’unique valeur telle que
+∫
+Ω h(x)dx = h0|Ω |.L av a l e u rd u
+minimum h(τ)(x) est unique si ℓ ̸=0 .
+Remarque 5.26. On retrouve à nouveau le fait (conforme à l’intuition méca-
+nique) que l’épaisseur optimale est d’autant plus grande que les contraintes
+sont grandes. En fait, l’épaisseur optimale est même précisément proportion-
+nelle au module des contraintes lorsqu’elle n’atteint pas ses valeurs extrêmes.
+Pour les treillis de barres (dits de Michell) ce principe d’optimalité conduit
+aux méthodes de “fully stressed design” [111], [153]. •
+Démonstration. La fonction h →
+∫
+Ω h−1|τ|2dx est convexe de Uad dans
+R, donc le Théorème 3.8 donne l’existence d’un point de minimum h.L e
+Théorème 3.19 caractérise ce point de minimum par la condition
+
+PAGE 23
+5.4 Le cas auto-adjoint : la compliance 99
+−
+∫
+Ω
+|τ|2
+h2 (k − h)dx ≥ 0 ∀k ∈U ad. (5.45)
+Soit µ> 0 un réel positif ﬁxé. La condition (5.45) est équivalente à
+∫
+Ω
+(
+h −
+(
+h + µ |τ|2
+h2
+⎫ ⎫
+(k − h)dx ≤ 0 ∀k ∈U ad,
+qui n’est rien d’autre que la caractérisation de la projection sur le convexe
+fermé Uad
+h = PUad
+(
+h + µ |τ|2
+h2
+⎫
+.
+On connaît l’opérateur de projection orthogonale PUad déﬁni par la formule
+(5.41), c’est-à-dire pour x ∈ Ω
+(
+PUad (k)
+⎫
+(x) = max (hmin,min (hmax,k (x) − ℓ))
+où (−ℓ) est l’unique multiplicateur de Lagrange tel que
+∫
+Ω PUad (k)dx = h0|Ω |.
+On en déduit alors aisément la caractérisation (5.44), et en particulier que
+|τ(x)|2
+h(x)2 − ℓ =0 pour tout x tel quehmin <h (x) <h max,
+ce qui donne la valeur de h∗(x), unique si ℓ ̸=0 .S i ℓ =0 , alors il peut y
+avoir plusieurs points de minimum dont les valeurs h(τ)(x) diﬀèrent là où
+τ(x)=0 . ⊓⊔
+Par conséquent, on a trouvé des conditions d’optimalité pour le problème
+d’optimisation (5.4) qui sont du type :
+1. si on connaît le τ optimal, alors un h optimal est donné par (5.44),
+2. si on connaît leh optimal, alors leτoptimal est l’unique point de minimum
+de (5.42) (obtenu en résolvant une simple équation aux dérivées partielles).
+On en déduit un algorithme de minimisation pour (5.4), dit de directions
+alternées, qui consiste à minimiser successivement et alternativement en h
+et en τ.
+5.4.3 Algorithme numérique
+Décrivons cet algorithme de directions alternées.
+1. Initialisation de l’épaisseur h0 ∈U ad.
+2. Itérations jusqu’à convergence, pour n ≥ 0 :
+
+PAGE 24
+100 5 Optimisation paramétrique
+a) Calcul de l’état τn, solution unique de
+min
+τ ∈L2(Ω )N
+−divτ = f dans Ω
+∫
+Ω
+h−1
+n |τ|2dx, (5.46)
+à l’aide de l’épaisseur précédente hn.
+b) Mise à jour de l’épaisseur :
+hn+1 = h(τn),
+où h(τ) est déﬁni par (5.44).
+Remarquons que la minimisation de (5.46) est équivalente à la résolution
+de l’équation (5.1), c’est-à-dire
+{
+−div (hn∇un)= f dans Ω
+un =0 sur ∂Ω,
+et que l’on retrouve τn par la formule
+τn = hn∇un.
+Cet algorithme s’interprète comme une minimisation alternative en τ puis
+en h de la fonctionnelle (5.43). En particulier, on en déduit que la fonction
+objectif décroît toujours au cours des itérations
+J(hn+1)=
+∫
+Ω
+h−1
+n+1|τn+1|2dx ≤
+∫
+Ω
+h−1
+n+1|τn|2dx ≤
+∫
+Ω
+h−1
+n |τn|2dx = J(hn).
+Cet algorithme s’interprète aussi comme une méthode decritère d’opti-
+malité (voir [18], [37], [153]). Les méthodes de critère d’optimalité sont très
+populaires parmi les ingénieurs bien que leurs fondements théoriques ne soient
+pas très clairs. Le principe de ces méthodes consiste à résoudre de manière ité-
+rative les conditions d’optimalité plutôt que de minimiser la fonction objectif.
+Si les conditions d’optimalité sont nécessaires et suﬃsantes, et si la méthode
+converge, on trouve ainsi une solution optimale. Cependant, il n’y a aucune
+garantie, en général, pour qu’elle converge. Plus grave, si les conditions d’opti-
+malité sont seulement nécessaires, on peut converger vers une “fausse solution”.
+L’algorithme de directions alternées ci-dessus est une méthode de critère d’op-
+timalité puisqu’elle est une méthode itérative de point ﬁxe sur les conditions
+d’optimalité. On peut démontrer la convergence de cet algorithme [178]. Nous
+renvoyons à la Section 5.6 pour la mise en oeuvre de cet algorithme dans le
+cas d’une plaque élastique.
+
+PAGE 25
+5.5 Approche discrète 101
+5.5 Approche discrète
+Le but de cette section est de montrer qu’il n’y a pas de simpliﬁcation par-
+ticulière à étudier la version discrète d’un problème d’optimisation de formes
+plutôt que sa version continue. Par ailleurs, nous montrerons aussi que la dis-
+crétisation du gradient de la fonction objectif dans l’approche continue est
+égal au gradient “discret” de l’approche discrète. Il n’y a donc aucune perte
+de précision dans l’approche continue pour ce modèle d’optimisation para-
+métrique.
+5.5.1 Discrétisation du problème
+Si l’on discrétise le problème aux limites (5.1), par exemple par
+une méthode d’éléments ﬁnis, on obtient le système linéaire suivant
+K(h)y(h)= b, (5.47)
+où K(h) est la matrice de rigidité de la membrane (qui dépend de h), b
+est le second membre qui correspond aux forces f,e t y(h) est le vecteur des
+coordonnées de la solution u de (5.1) dans la base des éléments ﬁnis. Ici h est
+toujours la variable d’épaisseur (elle aussi discrétisée), et non pas le pas du
+maillage d’éléments ﬁnis. On note n la dimension de l’espace de discrétisation
+(autrement dit le nombre de degrés de liberté dans la méthode des éléments
+ﬁnis) : b et y(h) sont des vecteurs de Rn, tandis que K(h) est une matrice
+symétrique déﬁnie positive d’ordre n.
+Pour simpliﬁer, nous allons supposer que l’épaisseur h est discrétisée de la
+même manière que le déplacement, c’est-à-dire que nous associons à chaque
+degré de liberté du déplacement une variable discrète d’épaisseur. Par consé-
+quent, h est désormais aussi un vecteur de Rn. Ce choix est arbitraire : on
+aurait pu prendre moins de degrés de liberté pour h (par exemple, constant
+par sous-domaines), ou plus (par exemple, h déﬁni en chaque point d’inté-
+gration d’une formule de quadrature utilisée pour l’évaluation de la matrice
+K(h)). Dans ces conditions l’ensemble admissible (5.2) est discrétisé par
+Udisc
+ad =
+{
+h ∈ Rn ,h max ≥ hi ≥ hmin > 0,
+n∑
+i=1
+cihi = h0|Ω |
+}
+,
+où ∑n
+i=1 cihi est une approximation de
+∫
+Ω h(x)dx. On calcule aussi une
+approximation de la fonction coût (5.3) par une formule de quadrature : soit
+jdisc une fonction (régulière) de Rn dans R qui approche
+∫
+Ω j(u(x))dx. Dans
+le cas de la compliance, jdisc est une fonction linéaire de y(h) qui vaut
+jdisc(y(h)) = b · y(h)= K(h)−1b · b.
+Dans le cas d’un critère quadratique pour approcher un déplacement cible,
+jdisc est aussi quadratique en y(h)
+
+PAGE 26
+102 5 Optimisation paramétrique
+jdisc(y(h)) = B(y(h) − y0) · (y(h) − y0).
+Le problème discret est donc
+inf
+h∈Udisc
+ad
+{
+Jdisc(h)= jdisc(y(h))
+}
+. (5.48)
+D’un point de vue pratique ce qui nous intéresse c’est le calcul de la dérivée
+première (et éventuellement seconde) de Jdisc(h) pour pouvoir utiliser des
+méthodes numériques de type gradient pour trouver les minima de Jdisc(h).
+Le fait que l’on dispose de la formule explicitey(h)= K(h)−1b pour l’état de
+la structure est un leurre en pratique ! On pourrait croire qu’il suﬃt d’écrire
+(
+Jdisc⎫′
+(h)= y′(h)
+(
+jdisc⎫′
+(y(h)), (5.49)
+où y′(h) est déﬁni par la dérivation terme à terme de (5.47), c’est-à-dire
+K(h)y′(h)= −K′(h)y(h), (5.50)
+ou plus précisément, pour chaque composante de h,
+K(h) ∂y
+∂hi
+(h)= − ∂K
+∂hi
+(h)y(h),
+c’est-à-dire que
+y′(h)= −K(h)−1K(h)′K(h)−1b, (5.51)
+mais la formule (5.51) est inutilisable pour les systèmes de grande taille car le
+calcul de K(h)−1 est beaucoup trop coûteux en général (en temps de calcul
+mais surtout en place mémoire). Rappelons que, lorsque n est grand, la réso-
+lution de (5.47) s’eﬀectue sans calculer l’inverse de K(h) (par une méthode
+itérative de type gradient conjugué, ou par une méthode directe de décompo-
+sition de Cholesky). Remarquons que l’on peut utiliser la formule (5.51) sans
+connaître K(h)−1, mais il faut alors résoudren+1 systèmes linéaires associés
+à la matrice K(h) (un pour calculer y(h)= K(h)−1b, puis n pour calculer
+K(h)−1(∂K(h)/∂hi)y(h)), ce qui est encore très coûteux.
+Par conséquent,on n’utilise pasla formule explicite (5.51). Pour calculer
+la dérivée
+(
+Jdisc⎫′
+(h) on introduit la notion d’état adjoint q u ip e r m e td e
+simpliﬁer considérablement ce calcul. On déﬁnit l’état adjoint p ∈ Rn solution
+de
+K(h)p(h)= −
+(
+jdisc⎫′
+(y(h)). (5.52)
+En prenant le produit scalaire de (5.50) par p(h) et celui de (5.52) par y′(h),
+on obtient, pour chaque composante i,
+K(h)p(h) · ∂y
+∂hi
+(h)= − ∂K
+∂hi
+(h)y(h) · p(h)= −
+(
+jdisc⎫′
+(y(h)) · ∂y
+∂hi
+(h),
+d’où l’on déduit
+
+PAGE 27
+5.5 Approche discrète 103
+(
+Jdisc⎫′
+(h)= K′(h)y(h) · p(h)=
+(∂K
+∂hi
+(h)y(h) · p(h)
+⎫
+1≤i≤n
+. (5.53)
+En pratique, c’est la formule (5.53) que l’on utilise pour évaluer le gradient(
+Jdisc⎫′
+(h) puisqu’elle ne nécessite que deux résolutions de systèmes linéaires.
+Par conséquent, même dans le cas discret il est avantageux d’utili-
+ser la notion d’état adjoint pour calculer le gradient de la fonction
+objectif.
+Remarque 5.27. Comme dans le cas continu (voir la Section 5.3), pour trouver
+la déﬁnition exacte de l’état adjoint on introduit le Lagrangien
+L(h, y, p)= jdisc(y)+ p ·
+(
+K(h)y − b
+⎫
+,
+où p est le multiplicateur de Lagrange pour la contrainte (5.47) qui relie
+y = y(h) à h. Puisque K(h) est symétrique, la dérivée partielle de L par
+rapport à y est
+∂L
+∂y(h, y, p)=
+(
+jdisc⎫′
+(y)+ K(h)p,
+qui, lorsqu’elle s’annule, donne l’équation adjointe (5.52). •
+Remarque 5.28. D’un point de vue pratique, le point le plus diﬃcile pour cal-
+culer la dérivée
+(
+Jdisc⎫′
+(h) dans ce modèle discret est le calcul des dérivées
+(en variables discrètes) ∂K
+∂hi
+(h) et
+(
+jdisc⎫′
+(y). La première dérivée ∂K
+∂hi
+(h) est
+encore relativement facile à évaluer si on connaît les formules de quadrature
+utilisées dans le code d’éléments ﬁnis pour calculer la matrice de rigiditéK(h).
+Par contre, la seconde dérivée
+(
+jdisc⎫′
+(y) peut être assez compliquée. En ef-
+fet, en général on connaît explicitement la fonction j, déﬁnie dans le cadre
+continu (5.3), mais sa discrétisation (obtenue par “double” approximation :
+u est discrétisé en y et l’intégrale est approchée par quadrature) est nette-
+ment plus compliquée. Paradoxalement, il sera plus simple d’évaluer ces gra-
+dients dans le cadre continu, puis de les discrétiser, que d’évaluer directement
+les dérivées discrètes. Mentionnons toutefois la méthode de diﬀérentiation
+automatique [52] qui permet de calculer précisément ces dérivées discrètes.
+Cette méthode repose sur des algorithmes informatiques qui, à partir d’un
+programme en langage C ou Fortran, construisent automatiquement le pro-
+gramme donnant la dérivée des sorties du programme initial par rapport aux
+entrées. Cette méthode dépasse le cadre de ce cours : disons seulement que
+les logiciels de diﬀérentiation automatique sont peu nombreux et d’utilisation
+délicate. •
+5.5.2 Comparaison des gradients discret et continu
+Nous allons comparer le gradient, dit “continu”, calculé à la Section 5.3,
+avec le gradient “discret” (5.53) que nous venons d’obtenir. Bien sûr, dans
+
+PAGE 28
+104 5 Optimisation paramétrique
+les applications numériques le gradient continu n’est pas utilisé tel quel, mais
+est lui aussi discrétisé par une méthode d’éléments ﬁnis. Par conséquent nous
+allons comparer le gradient continu discrétisé avec le gradient discret et
+montrer en fait qu’ils sont égaux ! Autrement dit, les deux opérations de dis-
+crétisation et de calcul de gradient commutent (sous des hypothèses minimines
+sur la manière de discrétiser). C’est un résultat rassurant, qui conﬁrme le bien-
+fondé de l’approche continue que nous suivons dans cet ouvrage, et que l’on
+peut trouver dans [84], [120], [125].
+Commençons par calculer le gradient continu discrétisé. La formulation
+variationnelle du problème continu (5.1) est : trouver u ∈ H1
+0 (Ω) tel que
+∫
+Ω
+h∇u ·∇ φd x=
+∫
+Ω
+fφdx ∀φ ∈ H1
+0 (Ω), (5.54)
+Une discrétisation par éléments ﬁnis consiste à remplacer l’espace H1
+0 (Ω) par
+un sous-espace de dimension ﬁnie V∆ , c’est-à-dire à trouver la solution u∆ ∈
+V∆ de ∫
+Ω
+h∇u∆ ·∇ φ∆ dx =
+∫
+Ω
+fφ∆ dx ∀φ∆ ∈ V∆ . (5.55)
+Nous utilisons ici la notation∆ (comme ∆x ) pour désigner la taille des mailles
+puisque la notation usuelle h est déjà prise pour l’épaisseur. De la même
+manière on introduit un autre espace d’éléments ﬁnis W∆ pour l’épaisseur,
+c’est-à-dire un sous-espace de dimension ﬁnie de Uad. La formulation varia-
+tionnelle du problème adjoint (5.31) est : trouver p ∈ H1
+0 (Ω) tel que
+∫
+Ω
+h∇p ·∇ φd x= −
+∫
+Ω
+j′(u)φd x ∀φ ∈ H1
+0 (Ω), (5.56)
+et sa discrétisation par éléments ﬁnis donne : trouver la solution p∆ ∈ V∆ de
+∫
+Ω
+h∇p∆ ·∇ φ∆ dx = −
+∫
+Ω
+j′(u∆ )φ∆ dx ∀φ∆ ∈ V∆ . (5.57)
+Finalement, suivant la formule (5.32), le gradient continu discrétisé est déﬁni
+par
+J′
+∆ (h)= ∇u∆ ·∇ p∆ . (5.58)
+Remarquons qu’il faut éventuellement reprojeter J′
+∆ (h) dans W∆ avant de
+l’additionner à h (ce n’est pas la peine siV∆ est l’espace des éléments ﬁnis P1
+et W∆ celui des éléments ﬁnis P0).
+Calculons maintenant le gradient discret : nous l’avons déjà fait dans la
+sous-section précédente mais nous allons le ré-exprimer d’une autre manière
+pour le comparer à (5.58). Malgré les apparences, la formulation variationnelle
+(5.54) est exactement équivalente au système linéaire “discret” (5.47) ! En eﬀet,
+les coordonnées dans la base deV∆ de la solutionu∆ de (5.54) sont précisément
+le vecteur y(h), solution de (5.47) (voir, si besoin est, le Lemme 2.29). Par
+conséquent, u∆ est aussi l’état discret. La fonction objectif discrète est donc
+
+PAGE 29
+5.5 Approche discrète 105
+Jdisc(h)=
+∫
+Ω
+j(u∆ )dx,
+qui coïncide avec (5.48) si les intégrales sont évaluées exactement (et non
+pas à l’aide de quadratures). Avec ces notations le calcul de la dérivée de
+Jdisc(h) est identique à celui de la dérivée deJ(h) à la diﬀérence que l’espace
+H1
+0 (Ω) est remplacé par son sous-espace V∆ : l’essentiel est de raisonner sur
+les formulations variationnelles et non sur les équations.
+Plus précisément, l’application Jdisc(h),d e W∆ dans R, est diﬀérentiable
+et sa dérivée dans la direction k est donnée par
+⟨
+(
+Jdisc⎫′
+(h),k ⟩ =
+∫
+Ω
+j′(u∆ )w∆ dx , (5.59)
+où w∆ = ⟨u′
+∆ ,k ⟩ est l’unique solution dans V∆ de
+∫
+Ω
+h∇w∆ ·∇ φ∆ dx = −
+∫
+Ω
+k∇u∆ ·∇ φ∆ dx ∀φ∆ ∈ V∆ . (5.60)
+On remarque que la solution w∆ de (5.60) coïncide avec la discrétisation par
+éléments ﬁnis v∆ de la solution v de (5.27) qui joue le même rôle que w∆
+dans le cas continu (voir le Lemme 5.17). Pour éliminer w∆ dans la formule
+(5.59) et faire apparaître directement la direction de dérivationk, on introduit
+comme d’habitude un état adjoint q∆ , solution unique dans V∆ de
+∫
+Ω
+h∇q∆ ·∇ φ∆ dx = −
+∫
+Ω
+j′(u∆ )φ∆ dx ∀φ∆ ∈ V∆ , (5.61)
+et par intégration par parties on trouve que
+⟨
+(
+Jdisc⎫′
+(h),k ⟩ =
+∫
+Ω
+k∇u∆ ·∇ q∆ dx. (5.62)
+On remarque encore que cet état adjoint q∆ coïncide avec la discrétisation
+par éléments ﬁnis p∆ de l’état adjoint continu p, solution de (5.56). On en
+déduit donc que (5.62) coïncide aussi avec la formule (5.58). Par conséquent
+on a démontré le résultat suivant.
+Proposition 5.29. On suppose que toutes les intégrales sont évaluées exacte-
+ment et on néglige les erreurs d’arrondi. Alors le gradient continu discrétisé
+coïncide avec le gradient discret, c’est-à-dire que
+J′
+∆ (h)=
+(
+Jdisc⎫′
+(h).
+Autrement dit, on n’introduit pas de pertes de précision en utilisant le gra-
+dient continu dans les algorithmes numériques puisque sa discrétisation est le
+gradient exact du système discret. Rappelons encore une fois que l’avantage du
+gradient continu sur le gradient discret est qu’il ne nécessite pas de connaître
+les détails de l’implémentation informatique du code d’éléments ﬁnis utilisé.
+
+PAGE 30
+106 5 Optimisation paramétrique
+5.6 Optimisation de l’épaisseur d’une plaque élastique
+5.6.1 Modélisation
+Ω
+h
+Fig. 5.3. Plaque plane d’épaisseur variable.
+On peut étendre les résultats de ce chapitre à un modèle de plaque élas-
+tique. On considère une plaque plane de section moyenne Ω et d’épaisseur
+variable h(x) (voir la Figure 5.3). On suppose que les forces appliquées et les
+eﬀorts dans la plaque restent toujours plans. Alors, par moyennisation dans la
+direction orthogonale au plan médianΩ, on se ramène à un problème d’élasti-
+cité linéarisée bidimensionnel où les coeﬃcients de Lamé sont proportionnels
+à l’épaisseur.
+On suppose qu’une partie du bord ΓD est ﬁxée, tandis que des eﬀorts
+(éventuellement nuls) sont appliquées sur l’autre partieΓN (avec ∂Ω = ΓN ∪
+ΓD) .O nc o n s i d è r ed o n cl em o d è l es u i v a n t
+⎧
+⎪⎪⎨
+⎪⎪⎩
+−divσ = f dans Ω
+σ =2 µhe(u)+ λhtr (e(u))I dans Ω
+u =0 sur ΓD
+σn = g sur ΓN
+(5.63)
+où µ> 0 et λ ≥ 0 sont les coeﬃcients de Lamé du matériau isotrope consti-
+tutif de la plaque, h(x) est l’épaisseur de la plaque, u(x) est le déplacement
+(plan), e(u)= 1
+2
+(
+∇u +( ∇u)t⎫
+le tenseur des déformations, et σ le tenseur
+des contraintes. On note f les forces volumiques et g les forces surfaciques
+appliquées. Si f ∈ L2(Ω)N et g ∈ L2(ΓN )N , on sait qu’il existe une unique
+solution u ∈ H1(Ω)N de (5.63). On cherche à optimiser la plaque en faisant
+varier son épaisseur h(x) dans l’ensemble admissible déﬁni par
+Uad =
+{
+h ∈ L∞ (Ω),h max ≥ h(x) ≥ hmin > 0 dans Ω,
+∫
+Ω
+h(x)dx = h0|Ω |
+}
+,
+(5.64)
+avec hmax ≥ h0 ≥ hmin. On déﬁnit une fonction coût
+J(h)=
+∫
+Ω
+j(u)dx, (5.65)
+
+PAGE 31
+5.6 Optimisation de l’épaisseur d’une plaque élastique 107
+où u est la solution de (5.63) (et donc dépend de h)e t j est une fonction de
+classe C1 de RN dans R telle que |j(u)|≤ C(|u|2 +1 ) et |j′(u)|≤ C(|u| +1 )
+pour tout u ∈ RN . Le problème d’optimisation s’écrit
+inf
+h∈Uad
+J(h). (5.66)
+Dans ce qui suit nous choisirons comme fonction j,s o i tl ac o m p l i a n c e ,s o i t
+un critère de moindres carrés j(u)= |u − u0|2 pour atteindre un déplacement
+cible u0 ∈ L2(Ω)N . Tous les résultats obtenus pour le problème de membrane
+s’étendent à ce problème de plaque élastique.
+5.6.2 Résultats numériques pour la compliance
+Fig. 5.4. Conditions aux limites pour une plaque élastique.
+Dans cette sous-section on présente des résultats numériques obtenus pour
+le problème de minimisation de la compliance (ce qui revient à maximiser la
+rigidité de la plaque)
+min
+h∈Uad
+J(h)=
+∫
+Ω
+f · ud x+
+∫
+ΓN
+g · ud s
+avec l’algorithme des directions alternées introduit dans la Sous-section 5.4.3.
+Les conditions aux limites sont indiquées à la Figure 5.4 (en particulier on a
+f ≡ 0).
+Comme dans la Section 5.4, en utilisant le principe de minimisation de
+l’énergie complémentaire, le problème d’optimisation peut se réécrire comme
+une double minimisation
+inf
+τ ∈L2(Ω ; Ms
+N )
+−divτ = f dans Ω
+τn = g sur ΓN
+inf
+h∈Uad
+∫
+Ω
+1
+2µh
+(
+|τ|2 − λ
+2µ + Nλ(trτ)2
+⎫
+dx,
+où Ms
+N est l’ensemble des matrices symétriques d’ordreN. La généralisation
+suivante du Lemme 5.25 permet encore d’aﬃrmer que l’épaisseur optimale est
+proportionnelle à une certaine norme des contraintes.
+
+PAGE 32
+108 5 Optimisation paramétrique
+Fig. 5.5. Maillage de la plaque élastique.
+Lemme 5.30. Soit un tenseur des contraintes τ ∈ L2(Ω; Ms
+N ). Le problème
+min
+h∈Uad
+∫
+Ω
+1
+2µh
+(
+|τ|2 − λ
+2µ + Nλtr (τ)2
+⎫
+dx
+admet un point de minimum h(τ) dans Uad donné par
+h(τ)(x)=
+⎧
+⎨
+⎩
+h∗(x) si hmin <h ∗(x) <h max
+hmin si h∗(x) ≤ hmin
+hmax si h∗(x) ≥ hmax
+avec
+h∗(x)=
+√
+2µℓ−1
+(
+|τ|2 − λ
+2µ + Nλtr (τ)2
+⎫
+,
+où ℓ ∈ R+ est l’unique valeur telle que
+∫
+Ω h(x)dx = h0|Ω |.L av a l e u rd u
+minimum h(τ)(x) est unique si ℓ ̸=0 .
+L’équation (5.63) est résolue par une méthode d’éléments ﬁnis triangulaires
+P2. Le maillage du domaine Ω est représenté à la Figure 5.5. L’épaisseur
+est choisie constante par maille (éléments ﬁnis P0). On choisit hmin =0 .1,
+hmax =1 .0, et l’épaisseur moyenne h0 =0 .5. On initialise l’algorithme avec
+une plaque d’épaisseur uniforme égale à h0. Un historique partiel des cartes
+d’épaisseur h(x) est donné à la Figure 5.6. Les niveaux de gris correspondent
+à diﬀérentes épaisseurs allant de 0.1 (blanc) à 1.0 (noir). On détecte bien
+la convergence rapide de l’algorithme “à l’oeil nu” (voir aussi la courbe de
+convergence de la fonction coût à la Figure 5.7).
+La Figure 5.8 eﬀectue une comparaison des déformations de la plaque
+initiale et de la plaque optimale obtenue après convergence de l’algorithme.
+On voit bien que la plaque optimale se déforme moins et est donc plus rigide.
+Remarque 5.31. Si l’on choisit plutôt des éléments ﬁnis triangulaires P1 et
+que l’on conserve une épaisseur constante par maille ( P0), on obtient des
+oscillations numériques comme sur la Figure 5.9. Ce phénomène d’instabili-
+tés numériques est bien connu pour ce problème et s’appelle l’instabilité en
+damiers (ou “checkerboards”) [59], [166]. Elle est très semblable à l’instabilité
+numérique des équations de Stokes lorsque la vitesse est discrétisée avec des
+
+PAGE 33
+5.6 Optimisation de l’épaisseur d’une plaque élastique 109
+Fig. 5.6. Carte de l’épaisseur aux itérations 1, 5, 10, 30 (de gauche à droite et de
+haut en bas) de l’algorithme des directions alternées (épaisseur croissante du blanc
+au noir).
+iterations
+fonction objectif
+10 20 305 15 25
+20
+21
+22
+23
+24
+25
+26
+27
+28
+Fig. 5.7. Courbe de convergence de la fonction objectif en fonction des itérations
+de l’optimisation.
+Fig. 5.8. Comparaison des déformations de la plaque avant (à gauche) et après (à
+droite) optimisation.
+
+PAGE 34
+110 5 Optimisation paramétrique
+éléments ﬁnis P1 et la pression avec P0 (voir [77]). En utilisant un ﬁltrage des
+modes instables (voir [23]) ou en régularisant l’épaisseur (voir la Sous-section
+5.6.4 ci-dessous) on peut tout de même obtenir des résultats corrects avec les
+éléments ﬁnis P1. •
+Fig. 5.9. Carte de l’épaisseur de la plaque optimale obtenue avec des éléments ﬁnis
+P1 : instabilités en damiers.
+5.6.3 Un contre-exemple numérique
+Nous appliquons l’algorithme de la Sous-section 5.3.2 à la recherche d’une
+forme qui se déforme horizontalement le moins possible et verticalement le plus
+possible, sous le chargement proposé. Les conditions aux limites sont indiquées
+à la Figure 5.10. Cet exemple nous permet d’exhiber les conséquences numé-
+riques de la non-existence d’une forme optimale.
+Γ
+Γ
+Γ
+Γ
+−
++
+D N
+Fig. 5.10. Conditions aux limites pour un contre-exemple de non-existence.
+On minimise le critère de moindres carrés
+min
+h∈Uad
+J(h)=
+∫
+ΓN
+|u − u0|2ds +
+∫
+Γ+
+|u − u+|2ds +
+∫
+Γ−
+|u − u− |2ds
+avec u0 =( −1,0), u+ =( 0,100) et u− =( 0, −100), c’est-à-dire que l’on sou-
+haite que la plaque se déforme suivant le schéma de la Figure 5.11. Autrement
+
+PAGE 35
+5.6 Optimisation de l’épaisseur d’une plaque élastique 111
+dit, on veut que la plaque ne s’étire pas dans la direction horizontale mais
+s’élargisse dans la direction verticale. Comme précédemment on utilise des
+éléments ﬁnis triangulaires P2 pour calculer le déplacement élastique u (et
+l’adjoint p), et des éléments ﬁnis P0 pour l’épaisseur (constante sur chacune
+des mailles).
+Fig. 5.11. Déplacement cible pour le contre-exemple numérique.
+L’algorithme de la Sous-section 5.3.2 est utilisé pour une série de maillages
+de plus en plus ﬁns, comprenant 448, 947, 3992, 7186 triangles. La suite de
+formes optimales ainsi obtenue ne converge manifestement pas : des détails
+de plus en plus ﬁns apparaissent, ce qui manifeste le caractère mal-posé du
+problème (voir la Figure 5.12). De même, la valeur de la fonction objectif après
+convergence est décroissante au fur et à mesure que le maillage est raﬃné (voir
+la Figure 5.13). Cet exemple numérique est caractéristique d’un problème mal-
+posé : la suite de formes optimales exhibe une microstructure de plus en plus
+ﬁne comme le contre-exemple théorique de la Sous-section 5.2.1.
+5.6.4 Régularisation
+Dans les exemples précédents on ne peut pas utiliser des éléments ﬁnis
+triangulaires P1 pour calculer le déplacement élastique u, au risque d’obtenir
+des instabilités numériques très désagréables (voir la Figure 5.9 et la Remarque
+5.31). Ces instabilités disparaissent si on utilise des éléments ﬁnis P2 pour le
+déplacement etP0 pour l’épaisseur, mais cette solution n’est pas complètement
+satisfaisante car la résolution par éléments ﬁnis P2 coûte beaucoup plus cher
+que celle par éléments ﬁnis P1 (surtout en dimension N =3 ). Il est donc
+intéressant de chercher un autre moyen d’éviter ces instabilités, et c’est ce
+que nous allons faire par un procédé de régularisation de l’épaisseur h.
+Il existe une autre motivation pour régulariser l’épaisseur h qui est bien
+visible sur le contre-exemple de la Sous-section 5.6.3. On voit clairement sur la
+Figure 5.12 que la forme optimale obtenue numériquement varie en fonction
+du maillage. Plus le maillage est ﬁn et plus l’épaisseur est oscillante, c’est-
+à-dire présente des détails géométriques ﬁns. Comme nous l’avons déjà dit,
+
+PAGE 36
+112 5 Optimisation paramétrique
+Fig. 5.12. Épaisseur optimale du contre-exemple numérique pour diﬀérents
+maillages : de gauche à droite et de haut en bas, 448, 947, 3992, 7186 triangles.
+Nombre d’iterations
+Fonction objectif
+0 10 20 30 40 50 60 70 80 90 100
+4030
+4040
+4035
+448 
+947 
+3992
+7186
+Fig. 5.13. Convergence de la fonction objectif pour le contre-exemple numérique
+avec diﬀérents maillages.
+ce phénomène est lié à la non-existence de solution optimale h ∈U ad.O r ,
+d’après la Sous-section 5.2.3, on peut obtenir une solution optimale h ∈U reg
+ad
+si l’on impose une contrainte de régularité sur l’épaisseur. Numériquement,
+l’intérêt d’une telle procédure est d’obtenir une épaisseur optimale stable par
+raﬃnement de maillage.
+Expliquons comment procéder : le point de départ est la formule de déri-
+vation du Théorème 5.19 qui aﬃrme que
+⟨J′(h),k ⟩ =
+∫
+Ω
+k∇u ·∇ pd x ∀k ∈U ad. (5.67)
+Lorsque Uad = {h ∈ L∞ (Ω),h max ≥ h(x) ≥ hmin > 0 dans Ω },i le s tn a t u -
+rel d’identiﬁer le produit de dualité (entre L∞ (Ω) et son dual) avec la simple
+
+PAGE 37
+5.6 Optimisation de l’épaisseur d’une plaque élastique 113
+intégrale sur Ω (le produit scalaire usuel dans L2(Ω))
+⟨J′(h),k ⟩ =
+∫
+Ω
+J′(h)kd x et donc J′(h)= ∇u ·∇ p.
+Si maintenant on déﬁnit un ensemble admissible “régularisé”
+Ureg
+ad =
+{
+h ∈ H1(Ω),h max ≥ h(x) ≥ hmin > 0 dans Ω
+}
+,
+alors on peut utiliser un autre produit scalaire, à savoir celui de H1(Ω).P l u s
+précisément, on déﬁnit désormais
+⟨J′(h),k ⟩ =
+∫
+Ω
+(∇J′(h) ·∇ k + J′(h)k) dx,
+et l’on déduit de (5.67) la nouvelle formule
+⎧
+⎨
+⎩
+−∆J ′(h)+ J′(h)= ∇u ·∇ p dans Ω,
+∂J′(h)
+∂n =0 sur ∂Ω.
+(5.68)
+Le gradient J′(h), solution de (5.68), appartient à H1(Ω) et est donc plus
+régulier que ∇u ·∇ p (le prix à payer est la résolution de (5.68)). On reprend
+alors le même algorithme de gradient de la Sous-section 5.3.2 avec cette nou-
+velle formule pour J′(h). La suite des épaisseurs est désormais plus régulière
+car elle appartient à H1(Ω).
+Fig. 5.14. Épaisseur optimale régularisée pour diﬀérents maillages : de gauche à
+droite et de haut en bas, 448, 947, 3992, 7186 triangles (à comparer avec la Figure
+5.12).
+L’eﬀet numérique d’une telle régularisation (même faible, puisqu’ici on a
+mis un coeﬃcient 10−3 devant le Laplacien dans (5.68)) est manifeste sur
+
+PAGE 38
+114 5 Optimisation paramétrique
+la Figure 5.14 lorsqu’on la compare à la Figure 5.12. La solution optimale
+converge par raﬃnement de maillage.
+De la même manière, si l’on reprend l’exemple de la compliance calculée
+avec des éléments ﬁnisP1 (ce qui conduisait à des instabilités en damier, voir la
+Figure 5.9 et la Remarque 5.31), alors la régularisation stabilise l’optimisation
+et élimine les instabilités comme on peut le constater sur la Figure 5.15.
+Fig. 5.15. Carte de l’épaisseur de la plaque optimale régularisée obtenue avec des
+éléments ﬁnis P1.
+5.7 Bibliographie
+L’optimisation paramétrique est un cas particulier de la théorie du contrôle
+optimal des systèmes distribués où le contrôle agit dans les coeﬃcients du
+modèle [118]. Le caractère mal-posé de ce type de problèmes a été reconnu
+très tôt : les premiers contre-exemples de non-existence de solutions optimales
+sont dus à F. Murat [131] (les premiers indices numériques de ce problème
+de non-existence sont postérieurs, voir notamment le travail de G. Cheng et
+N. Olhoﬀ [44]). Le cas particulier de la compliance est presque “miraculeux”
+puisqu’il y a existence d’une solution optimale (voir le Théorème 5.23) : ce
+résultat est dû à [38].
+L’algorithme numérique des directions alternées proposé dans la Sous-
+section 5.4.3 a été introduit sous cette forme dans [4]. Il s’apparente à une
+classe plus large d’algorithmes, dits de critère d’optimalité, très populaires en
+optimisation de formes et décrits dans [18], [153]. Sa convergence a été prouvée
+dans [178].
+Il existe de nombreux travaux sur l’optimisation paramétrique : voir, par
+exemple, les ouvrages [14], [96], [143] et leur bibliographie. La régularisation
+de problèmes mal posés est un sujet très important, notamment en ce qui
+concerne les problèmes inverses [64], [177]. Rappelons enﬁn que le calcul des
+dérivées ou sensibilités par rapport aux paramètres peut se faire au niveau du
+programme informatique qui calcule la fonction objectif par les méthodes de
+diﬀérentiation automatique [52].

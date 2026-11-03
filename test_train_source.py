@@ -8,13 +8,18 @@ import processing as pro
 
 class TrainSourceTests(unittest.TestCase):
     def test_spectral_peaks_and_speed_scaling(self):
-        rolling, aero = train.spectral_amplitudes(np.array([500., 1000., 2000., 4000.]))
-        self.assertEqual(np.argmax(rolling), 1)
-        self.assertEqual(np.argmax(aero), 0)
-        np.testing.assert_allclose(rolling[0], rolling[2])
-        r2, a2 = train.spectral_amplitudes(1000., speed_kmh=600.)
-        self.assertAlmostEqual((r2 / rolling[1])**2, 8.)
-        self.assertAlmostEqual((a2 / aero[1])**2, 64.)
+        frequencies = np.array([500., 1425., 2250., 3000.])
+        rolling, aero = train.spectral_amplitudes(frequencies)
+        self.assertEqual(np.argmax(rolling), 2)
+        self.assertEqual(np.argmax(aero), 1)
+        self.assertAlmostEqual(rolling[2], 1.)
+        self.assertAlmostEqual(aero[1], 1.)
+        for index, center in enumerate([2250., 1425.]):
+            values = train.spectral_amplitudes(np.array([center/2, center, center*2]))[index]
+            np.testing.assert_allclose(values[0], values[2])
+        r2, a2 = train.spectral_amplitudes(frequencies, speed_kmh=600.)
+        np.testing.assert_allclose((r2 / rolling)**2, 8.)
+        np.testing.assert_allclose((a2 / aero)**2, 64.)
         np.testing.assert_array_equal(train.spectral_amplitudes(500., speed_kmh=0.), [0., 0.])
 
     def test_source_frequency_and_grid_coordinates(self):

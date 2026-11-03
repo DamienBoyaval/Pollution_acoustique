@@ -23,7 +23,7 @@ import train_source
 import demo_control_polycopie2024 as demo
 
 
-def run(fmin=500., fmax=1000., points=5, N=None, max_iter=100,
+def run(fmin=train_source.FREQUENCY_MIN_HZ, fmax=train_source.FREQUENCY_MAX_HZ, points=5, N=None, max_iter=100,
         material='ROCK_WOOL', level=0, fraction=.3, speed=300.,
         threshold=.5, output='resultats_energie_frequence_train'):
     omega, alpha, _ = material_alpha.load_material(material)
@@ -57,7 +57,7 @@ def run(fmin=500., fmax=1000., points=5, N=None, max_iter=100,
                   fraction=fraction, threshold=threshold, speed_kmh=speed,
                   length_m=1., sound_speed=340., source='train_source defaults; coherent',
                   source_sigma=.03, rolling_center=[.9,.5], aero_center=[.5,.5],
-                  rolling_peak_hz=1000., aero_peak_hz=500., width_octaves=1.,
+                  rolling_peak_hz=train_source.ROLLING_PEAK_HZ, aero_peak_hz=train_source.AERO_PEAK_HZ, width_octaves=1.,
                   reference_speed_kmh=300., gain_rolling=1., gain_aero=1.,
                   frequency_indices=indices.tolist(), frequencies_hz=frequencies[indices].tolist(),
                   protocol='Independent optimization at each frequency; same initial chi, no warm start',
@@ -162,8 +162,8 @@ def replot(output='resultats_energie_frequence_train', material=None):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--fmin',type=float,default=500.)
-    parser.add_argument('--fmax',type=float,default=1000.)
+    parser.add_argument('--fmin',type=float,default=train_source.FREQUENCY_MIN_HZ)
+    parser.add_argument('--fmax',type=float,default=train_source.FREQUENCY_MAX_HZ)
     parser.add_argument('--points',type=int,default=5)
     parser.add_argument('--N',type=int,default=None)
     parser.add_argument('--max-iter',type=int,default=100)

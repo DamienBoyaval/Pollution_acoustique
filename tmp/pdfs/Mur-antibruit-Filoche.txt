@@ -1,0 +1,472 @@
+
+PAGE 1
+Waves next to irregular boundariesWave localization, absorption, and noise abatement wall
+M. FilochePhysique de la Matière CondenséeEcole Polytechnique, CNRS
+
+PAGE 2
+
+
+PAGE 3
+Les murs anti-bruit
+
+
+PAGE 4
+Equation of acoustics
+
+PAGE 5
+vpvtrb¶= -Ñ -¶!!!
+()(),ik x tp x t Aew-=
+Equation of acoustics0PP p=+01rr r=+1Pprræö¶=ç÷¶èø
+Linear perturbation
+()10divvtrr¶=-¶!Equation of motion
+Conservation of mass222 201 0pppct c tbræö¶¶-D + =ç÷¶¶èøPlane wave
+Wave equation
+222200kiccwbwræö-+ - =ç÷èø
+
+PAGE 6
+()( )0012, ik x ik xitpx t e p e p ew-=+0210ZZppZZæö-=ç÷+èø()()12 1 1120, 111it it itpte pp e p p eww wgggæö-=+ = + =ç÷++èø()() 002 1 0 1 1210, 111it it itikpt ik e p p ik e p p exww wggggæö¶-=- = - = -ç÷¶+ +èø()0,pxt i k pxg¶=-¶
+()00 011 1tanZcikZc c krwgeræö==ç÷èø
+Effective boundary condition: 1D interfaceeAcoustic wave travelling towards a wall of thickness ε
+At the interface 
+00 00011 1ckikccerwger®æö-ç÷èø!
+00 0Zcr=()211tanckZikrwe=-
+
+PAGE 7
+What does happen for irregular boundaries?The low frequency, high absorption limit
+
+PAGE 8
+The fractal drum
+Fundamental mode of the Laplacian inside a prefractalboundaryRuss & Sapoval, Phys. Rev. Lett.2002
+
+PAGE 9
+Dirichlet modes next to a fractal boundary
+Russ & Sapoval, Phys. Rev. Lett.2002
+y y
+yÑ yÑ
+Fundamentalmode
+Mode number 4
+
+PAGE 10
+En= Energy contained in a stationary modeWn= Energy losses per cycle
+      Quality FactorThe damping of the n-thmode is characterized by the quality factor Qn
+Qn=2πEnWn
+
+PAGE 11
+Qncharacterizes the life time tnof the energy when no power source is present:dEndt=−WnTn=−2πEnQnTn=EnωnQn
+The width of the resonance is:Δωn=τn−1
+ 1-
+=
+D
+n
+n
+n
+Q
+w
+w
+Meaning of the Quality Factor
+→En=En0e−tτn τn=Qnωn−1with
+
+PAGE 12
+ E(ωn)=QnPexc.ωn()ωn
+If a system is excited continuously by a power Pexc(wn) ,the energy stored in the system is simply:
+Continuousexcitation
+
+PAGE 13
+Helmholtz equation:
+Wave equation
+Δp=1c2∂2p∂t2
+Δψ=−ω2c2ψp=ψx,y,z()expiωt()One seeks solutions:
+
+PAGE 14
+Diffusion equation:
+Heat Equation
+DΔC=∂C∂t
+Δψ=−1DτψC=ψx,y,z()exp−tτ⎛⎝⎜⎞⎠⎟One seeks solutions:
+
+PAGE 15
+Experiments: the fractal electrode
+
+
+PAGE 16
+Schrödinger equation:
+Quantum physics
+tim¶Y¶=DY- !!22
+yy22!mE-=D() ÷øöçèæ-=Y !iEtzyxexp,,yOne seeks solutions:
+
+PAGE 17
+Boundary conditionsØDirichlet:Vibrations: membrane fixed at the 
+boundaryDiffusion: constant concentration at 
+the boundary (perfect absorption)Heat: constant temperature
+Schrödinger: infinite irregular 
+quantum well
+ØNeumann:Vibrations: acoustic pressure, 
+transverse phonons.Diffusion: perfectly reflecting 
+boundaryHeat: non absorbing boundary
+ØMixed:Vibrations: acoustic absorption at the boundary
+Diffusion: boundary with finite permeability
+Nuclear relaxation
+Ψ=0 ∂Ψ∂n=0∂Ψ∂n=ΨΛ
+
+PAGE 18
+Boundary condition on a rigid wall
+vis the acoustical velocity.On a rigid wall :     v = 0    and∂p/∂n = 0
+ptvÑ-=¶¶0r
+
+PAGE 19
+Acoustic pressure( ) ()()tzyxVptzyxp nnn wycos,,,,, 0=
+nnn cywy22-=D
+p0: peak acoustic pressure V: volume of the cavity 
+()òòò=Vn dvzyx 1,,2yNormalization:
+
+PAGE 20
+Elasticor kineticenergy
+En=Vp02ψn2x,y,z()dvc2ρV∫∫∫
+
+PAGE 21
+EnergydissipationEnergydissipationisduetoheatconductionandviscousdissipationatthecavitywalls.
+()() ()dszyxcQ Snnnn òò=- ,,Re21 ywweLn=Vp02ρcReεωn()()ψn2x,y,z()S∫∫ds
+Thewallspresentsasmallbutfinitespecificadmittancee(w).Lnisthepowerdissipatedontheboundary:
+
+PAGE 22
+Thehighertheamplitudeontheboundary,thelowerthevalueofthelengthLnandthelowerthequalityfactor.
+Qn=2πΛnλn1Reεωn()()()òò=L-Snn dszyx,,21y
+Computing the losses
+
+PAGE 23
+Relation between localization and damping
+()dvzyxVVnnexòòò= ,,14, yExistence volume:
+L1=yConstant functionon a segment of lengthL:()LldzyxVLnnex ==ò,,14,yConstant functionon a square of sideL:L1=y ()24, ,,1LdszyxVSnnex ==òòy
+
+PAGE 24
+Ratio Vex,n/ Vresonator: theparticipation ratio
+nn S1»y
+Localizedstates are evenmore damped!
+Localization:ynis constant over its existence surface.
+pnnLS»L
+
+PAGE 25
+LL
+No. 0No. 1n=0n=1n=2
+Irregularity levels
+
+PAGE 26
+Astateislocalizedifthevibrationamplitudeislargeinonlyarestrictedregionofspace
+Non localized
+Localized
+Localizedvibration state
+
+PAGE 27
+050010001500200025003000
+01000200030004000
+N(W)W3
+No. 2No. 1No. 0
+Integrated densityof states
+
+PAGE 28
+01020304050
+050100150200250State index nNo. 2No. 1States 61-68L /   nLLosses
+
+PAGE 29
+01020304050
+00.20.40.60.81
+L /   nL
+Relat iv e Ex ist enc e Sur f ac e Sn/L2
+St at es 61 - 68No. 2No. 1
+Losses vs. localization
+
+PAGE 30
+Experimental prefractalcavity
+Size ≈ 40 cm
+
+PAGE 31
+L. F.  generatorLock-in AmplifierAmplifierMicrophoneLoudspeaker F. M. commandXY recorderC
+Experimental Setup
+
+PAGE 32
+0.4 kHz
+2 kHz2356789101415181920Mode index1.0 kHz16, 17
+1.0 kHz2 kHz0.4 kHz0.4 kHz(0,1)(1,0)(1,1)(0,2)(1,2)(0,3)(2,0)(2,2)(2,3)Rectangular
+Prefractal
+
+PAGE 33
+050100150200250
+0.60.81.01.21.4
+Measured quality factorsExperimental frequency (kHz)Rectangular Prefractal 
+Comparison between smooth and prefractal cavities with naked walls and felt walls
+Experimentalqualityfactors
+
+PAGE 34
+0102030405060
+0.60.81.01.21.4
+Quality factorsFrequency (kHz)
+Comparisontheory/experiment
+
+PAGE 35
+Various types of irregular resonators
+2 31
+
+PAGE 36
+Acoustic modes in fractal cavities
+()14nnS dsy-W=ò
+2nn nkyy-D =.0nnyÑ=
+“Existence surface”
+on the boundary
+Félix, Asch, Filoche, Sapoval, JSV2007
+
+PAGE 37
+Acoustic modes in fractal cavities
+2nn nkyy-D =.0nnyÑ=on the boundary
+
+PAGE 38
+Acoustic modes in fractal cavities
+2nn nkyy-D =.0nnyÑ=on the boundary
+
+PAGE 39
+The enhancing effect of irregularityWn=pn22ρ0c0Reν()Γ∫dℓEnergy loss at the boundary
+2nyisof the orderof 1/nS
+
+PAGE 40
+0=no tooth;  1=5 teeth;  2=10 teeth;  3=20 teeth;  4=25 teeth 
+Losses
+Losses in cavities with triangular teeth
+
+PAGE 41
+Average losses vs perimeter length
+
+PAGE 42
+Average localization volume vs. perimeter
+
+PAGE 43
+5 TEETH10 TEETH
+20 TEETH25 TEETH
+Losses vs. localization volume
+
+PAGE 44
+Spatial distribution of vibration modes
+
+
+PAGE 45
+Geometrical irregularity triggers the existence ofnon-localized and localized modes
+
+
+PAGE 46
+Localized and non localized modes
+
+PAGE 47
+0
+generation 3
+Fundamental stateSimon Félix
+2D acousticalcavitywitha prefractaldefect
+
+PAGE 48
+0
+0.0441
+
+PAGE 49
+0
+0.0466
+
+PAGE 50
+0
+0.2105
+
+PAGE 51
+0
+0.279067
+Evenroughnesslocalizes!
+
+PAGE 52
+0
+0.502729
+
+PAGE 53
+0
+0.521997
+
+PAGE 54
+Weak localization: destructive interferences
+Amplitude Amplitude modulus (color log scale)
+Nodes lines
+
+PAGE 55
+Fractal sea-coast cavity eigenmodessensitivity of localisation to frequencyl=213.0l=209.1
+500 500
+
+
+PAGE 56
+Descr ip ti on 1 25 H z 2 50 Hz 5 00 Hz 1 kH z 2 kH z 4 kH z
+Au dience  (siè ges occu pés)
+remb o urrage épa is
+remb o urrage mo yen
+remb o urrage lé ger
+0.7 6
+0.6 8
+0.5 6
+0 .83
+0 .75
+0 .68
+0 .88
+0 .82
+0 .79
+0 .91
+0 .85
+0 .83
+0 .91
+0 .86
+0 .86
+0 .89
+0 .86
+0 .86
+Siè ges in occu pés
+remb o urrage épa is
+remb o urrage mo yen
+remb o urrage lé ger
+0.7 2
+0.5 6
+0.3 5
+0 .79
+0 .64
+0 .45
+0 .83
+0 .70
+0 .57
+0 .84
+0 .72
+0 .61
+0 .83
+0 .68
+0 .59
+0 .79
+0 .62
+0 .55
+Plâ tre ép 3cm sur mé tal dé pl oyé 0.1 4 0 .12 0 .10 0 .09 0 .08 0 .07
+Gy psu m, 2 pla ques, é p 3 .2c m 0.2 8 0 .12 0 .10 0 .17 0 .13 0 .09
+B ois é p 2. 5c m avec  plenu m 0.1 9 0 .14 0 .09 0 .06 0 .06 0 .05
+Pan nea ux de c on trep laq ué mi nce 0.4 2 0 .21 0 .10 0 .08 0 .06 0 .06
+Parpai ngs, a vec ou sans plâtre , peint 0.1 1 0 .08 0 .07 0 .06 0 .05 0 .05
+Verre  épai s 0.1 8 0 .06 0 .04 0 .03 0 .02 0 .02
+Sol bé to n 0.0 1 0 .01 0 .02 0 .02 0 .02 0 .02
+L inoléu m sur bé to n 0.0 2 0 .03 0 .03 0 .03 0 .03 0 .03
+Parque t sur bét on 0.0 4 0 .04 0 .07 0 .06 0 .06 0 .07
+M oqu ette épai sse , sur bé to n 0.0 2 0 .06 0 .14 0 .37 0 .60 0 .65
+M oqu ette épai sse , sur s uppor t ca outch ouc 0.0 8 0 .24 0 .57 0 .69 0 .71 0 .73
+M oqu ette fine, sur bé to n 0.0 2 0 .04 0 .08 0 .20 0 .35 0 .40
+Absorption coefficients of various materials
+
+PAGE 57
+Noise-abatement walla (known) material: wood-concrete
+
+
+PAGE 58
+0.050.10.150.20.250.30.350.40.45-0.15
+-0.1
+-0.05
+0
+0.05
+0.1
+0.15
+0.2meters
+meters
+Profile of the wall
+
+PAGE 59
+«Fractality» of the wall
+
+
+PAGE 60
+(simulations : Mark Asch)
+shooting at a flat wall
+
+PAGE 61
+Areas of maximal amplitude in the absorbingmaterial
+(simulations : Mark Asch)
+Shooting at an irregularwall
+
+PAGE 62
+Comparison
+
+PAGE 63
+Without symmetry,irregular geometry workseven better!
+
+PAGE 64
+More complication
+Félix, Sapoval, Filoche, Asch, EPL2009
+
+PAGE 65
+Absorption measurement•Measurement of the decay (lifetime) of the acoustic power in a reverberation chamber.•A reverberation chamber is a “large” room whose walls are weakly absorbing.•Large: size larger than the wavelength corresponding to the studied.•Analysis of the results: based on the Sabine’s theory of reverberation.
+
+PAGE 66
+Reverberation chamber
+•At t = 0,  an acoustic wave is created with a loudspeaker: power Ps , frequency w.•The decay of the acoustic power in the chamber is measured (microphone). 
+
+
+PAGE 67
+Acoustic performance of the Fractal® wall
+
+
+PAGE 68
+Absorption coefficienta
+frequency (Hz)1005001000500000.10.20.30.40.50.60.70.80.91
+10050010005000
+Traffic acoustic spectrum
+frequency (Hz)
+.inc
+.ref1
+I
+I-=a
+I()AIDLα=10log101−αiΙiA()i∑ΙiA()i∑⎛⎝⎜⎜⎜⎞⎠⎟⎟⎟⇔DLα=10log10Ιinc.A()Iref.A()⎛⎝⎜⎜⎞⎠⎟⎟in dB(A)
+Acoustic absorption index DLα
+
+PAGE 69
+Testing the wall: Sabine’s formula
+Wallace C. Sabine
+Fractal® wall in a reverberation chamber
+()602024 ln 10aVRTcS=
+180.1110180.111010 log 110iiLsii LiDLa a==éùêúêú=- -êúêúëûåå
+Wall global acoustic performanceCategoryDLα(dB)A0undefinedA1 <4A2 4<DLα<7A3 8<DLα<11A4 >11
+
+PAGE 70
+Results•DLa= 17 dB•Corresponds to an average reflected power equal to 2% of the incoming power.•European standards: class A1 ; A2 ; A3 ; A4.0 < A1< 4 dB4 < A2 < 77 < A3 < 1111 < A4 < 20
+
+PAGE 71
+The prototype
+
+PAGE 72
+QuickTimeª et undŽcompresseur TIFF (non compressŽ)sont requis pour visionner cette image.
+
+
+PAGE 73
+VOS TRANSPORTS
+Unmur antibruitr6volutionnal
+F. MLlRnounait bientOt changer la vie
+;;;-fifiitt des auto-routes et des
+;;i* 6id"; urbaines..Nlis uYPqlll- Nrisw-iJ*Huil"u* ty*tino)' darrs les labo'
+raiTris de recherche du groupe Colasnum€ ro
+iiltiiito"r o" h consriction "t 9: lTI"'d::des routes, cet ouwage, presente rrardi au
+i*.4"p'"L:u", ii" fait pas qire deriier le bmit Il
+ilrr-"ilr""fr" li s"n t.it"t ' des.petites f-".T.".:
+;;;triqt"t qui amolF-ssent les sons et leur
+trt*f ffi ,.ttr#:!f fi ;{H"ffi 'fi fr '31
+iia;td;il* corit equivalent de l5o € Par
+;il6;fu' qui sera fabrique en France'.de
+ffi;r';;;ffi;rciatise ci"i ta.fin de I'ann€ e' Il
+piitta equip"r les -rebords des routes mas
+I*til"t oi,aos clos et assourdissanb que
+ffiriititti"Cl corealisateurs du projet les
+Jild,^ A; i'e-t" Po.lvtechnique-Hy:::I;Jr",^ c*"oncerqu ils nenresterarenr pas
+ii:il;eil"tt "nir"ti* te point dachever Ia
+Jon*plo" dun mw de toisicme g6n6ration
+iui cil"""ra encorc Par cinq les "'*T;:
+sonorcs.
+ffit A.1$:'.1!lot u'' uu p'!i!-P1:,!i: taboratoires du
+qroupe frangais cotas, 6hii antibruit nouvelle g"iZiitii,-ii"rra dquiper les routes i
+panir de ta fin de I'annde' <lPl
+
+
+PAGE 74
+
+
+PAGE 75
+Les Pennes-Mirabeau (nearAix en Provence)
+Herblay (Ile-de-France)
+Franconville (Ile-de-France)

@@ -7,8 +7,16 @@ import numpy as np
 import _env
 
 
+# Milieux arithmetiques des bandes du scenario TGV Duplex (Mellet et al., 2006).
+# Roulement : pic des roues ; le pic de voie 800-1000 Hz reste non represente.
+ROLLING_PEAK_HZ = (2000. + 2500.) / 2
+AERO_PEAK_HZ = (1250. + 1600.) / 2
+FREQUENCY_MIN_HZ = 500.
+FREQUENCY_MAX_HZ = 3000.
+
+
 def spectral_amplitudes(frequency_hz, speed_kmh=300., reference_speed_kmh=300.,
-                        rolling_peak_hz=1000., aero_peak_hz=500.,
+                        rolling_peak_hz=ROLLING_PEAK_HZ, aero_peak_hz=AERO_PEAK_HZ,
                         rolling_width_octaves=1., aero_width_octaves=1.,
                         rolling_gain=1., aero_gain=1.):
     """Amplitudes relatives des forcages roulement/aero (pas des pascals).
@@ -19,6 +27,13 @@ def spectral_amplitudes(frequency_hz, speed_kmh=300., reference_speed_kmh=300.,
     """
     frequency = np.asarray(frequency_hz, dtype=float)
 
+    positive = [reference_speed_kmh, rolling_peak_hz, aero_peak_hz,
+                rolling_width_octaves, aero_width_octaves]
+    nonnegative = [speed_kmh, rolling_gain, aero_gain]
+    if (not np.all(np.isfinite(frequency)) or np.any(frequency <= 0)
+            or not np.all(np.isfinite(positive)) or np.any(np.asarray(positive) <= 0)
+            or not np.all(np.isfinite(nonnegative)) or np.any(np.asarray(nonnegative) < 0)):
+        raise ValueError('Require positive finite frequencies, widths and reference speed; nonnegative speed and gains.')
     ratio = speed_kmh / reference_speed_kmh
     rolling = rolling_gain * ratio**1.5 * np.exp(
         -0.25 * (np.log2(frequency / rolling_peak_hz) / rolling_width_octaves)**2)
