@@ -23,7 +23,7 @@ import train_source
 import demo_control_polycopie2024 as demo
 
 
-def run(fmin=500., fmax=1000., points=15, N=None, max_iter=100,
+def run(fmin=500., fmax=1000., points=100, N=None, max_iter=100,
         material='ROCK_WOOL', level=0, fraction=.3, speed=300.,
         threshold=.5, output='resultats_energie_frequence_train'):
     omega, alpha, _ = material_alpha.load_material(material)
@@ -145,7 +145,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--fmin',type=float,default=500.)
     parser.add_argument('--fmax',type=float,default=1000.)
-    parser.add_argument('--points',type=int,default=15)
+    parser.add_argument('--points',type=int,default=100)
     parser.add_argument('--N',type=int,default=None)
     parser.add_argument('--max-iter',type=int,default=100)
     parser.add_argument('--material',choices=material_alpha.MATERIALS,default='ROCK_WOOL')
