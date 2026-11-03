@@ -285,8 +285,8 @@ if __name__ == '__main__':
     for i in range(1, 50):
         for j in range(1, N - 1):
             if domain_omega[i, j] == _env.NODE_INTERIOR:
-                x = j * spacestep
-                y = i * spacestep
+                x_coord = j * spacestep
+                y_coord = i * spacestep
 
                 # Coordonnées des sources (y_train = distance latérale, x_* = hauteurs)
                 y_train = i_train * spacestep
@@ -294,11 +294,11 @@ if __name__ == '__main__':
                 x_aero  = j_aero * spacestep
 
                 # Profil gaussien pour le roulement
-                dist2_roul = (x - x_roul)**2 + (y - y_train)**2
+                dist2_roul = (x_coord - x_roul)**2 + (y_coord - y_train)**2
                 f_roul = A_roul * numpy.exp(-dist2_roul / (2.0 * sigma**2))
 
                 # Profil gaussien pour l'aérodynamique (pantographe)
-                dist2_aero = (x - x_aero)**2 + (y - y_train)**2
+                dist2_aero = (x_coord - x_aero)**2 + (y_coord - y_train)**2
                 f_aero = A_aero * numpy.exp(-dist2_aero / (2.0 * sigma**2))
 
                 # Somme des contributions
