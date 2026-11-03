@@ -2,11 +2,11 @@
 
 
 # Python packages
-import matplotlib.colors
-import matplotlib.pyplot
-import numpy
 import os
-import time
+os.environ.setdefault('OPENBLAS_NUM_THREADS', '1')
+import matplotlib.pyplot
+import numpy 
+import scipy.sparse.linalg
 
 
 # MRG packages
@@ -14,11 +14,10 @@ import _env
 import preprocessing
 import processing
 import postprocessing
-import geometrie
-import train_source
-
-#import solutions
 import material_alpha
+import train_source
+#import solutions
+
 
 def your_optimization_procedure(domain_omega, spacestep, omega, f, f_dir, f_neu, f_rob,
                                 beta_pde, alpha_pde, alpha_dir, beta_neu, beta_rob, alpha_rob,
@@ -34,6 +33,8 @@ def your_optimization_procedure(domain_omega, spacestep, omega, f, f_dir, f_neu,
     sinon zeta_n / 2, zeta_n / 4, ... jusqu'a ce que J_rel(chi_{n+1}) < J_rel(chi_n).
     """
 
+    if not isinstance(max_iter, (int, numpy.integer)) or max_iter < 0:
+        raise ValueError('max_iter doit etre un entier positif ou nul.')
     numb_iter = max_iter
     tolerance_chi = 1e-6      # seuil du critere d'arret ||chi_{n+1} - chi_n|| < delta
     mu_min = 1e-5             # plus petit pas accepte par la recherche lineaire
@@ -54,6 +55,8 @@ def your_optimization_procedure(domain_omega, spacestep, omega, f, f_dir, f_neu,
 
     # normalisation : J0 = energie initiale (absolue)
     J0 = your_compute_objective_function(domain_omega, u, spacestep)
+    if not J0 > 0:
+        raise ValueError("Energie initiale nulle ou non definie : impossible de normaliser.")
     energy[0, 0] = 1.0
 
 
@@ -150,7 +153,11 @@ def your_project_density(values, domain_omega, V_obj):
     # Euclidean projection onto 0 <= chi <= 1, sum(chi) = V_obj*S.
     masque = domain_omega == _env.NODE_ROBIN
     S = numpy.count_nonzero(masque)
+    if S == 0 or not numpy.isfinite(V_obj) or not 0 <= V_obj <= 1:
+        raise ValueError('A nonempty Robin boundary and 0 <= V_obj <= 1 are required.')
     z = numpy.asarray(values, dtype=float)[masque]
+    if not numpy.all(numpy.isfinite(z)):
+        raise ValueError('Non-finite density.')
     chi = numpy.zeros(domain_omega.shape, dtype=float)
     if V_obj == 0 or V_obj == 1:
         chi[masque] = V_obj
@@ -185,104 +192,32 @@ def your_compute_objective_function(domain_omega, u, spacestep):
         numpy.abs(u[domain_omega == _env.NODE_INTERIOR])**2)
 
     return energy
-    wavenumber = 2 * numpy.pi * frequence / geometrie.C_SON
-    beta_pde, alpha_pde, alpha_dir, beta_neu, _, beta_rob = preprocessing._set_coefficients_of_pde(M, N)
-    f, f_dir, f_neu, f_rob = preprocessing._set_rhs_of_pde(M, N)
-    f_dir[0, 0:N] = 1.0
-    return processing.solve_helmholtz(domain_omega, spacestep, wavenumber, f, f_dir, f_neu, f_rob,
-                                      beta_pde, alpha_pde, alpha_dir, beta_neu, beta_rob, alpha_rob)
-
-
-def energies(domain_omega, u, spacestep, zone_paroi):
-    """
-    Intégrales de |u|² (u est nul hors des noeuds intérieurs) :
-        E_totale       : sur tout le domaine
-        densite_paroi  : énergie dans la zone de la paroi / aire de la zone
-        densite_piece  : énergie dans la pièce / aire de la pièce
-    """
-    u2 = numpy.abs(u) ** 2
-    zone_piece = (domain_omega == _env.NODE_INTERIOR) & ~zone_paroi
-    aire = spacestep ** 2
-    E_paroi = aire * numpy.sum(u2[zone_paroi])
-    E_piece = aire * numpy.sum(u2[zone_piece])
-    return {'E_totale': E_paroi + E_piece,
-            'densite_paroi': E_paroi / (aire * zone_paroi.sum()) if zone_paroi.any() else numpy.nan,
-            'densite_piece': E_piece / (aire * zone_piece.sum())}
-
-
-GRANDEURS = [('densite_paroi', "densité d'énergie dans la paroi"),
-             ('densite_piece', "densité d'énergie dans la pièce"),
-             ('E_totale', 'énergie totale')]
-
-
-def afficher_champs(domain_omega, u_sans, u_avec, e_sans, e_avec, frequence, titre):
-    """|u|² sans et avec Robin (même échelle), puis comparaison des énergies."""
-    hors_domaine = domain_omega != _env.NODE_INTERIOR
-    u2_sans = numpy.ma.masked_where(hors_domaine, numpy.abs(u_sans) ** 2)
-    u2_avec = numpy.ma.masked_where(hors_domaine, numpy.abs(u_avec) ** 2)
-    vmax = max(u2_sans.max(), u2_avec.max())
-    norme = matplotlib.colors.LogNorm(vmin=vmax * 1e-4, vmax=vmax)
-
-    matplotlib.pyplot.figure(figsize=(16, 5))
-    for k, (u2, nom) in enumerate([(u2_sans, 'sans Robin (paroi rigide)'), (u2_avec, 'avec Robin (chi = 1)')]):
-        matplotlib.pyplot.subplot(1, 3, k + 1)
-        matplotlib.pyplot.imshow(u2, cmap='jet', norm=norme)
-        matplotlib.pyplot.colorbar()
-        matplotlib.pyplot.title(f'$|u|^2$ à {frequence:.0f} Hz, {nom}', fontsize=9)
-        matplotlib.pyplot.axis('off')
-
-    matplotlib.pyplot.subplot(1, 3, 3)
-    position = numpy.arange(len(GRANDEURS))
-    matplotlib.pyplot.bar(position - 0.2, [e_sans[g] for g, _ in GRANDEURS], 0.4, label='sans Robin')
-    matplotlib.pyplot.bar(position + 0.2, [e_avec[g] for g, _ in GRANDEURS], 0.4, label='avec Robin')
-    matplotlib.pyplot.xticks(position, ['densité\nparoi', 'densité\npièce', 'énergie\ntotale'])
-    matplotlib.pyplot.yscale('log')
-    matplotlib.pyplot.legend()
-    matplotlib.pyplot.title(f'énergies à {frequence:.0f} Hz', fontsize=9)
-    matplotlib.pyplot.suptitle(titre)
-    matplotlib.pyplot.tight_layout()
-
-
-def afficher_balayage(frequences, liste_sans, liste_avec, titre, f0=None):
-    """Densité dans la paroi, dans la pièce et énergie totale en fonction de la fréquence."""
-    matplotlib.pyplot.figure(figsize=(16, 4.5))
-    for k, (g, nom) in enumerate(GRANDEURS):
-        matplotlib.pyplot.subplot(1, 3, k + 1)
-        matplotlib.pyplot.semilogy(frequences, [e[g] for e in liste_sans], 'k--o', markersize=3, label='sans Robin')
-        matplotlib.pyplot.semilogy(frequences, [e[g] for e in liste_avec], '-o', markersize=3, label='avec Robin')
-        if f0 is not None:
-            matplotlib.pyplot.axvline(f0, color='r', linestyle=':', label=f'f0 = {f0:.0f} Hz')
-        matplotlib.pyplot.xlabel('fréquence de la source (Hz)')
-        matplotlib.pyplot.ylabel(nom)
-        matplotlib.pyplot.legend()
-        matplotlib.pyplot.title(nom)
-    matplotlib.pyplot.suptitle(titre)
-    matplotlib.pyplot.tight_layout()
 
 
 if __name__ == '__main__':
+    # Choose 'un_materiau' to reproduce the previous single-frequency run.
+    mode = 'un_materiau'
+    if mode == 'comparaison':
+        from comparaison_materiaux import run_comparison
+        run_comparison(length_m=1.0, sound_speed=340.0, max_iter=100)
+        raise SystemExit(0)
 
     # ----------------------------------------------------------------------
     # -- Fell free to modify the function call in this cell.
     # ----------------------------------------------------------------------
     # -- set parameters of the geometry
-    TYPE_BORD = 'fractale'          # 'fractale', 'koch', 'resonateur', 'resonateur_fractal'
-    level = 1                       # level of the fractal
-    FREQUENCE_SOURCE = 1000.0        # fréquence de la source (Hz)
-    FREQUENCE_RESONATEUR = 1000.0    # fréquence visée par le résonateur (Hz), si résonateur
+    N = 50  # number of points along x-axis
+    M = 2 * N  # number of points along y-axis
+    level = 0 # level of the fractal
+    spacestep = 1.0 / N  # mesh size
 
-    # -- balayage en fréquence (comparaison avec / sans Robin)
-    BALAYAGE = False
-    if TYPE_BORD in ('resonateur', 'resonateur_fractal'):
-        frequences = numpy.linspace(0.5 * FREQUENCE_RESONATEUR, 1.5 * FREQUENCE_RESONATEUR, 50)
-    else:
-        frequences = numpy.linspace(100.0, 2000.0, 20)
-    f_max = max(FREQUENCE_SOURCE, frequences.max()) if BALAYAGE else FREQUENCE_SOURCE
-
-    # -- set geometry of domain (le maillage respecte 10 points par longueur d'onde jusqu'à f_max)
-    domain_omega, M, N, spacestep, zone_paroi = geometrie.creer_geometrie(TYPE_BORD, level, f_max, FREQUENCE_RESONATEUR)
-    for frequence in [FREQUENCE_SOURCE] + (list(frequences) if BALAYAGE else []):
-        geometrie.verifier_resolution(spacestep, frequence)
+    # -- coefficients calculated by the team (exact table index, no interpolation)
+    material = 'ROCK_WOOL'  # or 'RECYCLED_RUBBER'
+    frequency_index = 0  # 0..999: first entry is 500 Hz, last entry is 4000 Hz
+    length_m = 1.0  # physical length scale L, physical grid step = L/N
+    sound_speed = 340.0
+    omega_table, Alpha_table, error_table = material_alpha.load_material(material)
+    omega_physical = omega_table[frequency_index]
 
     # -- set parameters of the partial differential equation
     kx = -1.0
@@ -291,6 +226,8 @@ if __name__ == '__main__':
     wavenumber, Alpha_material = material_alpha.solver_parameters(
         omega_physical, Alpha_table[frequency_index], length_m, sound_speed)
     wavenumber = float(wavenumber)
+    if wavenumber * spacestep > 2 * numpy.pi / 10:
+        raise ValueError('Mesh too coarse: increase N to keep at least 10 points per wavelength.')
     print('Materiau :', material)
     print(f'Pulsation : {omega_physical:.8f} rad/s')
     print(f'Frequence : {omega_physical / (2 * numpy.pi):.8f} Hz')
@@ -307,11 +244,15 @@ if __name__ == '__main__':
     # -- set right hand sides of the partial differential equation
     f, f_dir, f_neu, f_rob = preprocessing._set_rhs_of_pde(M, N)
 
+    # -- set geometry of domain
+    domain_omega, x, y, _, _ = preprocessing._set_geometry_of_domain(M, N, level)
+
     # ----------------------------------------------------------------------
     # -- Fell free to modify the function call in this cell.
     # ----------------------------------------------------------------------
-    # -- define boundary conditions
-    # planar wave defined on top
+    # ----------------------------------------------------------------------
+    # 1. Condition aux limites g (bord supérieur) : pas d'onde incidente externe
+    # ----------------------------------------------------------------------
     f_dir[:, :] = 0.0
 
     # ----------------------------------------------------------------------
@@ -352,7 +293,7 @@ if __name__ == '__main__':
     chi = your_project_density(chi, domain_omega, V_obj)
 
     # -- define absorbing material
-    Alpha = 10.0 - 10.0 * 1j
+    Alpha = complex(Alpha_material)  # coefficient supplied for this material and omega
     # -- this is the function you have written during your project
     #import compute_alpha
     #Alpha = compute_alpha.compute_alpha(...)
@@ -374,8 +315,11 @@ if __name__ == '__main__':
     # -- Fell free to modify the function call in this cell.
     # ----------------------------------------------------------------------
     # -- compute optimization
-    # energy = numpy.zeros((100+1, 1), dtype=numpy.float64)
-    # chi, energy, u, grad = your_optimization_procedure(...)
+    energy = numpy.zeros((100+1, 1), dtype=numpy.float64)
+    chi, energy, u, grad = your_optimization_procedure(
+        domain_omega, spacestep, wavenumber, f, f_dir, f_neu, f_rob,
+        beta_pde, alpha_pde, alpha_dir, beta_neu, beta_rob, alpha_rob,
+        Alpha, mu, chi, V_obj)
     #chi, energy, u, grad = solutions.optimization_procedure(domain_omega, spacestep, wavenumber, f, f_dir, f_neu, f_rob,
     #                    beta_pde, alpha_pde, alpha_dir, beta_neu, beta_rob, alpha_rob,
     #                    Alpha, mu, chi, V_obj, mu1, V_0)
@@ -383,33 +327,6 @@ if __name__ == '__main__':
 
     chin = chi.copy()
     un = u.copy()
-
-    # ----------------------------------------------------------------------
-    # -- Comparaison avec / sans condition de Robin
-    # ----------------------------------------------------------------------
-    titre = TYPE_BORD if TYPE_BORD == 'resonateur' else f"{TYPE_BORD}, niveau {level}"
-    alpha_rob_sans = numpy.zeros((M, N), dtype=numpy.complex128)   # alpha = 0 : paroi rigide (Neumann)
-    u_sans = resoudre(domain_omega, spacestep, FREQUENCE_SOURCE, alpha_rob_sans)
-    e_avec = energies(domain_omega, u0, spacestep, zone_paroi)
-    e_sans = energies(domain_omega, u_sans, spacestep, zone_paroi)
-    print(f"\nÀ {FREQUENCE_SOURCE:.0f} Hz :            sans Robin   avec Robin")
-    for g, nom in GRANDEURS:
-        print(f"  {nom:32s} {e_sans[g]:11.4e}  {e_avec[g]:11.4e}")
-
-    geometrie.afficher_geometrie(domain_omega, zone_paroi, f"géométrie : {titre} (M = {M}, N = {N})")
-    afficher_champs(domain_omega, u_sans, u0, e_sans, e_avec, FREQUENCE_SOURCE, titre)
-
-    if BALAYAGE:
-        t0 = time.time()
-        liste_sans, liste_avec = [], []
-        for frequence in frequences:
-            liste_sans.append(energies(domain_omega, resoudre(domain_omega, spacestep, frequence, alpha_rob_sans),
-                                       spacestep, zone_paroi))
-            liste_avec.append(energies(domain_omega, resoudre(domain_omega, spacestep, frequence, alpha_rob),
-                                       spacestep, zone_paroi))
-        print(f"Balayage de {len(frequences)} fréquences : {time.time() - t0:.0f} s")
-        f0 = FREQUENCE_RESONATEUR if TYPE_BORD in ('resonateur', 'resonateur_fractal') else None
-        afficher_balayage(frequences, liste_sans, liste_avec, titre, f0)
 
     # -- affichage de la solution initiale
     postprocessing._plot_uncontroled_solution(u0, chi0)
@@ -443,5 +360,4 @@ if __name__ == '__main__':
         numpy.imag(u), title='Champ binaire : partie imaginaire', colorbar='colorbar',
         cmap='jet', filename='fig_u_binaire_im.jpg')
 
-    matplotlib.pyplot.show()
     print('End.')
