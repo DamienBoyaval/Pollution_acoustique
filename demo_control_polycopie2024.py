@@ -213,7 +213,7 @@ if __name__ == '__main__':
     # forme de la paroi : 'koch', 'plat', 'minkowski', 'creneaux', 'resonateur', 'resonateur_fractal',
     # 'deux_resonateurs'
     forme = 'minkowski'
-    k_resonateurs = (2.0, 3.5)  # nombres d'onde visés par les deux résonateurs ('deux_resonateurs')
+    f_resonateurs = (110.0, 190.0)  # fréquences visées (Hz) par les deux résonateurs ('deux_resonateurs')
     spacestep = 1.0 / N  # mesh size
 
     # -- coefficients calculated by the team (exact table index, no interpolation)
@@ -221,6 +221,11 @@ if __name__ == '__main__':
     frequency_index = 0  # 0..999: first entry is 500 Hz, last entry is 4000 Hz
     length_m = 1.0  # physical length scale L, physical grid step = L/N
     sound_speed = 340.0
+    # même conversion que le solveur : k = omega L / c = 2 pi f L / c
+    k_resonateurs = tuple(2 * numpy.pi * fr * length_m / sound_speed for fr in f_resonateurs)
+    if forme == 'deux_resonateurs':
+        print('Resonateurs : ' + ', '.join(f'{fr:g} Hz (k = {kr:.2f})'
+                                           for fr, kr in zip(f_resonateurs, k_resonateurs)))
     omega_table, Alpha_table, error_table = material_alpha.load_material(material)
     omega_physical = omega_table[frequency_index]
 
