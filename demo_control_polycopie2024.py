@@ -15,12 +15,13 @@ import preprocessing
 import processing
 import postprocessing
 import material_alpha
+import train_source
 #import solutions
 
 
 def your_optimization_procedure(domain_omega, spacestep, omega, f, f_dir, f_neu, f_rob,
                                 beta_pde, alpha_pde, alpha_dir, beta_neu, beta_rob, alpha_rob,
-                                Alpha, mu, chi, V_obj):
+                                Alpha, mu, chi, V_obj, max_iter=100):
     """Descente de gradient projete (pulsation omega fixee, volume V_obj fixe).
 
     On minimise l'energie RELATIVE J_rel(chi) = J(chi) / J(chi_0), de sorte que
@@ -32,7 +33,9 @@ def your_optimization_procedure(domain_omega, spacestep, omega, f, f_dir, f_neu,
     sinon zeta_n / 2, zeta_n / 4, ... jusqu'a ce que J_rel(chi_{n+1}) < J_rel(chi_n).
     """
 
-    numb_iter = 100
+    if not isinstance(max_iter, (int, numpy.integer)) or max_iter < 0:
+        raise ValueError('max_iter doit etre un entier positif ou nul.')
+    numb_iter = max_iter
     tolerance_chi = 1e-6      # seuil du critere d'arret ||chi_{n+1} - chi_n|| < delta
     mu_min = 1e-5             # plus petit pas accepte par la recherche lineaire
     mu_increase = 0.001       # increment du pas : zeta_{n+1} = zeta_n + 0.001 si succes
@@ -56,21 +59,13 @@ def your_optimization_procedure(domain_omega, spacestep, omega, f, f_dir, f_neu,
         raise ValueError("Energie initiale nulle ou non definie : impossible de normaliser.")
     energy[0, 0] = 1.0
 
-    print(f"Coefficient Alpha utilise : {Alpha}")
-    print(f"Quantite de materiau imposee : {V_obj * numpy.count_nonzero(domain_omega == _env.NODE_ROBIN):.8f}")
-    print(f"Energie initiale absolue J0 : {J0:.6e}")
 
     variation_chi = numpy.inf
     k = 0
     while k < numb_iter and mu > mu_min:
-        print('---- numero d\'iteration = ', k)
-        print('1-2. probleme adjoint, i.e., p')
         p = your_compute_adjoint(domain_omega, u, spacestep, mat)
-        print('3. gradient parametrique')
         grad = your_compute_gradient(domain_omega, u, p, spacestep,
                                      f_rob, beta_pde, beta_rob, Alpha, chi) / J0
-        print(f"   Energie relative actuelle : {energy[k, 0]:.12f}")
-        print(f"   Norme du gradient (normalise) : {numpy.linalg.norm(grad):.6e}")
 
         # Recherche lineaire : division du pas par 2 tant que l'energie ne diminue pas
         ene = energy[k, 0]
@@ -78,7 +73,6 @@ def your_optimization_procedure(domain_omega, spacestep, omega, f, f_dir, f_neu,
             chi_test = your_project_density(chi - mu * grad, domain_omega, V_obj)
             u_test, mat_test, _ = solve(chi_test)
             ene = your_compute_objective_function(domain_omega, u_test, spacestep) / J0
-            print(f"   Pas teste : {mu:.8g} | Energie relative testee : {ene:.12f}")
 
             if ene < energy[k, 0]:
                 variation_chi = numpy.linalg.norm(chi_test - chi)
@@ -93,10 +87,8 @@ def your_optimization_procedure(domain_omega, spacestep, omega, f, f_dir, f_neu,
 
         k += 1
         energy[k, 0] = ene
-        print(f"   Essai accepte | variation de chi : {variation_chi:.6e}")
 
         if variation_chi < tolerance_chi:
-            print(f"   Arret : stabilisation de chi ({variation_chi:.6e} < {tolerance_chi:.1e})")
             break
 
     # -- calcul du gradient pour la densite finale (retourne pour le post-traitement)
@@ -104,14 +96,6 @@ def your_optimization_procedure(domain_omega, spacestep, omega, f, f_dir, f_neu,
     grad = your_compute_gradient(domain_omega, u, p, spacestep,
                                  f_rob, beta_pde, beta_rob, Alpha, chi) / J0
 
-    print("\nBILAN DE L'OPTIMISATION")
-    print(f"Iterations acceptees : {k}")
-    print(f"Energie initiale (absolue) : {J0:.12e}")
-    print(f"Energie finale (absolue) : {J0 * energy[k, 0]:.12e}")
-    print(f"Energie finale relative J/J0 : {energy[k, 0]:.12f}")
-    print(f"Reduction : {100 * (1 - energy[k, 0]):.4f} %")
-    print(f"Quantite de materiau finale : {numpy.sum(chi):.8f}")
-    print(f"Dernier pas : {mu:.8g}")
 
     # energy = historique de J/J0 (1 -> valeur finale), grad = gradient de J/J0
     return chi, energy[:k + 1], u, grad
@@ -276,48 +260,24 @@ if __name__ == '__main__':
     # ----------------------------------------------------------------------
     f[:, :] = 0.0
 
-    # Paramètres du train
-    V_kmh = 300.0  # Vitesse du train en km/h
-    V_ref = 300.0  # Vitesse de croisement roulement/aéro (littérature SNCF/TGV)
-
-    # Amplitudes de pression (Helmholtz : énergie |u|^2 varie en V^3 et V^6)
-    A_roul = (V_kmh / V_ref) ** 1.5
-    A_aero = (V_kmh / V_ref) ** 3.0
-
-    # Configuration par rotation de la grille : le train roule SUR LE MUR DROIT (j = 49)
-    # - Le sol/voie ferrée est la paroi droite (j = 49).
-    # - Les roues sont au contact du mur droit : j_roul = 45 (à 4 mailles du sol j=49).
-    # - Le pantographe est en hauteur vers l'intérieur : j_aero = 25 (au-dessus des roues).
-    # - Le mur absorbant (Robin) est sur le côté du train, en i = 50.
-    # - Le train circule à une distance fixe du mur absorbant : i_train = 44 (à 6 mailles du mur).
-    i_train = 25              # Train centré au milieu de la longueur du mur (i = 25)
-    j_roul = 45               # Roues au contact du mur droit (sol j=49)
-    j_aero = 25               # Pantographe en hauteur (vers l'intérieur)
-
-    sigma = 1.5 * spacestep   # Largeur spatiale de la source (lissage gaussien)
-
-    # Remplissage du terme source f dans l'intérieur du domaine
-    for i in range(1, 50):
-        for j in range(1, N - 1):
-            if domain_omega[i, j] == _env.NODE_INTERIOR:
-                x_coord = j * spacestep
-                y_coord = i * spacestep
-
-                # Coordonnées des sources (y_train = distance latérale, x_* = hauteurs)
-                y_train = i_train * spacestep
-                x_roul  = j_roul * spacestep
-                x_aero  = j_aero * spacestep
-
-                # Profil gaussien pour le roulement
-                dist2_roul = (x_coord - x_roul)**2 + (y_coord - y_train)**2
-                f_roul = A_roul * numpy.exp(-dist2_roul / (2.0 * sigma**2))
-
-                # Profil gaussien pour l'aérodynamique (pantographe)
-                dist2_aero = (x_coord - x_aero)**2 + (y_coord - y_train)**2
-                f_aero = A_aero * numpy.exp(-dist2_aero / (2.0 * sigma**2))
-
-                # Somme des contributions
-                f[i, j] = f_roul + f_aero
+    # Source harmonique a la meme frequence que k et Alpha.
+    # Modele spectral simplifie : references et hypotheses dans README_SOURCE_TRAIN.md.
+    frequency_hz = float(omega_physical / (2 * numpy.pi))
+    V_kmh = 300.0
+    V_ref = 300.0  # vitesse de reference, pas une vitesse de croisement calibree
+    sigma = 0.03  # 1.5 mailles pour N=50 ; largeur fixe si le maillage change
+    spectral_parameters = dict(
+        reference_speed_kmh=V_ref,
+        rolling_peak_hz=1000.0, aero_peak_hz=500.0,
+        rolling_width_octaves=1.0, aero_width_octaves=1.0,
+        rolling_gain=1.0, aero_gain=1.0)
+    f, (A_roul, A_aero) = train_source.gaussian_train_source(
+        domain_omega, spacestep, frequency_hz, V_kmh, sigma=sigma,
+        rolling_center=(0.9, 0.5), aero_center=(0.5, 0.5),
+        **spectral_parameters)
+    print('Source train : enveloppes spectrales de scenario, non calibrees.')
+    print(f'Frequence source : {frequency_hz:.3f} Hz ; vitesse : {V_kmh:g} km/h')
+    print(f'Amplitudes relatives : roulement={A_roul:.6f}, aero={A_aero:.6f}')
 
     # -- initialize
     alpha_rob[:, :] = - wavenumber * 1j
@@ -368,11 +328,36 @@ if __name__ == '__main__':
     chin = chi.copy()
     un = u.copy()
 
-    # -- plot chi, u, and energy
+    # -- affichage de la solution initiale
     postprocessing._plot_uncontroled_solution(u0, chi0)
-    postprocessing._plot_controled_solution(un, chin)
-    err = un - u0
-    postprocessing._plot_error(err)
-    postprocessing._plot_energy_history(energy)
+
+    # -- binarisation APRES l'optimisation continue (sans affichage intermediaire)
+    # chin et un conservent la solution continue pour la comparaison.
+    threshold = 0.5
+    chi = binarize_chi_threshold(chin, domain_omega, threshold=threshold)
+    alpha_rob = Alpha * chi
+    # Le champ doit etre recalcule avec le nouveau coefficient de Robin.
+    u = processing.solve_helmholtz(
+        domain_omega, spacestep, wavenumber, f, f_dir, f_neu, f_rob,
+        beta_pde, alpha_pde, alpha_dir, beta_neu, beta_rob, alpha_rob)
+    energy_continuous = your_compute_objective_function(domain_omega, un, spacestep)
+    energy_binary = your_compute_objective_function(domain_omega, u, spacestep)
+
+    print('\nBILAN DE LA BINARISATION')
+    print(f'Seuil : {threshold:g} ; valeurs de chi : {numpy.unique(chi)}')
+    print(f'Fraction absorbante binaire : {chi.sum() / S:.6f} (cible : {V_obj:g})')
+    print('Le seuillage ne garantit pas la conservation de la quantite de materiau.')
+    print(f'Energie initiale : {your_compute_objective_function(domain_omega, u0, spacestep):.12e}')
+    print(f'Energie absolue binaire : {energy_binary:.12e}')
+
+    postprocessing.myimshow(
+        chi, title='Densite binaire (seuil 0.5)', colorbar='colorbar',
+        cmap='gray_r', vmin=0, vmax=1, filename='fig_chi_binaire.jpg')
+    postprocessing.myimshow(
+        numpy.real(u), title='Champ binaire : partie reelle', colorbar='colorbar',
+        cmap='jet', filename='fig_u_binaire_re.jpg')
+    postprocessing.myimshow(
+        numpy.imag(u), title='Champ binaire : partie imaginaire', colorbar='colorbar',
+        cmap='jet', filename='fig_u_binaire_im.jpg')
 
     print('End.')
