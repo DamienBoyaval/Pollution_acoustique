@@ -2,11 +2,11 @@
 
 
 # Python packages
-import os
-os.environ.setdefault('OPENBLAS_NUM_THREADS', '1')
+import matplotlib.colors
 import matplotlib.pyplot
-import numpy 
-import scipy.sparse.linalg
+import numpy
+import os
+import time
 
 
 # MRG packages
@@ -14,227 +14,181 @@ import _env
 import preprocessing
 import processing
 import postprocessing
-import material_alpha
+import geometrie
 #import solutions
 
 
-def your_optimization_procedure(domain_omega, spacestep, omega, f, f_dir, f_neu, f_rob,
-                           beta_pde, alpha_pde, alpha_dir, beta_neu, beta_rob, alpha_rob,
-                           Alpha, mu, chi, V_obj):
-    """This function return the optimized density.
+# ----------------------------------------------------------------------
+# -- Optimisation de chi : mise en commentaire pour l'instant (chi = 1 partout)
+# ----------------------------------------------------------------------
+# def your_optimization_procedure(domain_omega, spacestep, omega, f, f_dir, f_neu, f_rob,
+#                            beta_pde, alpha_pde, alpha_dir, beta_neu, beta_rob, alpha_rob,
+#                            Alpha, mu, chi, V_obj):
+#     """This function return the optimized density.
+#
+#     Parameter:
+#         cf solvehelmholtz's remarks
+#         Alpha: complex, it corresponds to the absorbtion coefficient;
+#         mu: float, it is the initial step of the gradient's descent;
+#         V_obj: float, it characterizes the volume constraint on the density chi.
+#     """
+#
+#     k = 0
+#     (M, N) = numpy.shape(domain_omega)
+#     numb_iter = 100
+#     energy = numpy.zeros((numb_iter+1, 1), dtype=numpy.float64)
+#     while k < numb_iter and mu > 10**(-5):
+#         print('---- iteration number = ', k)
+#         print('1. computing solution of Helmholtz problem, i.e., u')
+#         print('2. computing solution of adjoint problem, i.e., p')
+#         print('3. computing objective function, i.e., energy')
+#         print('4. computing parametric gradient')
+#         while ene >= energy[k] and mu > 10 ** -5:
+#             print('    a. computing gradient descent')
+#             print('    b. computing projected gradient')
+#             print('    c. computing solution of Helmholtz problem, i.e., u')
+#             print('    d. computing objective function, i.e., energy (E)')
+#             ene = compute_objective_function(domain_omega, u, spacestep)
+#             if bool_a:
+#                 # The step is increased if the energy decreased
+#                 mu = mu * 1.1
+#             else:
+#                 # The step is decreased is the energy increased
+#                 mu = mu / 2
+#         k += 1
+#
+#     print('end. computing solution of Helmholtz problem, i.e., u')
+#
+#     return chi, energy, u, grad
+#
+#
+# def your_compute_objective_function(domain_omega, u, spacestep):
+#     """
+#     This function compute the objective function:
+#     J(u,domain_omega)= \int_{domain_omega}||u||^2
+#
+#     Parameter:
+#         domain_omega: Matrix (NxP), it defines the domain and the shape of the
+#         Robin frontier;
+#         u: Matrix (NxP), it is the solution of the Helmholtz problem, we are
+#         computing its energy;
+#         spacestep: float, it corresponds to the step used to solve the Helmholtz
+#         equation.
+#     """
+#
+#     energy = 0.0
+#
+#     return energy
 
-    Parameter:
-        cf solvehelmholtz's remarks
-        Alpha: complex, it corresponds to the absorbtion coefficient;
-        mu: float, it is the initial step of the gradient's descent;
-        V_obj: float, it characterizes the volume constraint on the density chi.
-    """
 
-    k = 0
+# ----------------------------------------------------------------------
+# -- Résolution et énergies
+# ----------------------------------------------------------------------
+
+def resoudre(domain_omega, spacestep, frequence, alpha_rob):
+    """Solution de Helmholtz à la fréquence donnée (onde plane imposée en haut)."""
     (M, N) = numpy.shape(domain_omega)
-    numb_iter = 100
-    tolerance_chi = 1e-6
-    chi_stabilise = False
-    energy = numpy.zeros((numb_iter+1, 1), dtype=numpy.float64)
-    chi = your_project_density(chi, domain_omega, V_obj)
-    grad = numpy.zeros((M, N), dtype=numpy.float64)
-    print(f"Coefficient Alpha utilise : {Alpha}")
-    print(f"Quantite de materiau imposee : {V_obj * numpy.count_nonzero(domain_omega == _env.NODE_ROBIN):.8f}")
-    while k < numb_iter and mu > 10**(-2):
-        print('---- iteration number = ', k)
-        print('1. computing solution of Helmholtz problem, i.e., u')
-        u, mat, rhs = processing.solve_helmholtz(
-            domain_omega, spacestep, omega, f, f_dir, f_neu, f_rob,
-            beta_pde, alpha_pde, alpha_dir, beta_neu, beta_rob,
-            Alpha * chi, return_system=True)
-        print('2. computing solution of adjoint problem, i.e., p')
-        p = your_compute_adjoint(domain_omega, u, spacestep, mat)
-        print('3. computing objective function, i.e., energy')
-        energy[k, 0] = your_compute_objective_function(domain_omega, u, spacestep)
-        print(f"   Energie actuelle : {energy[k, 0]:.12f}")
-        print('4. computing parametric gradient')
-        grad = your_compute_gradient(domain_omega, u, p, spacestep,
-                                     f_rob, beta_pde, beta_rob, Alpha, chi)
-        print(f"   Norme de l'adjoint : {numpy.linalg.norm(p):.6e}")
-        print(f"   Norme du gradient : {numpy.linalg.norm(grad):.6e}")
-        ene = energy[k, 0]
-        bool_a = False
-        while ene >= energy[k, 0] and mu > 10 ** -5:
-            print('    a. computing gradient descent')
-            chi_test = chi - mu * grad
-            print('    b. computing projected gradient')
-            chi_test = your_project_density(chi_test, domain_omega, V_obj)
-            print('    c. computing solution of Helmholtz problem, i.e., u')
-            u_test = processing.solve_helmholtz(
-                domain_omega, spacestep, omega, f, f_dir, f_neu, f_rob,
-                beta_pde, alpha_pde, alpha_dir, beta_neu, beta_rob, Alpha * chi_test)
-            print('    d. computing objective function, i.e., energy (E)')
-            ene = your_compute_objective_function(domain_omega, u_test, spacestep)
-            print(f"   Pas teste : {mu:.8g} | Energie testee : {ene:.12f}")
-            print(f"   Variation de chi : {numpy.linalg.norm(chi_test - chi):.6e}")
-            bool_a = numpy.isfinite(ene) and ene < energy[k, 0]
-            print("   Essai accepte" if bool_a else "   Essai refuse : reduction du pas")
-            if bool_a:
-                # Evaluate the accepted change before replacing the current density.
-                variation_chi = numpy.linalg.norm(chi_test - chi)
-                chi_stabilise = variation_chi < tolerance_chi
-                chi = chi_test
-                u = u_test
-                # The step is increased if the energy decreased
-                mu = mu * 1.1
-            else:
-                # The step is decreased is the energy increased
-                mu = mu / 2
-                ene = energy[k, 0]  # force another trial, also for non-finite energy
-        if not bool_a:
-            break  # no rejected trial may replace the last accepted density
-        k += 1
-        energy[k, 0] = ene
-        if chi_stabilise:
-            break  # keep this accepted state and its energy in the history
-
-    print('end. computing solution of Helmholtz problem, i.e., u')
-    u, mat, rhs = processing.solve_helmholtz(
-        domain_omega, spacestep, omega, f, f_dir, f_neu, f_rob,
-        beta_pde, alpha_pde, alpha_dir, beta_neu, beta_rob,
-        Alpha * chi, return_system=True)
-    energy[k, 0] = your_compute_objective_function(domain_omega, u, spacestep)
-    p = your_compute_adjoint(domain_omega, u, spacestep, mat)
-    grad = your_compute_gradient(domain_omega, u, p, spacestep,
-                                 f_rob, beta_pde, beta_rob, Alpha, chi)
-    print("\nBILAN DE L'OPTIMISATION")
-    print(f"Iterations acceptees : {k}")
-    print(f"Energie initiale : {energy[0, 0]:.12f}")
-    print(f"Energie finale : {energy[k, 0]:.12f}")
-    if energy[0, 0] > 0:
-        print(f"Reduction : {100 * (1 - energy[k, 0] / energy[0, 0]):.4f} %")
-    print(f"Quantite de materiau finale : {numpy.sum(chi):.8f}")
-    print(f"Dernier pas : {mu:.8g}")
-    if chi_stabilise:
-        print(f"Arret : stabilisation de chi ({variation_chi:.6e} < {tolerance_chi:.1e})")
-    elif k == numb_iter:
-        print("Arret : limite d'iterations atteinte")
-    else:
-        print("Arret : pas inferieur au seuil de la boucle")
-    return chi, energy[:k+1], u, grad
+    wavenumber = 2 * numpy.pi * frequence / geometrie.C_SON
+    beta_pde, alpha_pde, alpha_dir, beta_neu, _, beta_rob = preprocessing._set_coefficients_of_pde(M, N)
+    f, f_dir, f_neu, f_rob = preprocessing._set_rhs_of_pde(M, N)
+    f_dir[0, 0:N] = 1.0
+    return processing.solve_helmholtz(domain_omega, spacestep, wavenumber, f, f_dir, f_neu, f_rob,
+                                      beta_pde, alpha_pde, alpha_dir, beta_neu, beta_rob, alpha_rob)
 
 
-def your_compute_adjoint(domain_omega, u, spacestep, mat):
-    # Discrete adjoint: A^H p = h^2 u on the interior, zero elsewhere.
-    g = numpy.zeros_like(u, dtype=numpy.complex128)
-    masque = domain_omega == _env.NODE_INTERIOR
-    g[masque] = spacestep**2 * u[masque]
-    return scipy.sparse.linalg.spsolve(mat.conjugate().transpose().tocsr(),
-                                     g.ravel()).reshape(u.shape)
-
-
-def your_compute_gradient(domain_omega, u, p, spacestep,
-                          f_rob, beta_pde, beta_rob, Alpha, chi):
-    # Differentiate exactly the Robin elimination used by processing.py.
-    # dJ = 2 Re[p^H (db - dA u)]; p here includes neither factor 2 nor a minus sign.
-    M, N = domain_omega.shape
-    grad = numpy.zeros((M, N), dtype=numpy.float64)
-    h = spacestep
-    for i in range(1, M-1):
-        for j in range(1, N-1):
-            if domain_omega[i, j] != _env.NODE_INTERIOR:
-                continue
-            for a, b in [(i-1, j), (i+1, j), (i, j-1), (i, j+1)]:
-                if domain_omega[a, b] == _env.NODE_ROBIN:
-                    beta = beta_pde[i, j]
-                    denom = beta_rob[a, b] - Alpha * chi[a, b] * h / beta
-                    dA = Alpha * h * beta_rob[a, b] / (beta * denom**2)
-                    db = f_rob[a, b] * h**2 * Alpha / (beta * denom**2)
-                    grad[a, b] += 2 * numpy.real(
-                        numpy.conj(p[i, j]) * (db - dA * u[i, j]))
-    return grad
-
-
-def your_project_density(values, domain_omega, V_obj):
-    # Euclidean projection onto 0 <= chi <= 1, sum(chi) = V_obj*S.
-    masque = domain_omega == _env.NODE_ROBIN
-    S = numpy.count_nonzero(masque)
-    if S == 0 or not numpy.isfinite(V_obj) or not 0 <= V_obj <= 1:
-        raise ValueError('A nonempty Robin boundary and 0 <= V_obj <= 1 are required.')
-    z = numpy.asarray(values, dtype=float)[masque]
-    if not numpy.all(numpy.isfinite(z)):
-        raise ValueError('Non-finite density.')
-    chi = numpy.zeros(domain_omega.shape, dtype=float)
-    if V_obj == 0 or V_obj == 1:
-        chi[masque] = V_obj
-        return chi
-    # These bounds bracket every possible shift, even for large gradient steps.
-    lo, hi = -numpy.max(z), 1 - numpy.min(z)
-    for _ in range(80):
-        shift = (lo + hi) / 2
-        if numpy.sum(numpy.clip(z + shift, 0, 1)) < V_obj * S:
-            lo = shift
-        else:
-            hi = shift
-    chi[masque] = numpy.clip(z + (lo + hi) / 2, 0, 1)
-    return chi
-
-
-def your_compute_objective_function(domain_omega, u, spacestep):
+def energies(domain_omega, u, spacestep, zone_paroi):
     """
-    This function compute the objective function:
-    J(u,domain_omega)= \int_{domain_omega}||u||^2 
-
-    Parameter:
-        domain_omega: Matrix (NxP), it defines the domain and the shape of the
-        Robin frontier;
-        u: Matrix (NxP), it is the solution of the Helmholtz problem, we are
-        computing its energy;
-        spacestep: float, it corresponds to the step used to solve the Helmholtz
-        equation.
+    Intégrales de |u|² (u est nul hors des noeuds intérieurs) :
+        E_totale       : sur tout le domaine
+        densite_paroi  : énergie dans la zone de la paroi / aire de la zone
+        densite_piece  : énergie dans la pièce / aire de la pièce
     """
+    u2 = numpy.abs(u) ** 2
+    zone_piece = (domain_omega == _env.NODE_INTERIOR) & ~zone_paroi
+    aire = spacestep ** 2
+    E_paroi = aire * numpy.sum(u2[zone_paroi])
+    E_piece = aire * numpy.sum(u2[zone_piece])
+    return {'E_totale': E_paroi + E_piece,
+            'densite_paroi': E_paroi / (aire * zone_paroi.sum()) if zone_paroi.any() else numpy.nan,
+            'densite_piece': E_piece / (aire * zone_piece.sum())}
 
-    energy = spacestep**2 * numpy.sum(
-        numpy.abs(u[domain_omega == _env.NODE_INTERIOR])**2)
 
-    return energy
+GRANDEURS = [('densite_paroi', "densité d'énergie dans la paroi"),
+             ('densite_piece', "densité d'énergie dans la pièce"),
+             ('E_totale', 'énergie totale')]
+
+
+def afficher_champs(domain_omega, u_sans, u_avec, e_sans, e_avec, frequence, titre):
+    """|u|² sans et avec Robin (même échelle), puis comparaison des énergies."""
+    hors_domaine = domain_omega != _env.NODE_INTERIOR
+    u2_sans = numpy.ma.masked_where(hors_domaine, numpy.abs(u_sans) ** 2)
+    u2_avec = numpy.ma.masked_where(hors_domaine, numpy.abs(u_avec) ** 2)
+    vmax = max(u2_sans.max(), u2_avec.max())
+    norme = matplotlib.colors.LogNorm(vmin=vmax * 1e-4, vmax=vmax)
+
+    matplotlib.pyplot.figure(figsize=(16, 5))
+    for k, (u2, nom) in enumerate([(u2_sans, 'sans Robin (paroi rigide)'), (u2_avec, 'avec Robin (chi = 1)')]):
+        matplotlib.pyplot.subplot(1, 3, k + 1)
+        matplotlib.pyplot.imshow(u2, cmap='jet', norm=norme)
+        matplotlib.pyplot.colorbar()
+        matplotlib.pyplot.title(f'$|u|^2$ à {frequence:.0f} Hz, {nom}', fontsize=9)
+        matplotlib.pyplot.axis('off')
+
+    matplotlib.pyplot.subplot(1, 3, 3)
+    position = numpy.arange(len(GRANDEURS))
+    matplotlib.pyplot.bar(position - 0.2, [e_sans[g] for g, _ in GRANDEURS], 0.4, label='sans Robin')
+    matplotlib.pyplot.bar(position + 0.2, [e_avec[g] for g, _ in GRANDEURS], 0.4, label='avec Robin')
+    matplotlib.pyplot.xticks(position, ['densité\nparoi', 'densité\npièce', 'énergie\ntotale'])
+    matplotlib.pyplot.yscale('log')
+    matplotlib.pyplot.legend()
+    matplotlib.pyplot.title(f'énergies à {frequence:.0f} Hz', fontsize=9)
+    matplotlib.pyplot.suptitle(titre)
+    matplotlib.pyplot.tight_layout()
+
+
+def afficher_balayage(frequences, liste_sans, liste_avec, titre, f0=None):
+    """Densité dans la paroi, dans la pièce et énergie totale en fonction de la fréquence."""
+    matplotlib.pyplot.figure(figsize=(16, 4.5))
+    for k, (g, nom) in enumerate(GRANDEURS):
+        matplotlib.pyplot.subplot(1, 3, k + 1)
+        matplotlib.pyplot.semilogy(frequences, [e[g] for e in liste_sans], 'k--o', markersize=3, label='sans Robin')
+        matplotlib.pyplot.semilogy(frequences, [e[g] for e in liste_avec], '-o', markersize=3, label='avec Robin')
+        if f0 is not None:
+            matplotlib.pyplot.axvline(f0, color='r', linestyle=':', label=f'f0 = {f0:.0f} Hz')
+        matplotlib.pyplot.xlabel('fréquence de la source (Hz)')
+        matplotlib.pyplot.ylabel(nom)
+        matplotlib.pyplot.legend()
+        matplotlib.pyplot.title(nom)
+    matplotlib.pyplot.suptitle(titre)
+    matplotlib.pyplot.tight_layout()
 
 
 if __name__ == '__main__':
-    # Choose 'un_materiau' to reproduce the previous single-frequency run.
-    mode = 'comparaison'
-    if mode == 'comparaison':
-        from comparaison_materiaux import run_comparison
-        run_comparison(length_m=1.0, sound_speed=340.0, max_iter=100)
-        raise SystemExit(0)
 
     # ----------------------------------------------------------------------
     # -- Fell free to modify the function call in this cell.
     # ----------------------------------------------------------------------
     # -- set parameters of the geometry
-    N = 50  # number of points along x-axis
-    M = 2 * N  # number of points along y-axis
-    level = 0 # level of the fractal
-    spacestep = 1.0 / N  # mesh size
+    TYPE_BORD = 'fractale'          # 'fractale', 'koch', 'resonateur', 'resonateur_fractal'
+    level = 1                       # level of the fractal
+    FREQUENCE_SOURCE = 1000.0        # fréquence de la source (Hz)
+    FREQUENCE_RESONATEUR = 1000.0    # fréquence visée par le résonateur (Hz), si résonateur
 
-    # -- coefficients calculated by the team (exact table index, no interpolation)
-    material = 'ROCK_WOOL'  # or 'RECYCLED_RUBBER'
-    frequency_index = 0  # 0..999: first entry is 500 Hz, last entry is 4000 Hz
-    length_m = 1.0  # physical length scale L, physical grid step = L/N
-    sound_speed = 340.0
-    omega_table, Alpha_table, error_table = material_alpha.load_material(material)
-    omega_physical = omega_table[frequency_index]
+    # -- balayage en fréquence (comparaison avec / sans Robin)
+    BALAYAGE = False
+    if TYPE_BORD in ('resonateur', 'resonateur_fractal'):
+        frequences = numpy.linspace(0.5 * FREQUENCE_RESONATEUR, 1.5 * FREQUENCE_RESONATEUR, 50)
+    else:
+        frequences = numpy.linspace(100.0, 2000.0, 20)
+    f_max = max(FREQUENCE_SOURCE, frequences.max()) if BALAYAGE else FREQUENCE_SOURCE
+
+    # -- set geometry of domain (le maillage respecte 10 points par longueur d'onde jusqu'à f_max)
+    domain_omega, M, N, spacestep, zone_paroi = geometrie.creer_geometrie(TYPE_BORD, level, f_max, FREQUENCE_RESONATEUR)
+    for frequence in [FREQUENCE_SOURCE] + (list(frequences) if BALAYAGE else []):
+        geometrie.verifier_resolution(spacestep, frequence)
 
     # -- set parameters of the partial differential equation
-    kx = -1.0
-    ky = -1.0
-    wavenumber = numpy.sqrt(kx**2 + ky**2)  # wavenumber
-    wavenumber, Alpha_material = material_alpha.solver_parameters(
-        omega_physical, Alpha_table[frequency_index], length_m, sound_speed)
-    wavenumber = float(wavenumber)
-    if wavenumber * spacestep > 2 * numpy.pi / 10:
-        raise ValueError('Mesh too coarse: increase N to keep at least 10 points per wavelength.')
-    print('Materiau :', material)
-    print(f'Pulsation : {omega_physical:.8f} rad/s')
-    print(f'Frequence : {omega_physical / (2 * numpy.pi):.8f} Hz')
-    print(f'Nombre d\'onde du solveur : {wavenumber:.8f}')
-    print(f'Echelle physique L : {length_m:g} m ; c : {sound_speed:g} m/s')
-    print(f'Erreur d\'ajustement fournie : {error_table[frequency_index]:.6e}')
+    wavenumber = 2 * numpy.pi * FREQUENCE_SOURCE / geometrie.C_SON  # wavenumber
 
     # ----------------------------------------------------------------------
     # -- Do not modify this cell, these are the values that you will be assessed against.
@@ -245,89 +199,41 @@ if __name__ == '__main__':
     # -- set right hand sides of the partial differential equation
     f, f_dir, f_neu, f_rob = preprocessing._set_rhs_of_pde(M, N)
 
-    # -- set geometry of domain
-    domain_omega, x, y, _, _ = preprocessing._set_geometry_of_domain(M, N, level)
-
     # ----------------------------------------------------------------------
     # -- Fell free to modify the function call in this cell.
     # ----------------------------------------------------------------------
-    # ----------------------------------------------------------------------
-    # 1. Condition aux limites g (bord supérieur) : pas d'onde incidente externe
-    # ----------------------------------------------------------------------
+    # -- define boundary conditions
+    # planar wave defined on top
     f_dir[:, :] = 0.0
-
-    # ----------------------------------------------------------------------
-    # 2. Modélisation des sources f : Mur absorbant SUR LE CÔTÉ du train
-    # ----------------------------------------------------------------------
-    f[:, :] = 0.0
-
-    # Paramètres du train
-    V_kmh = 300.0  # Vitesse du train en km/h
-    V_ref = 300.0  # Vitesse de croisement roulement/aéro (littérature SNCF/TGV)
-
-    # Amplitudes de pression (Helmholtz : énergie |u|^2 varie en V^3 et V^6)
-    A_roul = (V_kmh / V_ref) ** 1.5
-    A_aero = (V_kmh / V_ref) ** 3.0
-
-    # Configuration par rotation de la grille : le train roule SUR LE MUR DROIT (j = 49)
-    # - Le sol/voie ferrée est la paroi droite (j = 49).
-    # - Les roues sont au contact du mur droit : j_roul = 45 (à 4 mailles du sol j=49).
-    # - Le pantographe est en hauteur vers l'intérieur : j_aero = 25 (au-dessus des roues).
-    # - Le mur absorbant (Robin) est sur le côté du train, en i = 50.
-    # - Le train circule à une distance fixe du mur absorbant : i_train = 44 (à 6 mailles du mur).
-    i_train = 25              # Train centré au milieu de la longueur du mur (i = 25)
-    j_roul = 45               # Roues au contact du mur droit (sol j=49)
-    j_aero = 25               # Pantographe en hauteur (vers l'intérieur)
-
-    sigma = 1.5 * spacestep   # Largeur spatiale de la source (lissage gaussien)
-
-    # Remplissage du terme source f dans l'intérieur du domaine
-    for i in range(1, 50):
-        for j in range(1, N - 1):
-            if domain_omega[i, j] == _env.NODE_INTERIOR:
-                x_coord = j * spacestep
-                y_coord = i * spacestep
-
-                # Coordonnées des sources (y_train = distance latérale, x_* = hauteurs)
-                y_train = i_train * spacestep
-                x_roul  = j_roul * spacestep
-                x_aero  = j_aero * spacestep
-
-                # Profil gaussien pour le roulement
-                dist2_roul = (x_coord - x_roul)**2 + (y_coord - y_train)**2
-                f_roul = A_roul * numpy.exp(-dist2_roul / (2.0 * sigma**2))
-
-                # Profil gaussien pour l'aérodynamique (pantographe)
-                dist2_aero = (x_coord - x_aero)**2 + (y_coord - y_train)**2
-                f_aero = A_aero * numpy.exp(-dist2_aero / (2.0 * sigma**2))
-
-                # Somme des contributions
-                f[i, j] = f_roul + f_aero
+    f_dir[0, 0:N] = 1.0
+    # spherical wave defined on top
+    #f_dir[:, :] = 0.0
+    #f_dir[0, int(N/2)] = 10.0
 
     # -- initialize
     alpha_rob[:, :] = - wavenumber * 1j
 
-    # -- define material density matrix
-    chi = preprocessing._set_chi(M, N, x, y)
+    # -- define material density matrix : chi = 1 sur toute la paroi de Robin
+    chi = numpy.ones((M, N), dtype=numpy.float64)
     chi = preprocessing.set2zero(chi, domain_omega)
 
     # -- define absorbing material
-    Alpha = complex(Alpha_material)  # coefficient supplied for this material and omega
+    Alpha = 10.0 - 10.0 * 1j
     # -- this is the function you have written during your project
     #import compute_alpha
     #Alpha = compute_alpha.compute_alpha(...)
     alpha_rob = Alpha * chi
 
     # -- set parameters for optimization
-    S = 0  # surface of the fractal
-    for i in range(0, M):
-        for j in range(0, N):
-            if domain_omega[i, j] == _env.NODE_ROBIN:
-                S += 1
-    V_0 = 1  # initial volume of the domain
-    V_obj = numpy.sum(numpy.sum(chi)) / S  # constraint on the density
-    mu = 5  # initial gradient step
-    mu1 = 10**(-5)  # parameter of the volume functional
+    # S = 0  # surface of the fractal
+    # for i in range(0, M):
+    #     for j in range(0, N):
+    #         if domain_omega[i, j] == _env.NODE_ROBIN:
+    #             S += 1
+    # V_0 = 1  # initial volume of the domain
+    # V_obj = numpy.sum(numpy.sum(chi)) / S  # constraint on the density
+    # mu = 5  # initial gradient step
+    # mu1 = 10**(-5)  # parameter of the volume functional
 
     # ----------------------------------------------------------------------
     # -- Do not modify this cell, these are the values that you will be assessed against.
@@ -342,24 +248,49 @@ if __name__ == '__main__':
     # -- Fell free to modify the function call in this cell.
     # ----------------------------------------------------------------------
     # -- compute optimization
-    energy = numpy.zeros((100+1, 1), dtype=numpy.float64)
-    chi, energy, u, grad = your_optimization_procedure(
-        domain_omega, spacestep, wavenumber, f, f_dir, f_neu, f_rob,
-        beta_pde, alpha_pde, alpha_dir, beta_neu, beta_rob, alpha_rob,
-        Alpha, mu, chi, V_obj)
+    # energy = numpy.zeros((100+1, 1), dtype=numpy.float64)
+    # chi, energy, u, grad = your_optimization_procedure(...)
     #chi, energy, u, grad = solutions.optimization_procedure(domain_omega, spacestep, wavenumber, f, f_dir, f_neu, f_rob,
     #                    beta_pde, alpha_pde, alpha_dir, beta_neu, beta_rob, alpha_rob,
     #                    Alpha, mu, chi, V_obj, mu1, V_0)
     # --- en of optimization
 
-    chin = chi.copy()
-    un = u.copy()
+    # chin = chi.copy()
+    # un = u.copy()
+
+    # ----------------------------------------------------------------------
+    # -- Comparaison avec / sans condition de Robin
+    # ----------------------------------------------------------------------
+    titre = TYPE_BORD if TYPE_BORD == 'resonateur' else f"{TYPE_BORD}, niveau {level}"
+    alpha_rob_sans = numpy.zeros((M, N), dtype=numpy.complex128)   # alpha = 0 : paroi rigide (Neumann)
+    u_sans = resoudre(domain_omega, spacestep, FREQUENCE_SOURCE, alpha_rob_sans)
+    e_avec = energies(domain_omega, u0, spacestep, zone_paroi)
+    e_sans = energies(domain_omega, u_sans, spacestep, zone_paroi)
+    print(f"\nÀ {FREQUENCE_SOURCE:.0f} Hz :            sans Robin   avec Robin")
+    for g, nom in GRANDEURS:
+        print(f"  {nom:32s} {e_sans[g]:11.4e}  {e_avec[g]:11.4e}")
+
+    geometrie.afficher_geometrie(domain_omega, zone_paroi, f"géométrie : {titre} (M = {M}, N = {N})")
+    afficher_champs(domain_omega, u_sans, u0, e_sans, e_avec, FREQUENCE_SOURCE, titre)
+
+    if BALAYAGE:
+        t0 = time.time()
+        liste_sans, liste_avec = [], []
+        for frequence in frequences:
+            liste_sans.append(energies(domain_omega, resoudre(domain_omega, spacestep, frequence, alpha_rob_sans),
+                                       spacestep, zone_paroi))
+            liste_avec.append(energies(domain_omega, resoudre(domain_omega, spacestep, frequence, alpha_rob),
+                                       spacestep, zone_paroi))
+        print(f"Balayage de {len(frequences)} fréquences : {time.time() - t0:.0f} s")
+        f0 = FREQUENCE_RESONATEUR if TYPE_BORD in ('resonateur', 'resonateur_fractal') else None
+        afficher_balayage(frequences, liste_sans, liste_avec, titre, f0)
 
     # -- plot chi, u, and energy
     postprocessing._plot_uncontroled_solution(u0, chi0)
-    postprocessing._plot_controled_solution(un, chin)
-    err = un - u0
-    postprocessing._plot_error(err)
-    postprocessing._plot_energy_history(energy)
+    # postprocessing._plot_controled_solution(un, chin)
+    # err = un - u0
+    # postprocessing._plot_error(err)
+    # postprocessing._plot_energy_history(energy)
 
+    matplotlib.pyplot.show()
     print('End.')

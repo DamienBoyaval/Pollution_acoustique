@@ -59,10 +59,6 @@ def _set_rhs_of_pde(M, N):
 
 
 def _set_geometry_of_domain(M, N, level=0):
-    if level < 0 or int(level) != level or N < 4 or N % (4**level):
-        raise ValueError('Use an integer level >= 0 and N divisible by 4**level (N >= 4).')
-    if M < 2*N:
-        raise ValueError('Use M >= 2*N to contain the fractal and the exterior seed.')
     # -- define geometry
     domain_omega = numpy.zeros((M, N), dtype=numpy.int64)
     # # attention version pour les fractales
