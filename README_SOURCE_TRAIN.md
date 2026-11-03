@@ -99,23 +99,22 @@ Les anciens resultats du dossier n'ont pas ete recalcules avec cette source.
 
 ## Comparaison de l'energie avant/apres suivant la frequence
 
-`python test_energie_frequence.py` trace 5 frequences des tables entre 500 et
-3000 Hz, avec 100 iterations maximum par frequence, la laine de roche et une
+`python test_energie_frequence.py` trace toutes les 714 frequences disponibles des tables entre 500 et
+3000 Hz (pas voisin de 3,5 Hz), avec 30 iterations maximum par frequence, la laine de roche et une
 fraction initiale de 30 %. Le maillage est choisi pour toute la plage.
 Le programme recalcule les sources du train et Alpha a chaque frequence.
 
 Test court :
 `python test_energie_frequence.py --fmax 600 --points 3 --N 50 --max-iter 8 --output resultats_energie_frequence_train_test`
 
-Echantillonnage plus dense (calcul plus long) :
+Echantillonnage reduit pour un calcul plus court :
 `python test_energie_frequence.py --fmax 3000 --points 40`
 
 Chaque point repart du meme chi initial et optimise son propre chi ; il ne
 s'agit pas du spectre d'une seule frontiere optimisee puis fixee. La reference
 est la distribution initiale projetee a 30 %, pas un mur entierement rigide.
-Seules l'energie initiale et l'energie apres seuillage binaire sont affichees.
-L'optimisation continue est calculee silencieusement comme etape intermediaire ;
-ses valeurs restent dans les donnees de diagnostic CSV/NPZ. L'historique normalise J/J0
+La premiere figure affiche les energies initiale, continue optimisee, binaire
+et entierement absorbante. Chaque frequence a son propre chi optimise. L'historique normalise J/J0
 n'est pas confondu avec l'energie absolue. La quantite binaire peut changer.
 
 Le dossier de sortie contient `energie_avant_apres.png`, `energies.csv`,
@@ -129,3 +128,24 @@ La selection conserve les frequences exactes des tables : la derniere frequence
 inferieure a 3000 Hz est environ 2997,998 Hz. Le maillage automatique est N=96
 pour cette bande au niveau 0. Les anciens CSV/NPZ ne sont pas recalcules :
 leurs configurations historiques restent celles du calcul d'origine.
+
+## Performance sur toute la bande du chi choisi au pic initial
+
+Apres les optimisations independantes, le programme selectionne la frequence
+ou l'energie INITIALE est maximale sur la grille exploree. Il reprend le chi
+continu optimise a cette frequence et sa version binaire. Ces deux repartitions
+restent ensuite fixes : seul le nombre d'onde, Alpha et la source changent avec
+la frequence. Aucune nouvelle optimisation n'est faite dans ce second balayage.
+
+- `energie_chi_fixe.png` : comparaison avec la repartition initiale et la paroi
+  entierement absorbante ; cible en pointilles et maxima echantillonnes en etoiles.
+- `energies_chi_fixe.csv` : energies de ce second balayage et frequence cible.
+- `chi_fixe.npz` : repartitions retenues, domaine et indice de la frequence cible.
+
+`--replot` retrace aussi ce graphique si son CSV existe. `--points 5` permet un
+essai court ; sans cette option, toutes les frequences disponibles sont utilisees.
+Le calcul dense conserve jusqu'a 30 iterations pour chacune des 714 frequences
+et peut etre long. Les traits relient les calculs, sans lissage artificiel ; des
+resonances plus etroites que le pas peuvent encore echapper a l'echantillonnage.
+Le seuillage binaire conserve sa limitation : il peut changer la quantite de
+materiau et augmenter l'energie a certaines frequences.

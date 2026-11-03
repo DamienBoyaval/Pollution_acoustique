@@ -98,23 +98,60 @@ def your_optimization_procedure(domain_omega, spacestep, omega, f, f_dir, f_neu,
     # energy = historique de J/J0 (1 -> valeur finale), grad = gradient de J/J0
     return chi, energy[:k + 1], u, grad
 
-def binarize_chi_threshold(chi, domain_omega, threshold=0.5):
+def binarize_chi_threshold(chi, domain_omega, threshold=0.5, fraction=0.3):
     """
-    Transforme chi en fonction binaire {0, 1} avec un seuil explicite.
+    Transforme chi en fonction binaire {0, 1} en conservant la quantite de materiau :
+    on met a 1.0 les n points les plus proches de 1 (les plus absorbants)
+    de sorte a avoir exactement la fraction cible (30% par defaut) de mur absorbant.
     """
     M, N = chi.shape
     chi_bin = numpy.zeros((M, N), dtype=numpy.float64)
+    masque = (domain_omega == _env.NODE_ROBIN)
+    S = numpy.count_nonzero(masque)
+    if S == 0:
+        return chi_bin
 
-    for i in range(M):
-        for j in range(N):
-            # On ne modifie que les points situés sur la frontière de Robin
-            if domain_omega[i, j] == _env.NODE_ROBIN:
-                if chi[i, j] >= threshold:
-                    chi_bin[i, j] = 1.0
-                else:
-                    chi_bin[i, j] = 0.0
+    # Nombre de points absorbants pour respecter la fraction cible (ex: 30%)
+    if fraction is not None:
+        n_absorb = int(numpy.round(fraction * S))
+    else:
+        n_absorb = int(numpy.round(numpy.sum(chi[masque])))
+
+    # Coordonnees et valeurs des points de la frontiere de Robin
+    indices = numpy.argwhere(masque)
+    valeurs = chi[masque]
+
+    # Tri decroissant pour retenir les n points les plus proches de 1
+    ordre = numpy.argsort(-valeurs)
+    retenus = indices[ordre[:n_absorb]]
+
+    for i, j in retenus:
+        chi_bin[i, j] = 1.0
 
     return chi_bin
+
+
+# Alias pratique
+chi_binarize = binarize_chi_threshold
+
+
+# # def _binarize_chi_threshold_legacy(chi, domain_omega, threshold=0.5):
+#     """
+#     Transforme chi en fonction binaire {0, 1} avec un seuil explicite.
+#     """
+#     M, N = chi.shape
+#     chi_bin = numpy.zeros((M, N), dtype=numpy.float64)
+# 
+#     for i in range(M):
+#         for j in range(N):
+#             # On ne modifie que les points situés sur la frontière de Robin
+#             if domain_omega[i, j] == _env.NODE_ROBIN:
+#                 if chi[i, j] >= threshold:
+#                     chi_bin[i, j] = 1.0
+#                 else:
+#                     chi_bin[i, j] = 0.0
+# 
+#     return chi_bin
 
 def your_compute_adjoint(domain_omega, u, spacestep, mat):
     # Discrete adjoint: A^H p = h^2 u on the interior, zero elsewhere.
