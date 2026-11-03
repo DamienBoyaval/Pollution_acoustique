@@ -28,13 +28,6 @@ def run(fmin=500., fmax=1000., points=5, N=None, max_iter=100,
         threshold=.5, output='resultats_energie_frequence_train'):
     omega, alpha, _ = material_alpha.load_material(material)
     frequencies = omega / (2 * np.pi)
-    if not (np.isfinite(fmin) and np.isfinite(fmax) and
-            frequencies[0]-1e-8 <= fmin < fmax <= frequencies[-1]+1e-8):
-        raise ValueError('Choisir 500 <= fmin < fmax <= 4000 Hz.')
-    if points < 2 or points > len(omega) or not 0 <= fraction <= 1:
-        raise ValueError('Il faut 2 a 1000 points et une fraction entre 0 et 1.')
-    if level < 0 or max_iter < 0 or not 0 < threshold <= 1 or not np.isfinite(speed) or speed <= 0:
-        raise ValueError('Niveau et iterations >= 0 ; seuil dans ]0,1] ; vitesse > 0.')
     # Selection dans les tables, sans interpolation du coefficient Alpha.
     available = np.flatnonzero((frequencies >= fmin-1e-8) & (frequencies <= fmax+1e-8))
     if len(available) < points:
