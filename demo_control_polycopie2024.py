@@ -207,9 +207,13 @@ if __name__ == '__main__':
     # -- Fell free to modify the function call in this cell.
     # ----------------------------------------------------------------------
     # -- set parameters of the geometry
-    N = 50  # number of points along x-axis
+    N = 200  # number of points along x-axis
     M = 2 * N  # number of points along y-axis
-    level = 0 # level of the fractal
+    level = 2 # level of the fractal
+    # forme de la paroi : 'koch', 'plat', 'minkowski', 'creneaux', 'resonateur', 'resonateur_fractal',
+    # 'deux_resonateurs'
+    forme = 'minkowski'
+    k_resonateurs = (2.0, 3.5)  # nombres d'onde visés par les deux résonateurs ('deux_resonateurs')
     spacestep = 1.0 / N  # mesh size
 
     # -- coefficients calculated by the team (exact table index, no interpolation)
@@ -246,7 +250,7 @@ if __name__ == '__main__':
     f, f_dir, f_neu, f_rob = preprocessing._set_rhs_of_pde(M, N)
 
     # -- set geometry of domain
-    domain_omega, x, y, _, _ = preprocessing._set_geometry_of_domain(M, N, level)
+    domain_omega, x, y, _, _ = preprocessing._set_geometry_of_domain(M, N, level, forme, k_resonateurs)
 
     # ----------------------------------------------------------------------
     # -- Fell free to modify the function call in this cell.
@@ -265,6 +269,7 @@ if __name__ == '__main__':
     # -- define material density matrix
     chi = preprocessing._set_chi(M, N, x, y)
     chi = preprocessing.set2zero(chi, domain_omega)
+    chi[domain_omega == _env.NODE_ROBIN] = 1.0  # matériau sur toute la paroi
 
     # -- define absorbing material
     Alpha = complex(Alpha_material)  # coefficient supplied for this material and omega
