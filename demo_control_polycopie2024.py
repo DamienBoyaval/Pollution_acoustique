@@ -251,13 +251,58 @@ if __name__ == '__main__':
     # ----------------------------------------------------------------------
     # -- Fell free to modify the function call in this cell.
     # ----------------------------------------------------------------------
-    # -- define boundary conditions
-    # planar wave defined on top
+    # ----------------------------------------------------------------------
+    # 1. Condition aux limites g (bord supérieur) : pas d'onde incidente externe
+    # ----------------------------------------------------------------------
     f_dir[:, :] = 0.0
-    f_dir[0, 0:N] = 1.0
-    # spherical wave defined on top
-    #f_dir[:, :] = 0.0
-    #f_dir[0, int(N/2)] = 10.0
+
+    # ----------------------------------------------------------------------
+    # 2. Modélisation des sources f : Mur absorbant SUR LE CÔTÉ du train
+    # ----------------------------------------------------------------------
+    f[:, :] = 0.0
+
+    # Paramètres du train
+    V_kmh = 300.0  # Vitesse du train en km/h
+    V_ref = 300.0  # Vitesse de croisement roulement/aéro (littérature SNCF/TGV)
+
+    # Amplitudes de pression (Helmholtz : énergie |u|^2 varie en V^3 et V^6)
+    A_roul = (V_kmh / V_ref) ** 1.5
+    A_aero = (V_kmh / V_ref) ** 3.0
+
+    # Configuration par rotation de la grille : le train roule SUR LE MUR DROIT (j = 49)
+    # - Le sol/voie ferrée est la paroi droite (j = 49).
+    # - Les roues sont au contact du mur droit : j_roul = 45 (à 4 mailles du sol j=49).
+    # - Le pantographe est en hauteur vers l'intérieur : j_aero = 25 (au-dessus des roues).
+    # - Le mur absorbant (Robin) est sur le côté du train, en i = 50.
+    # - Le train circule à une distance fixe du mur absorbant : i_train = 44 (à 6 mailles du mur).
+    i_train = 25              # Train centré au milieu de la longueur du mur (i = 25)
+    j_roul = 45               # Roues au contact du mur droit (sol j=49)
+    j_aero = 25               # Pantographe en hauteur (vers l'intérieur)
+
+    sigma = 1.5 * spacestep   # Largeur spatiale de la source (lissage gaussien)
+
+    # Remplissage du terme source f dans l'intérieur du domaine
+    for i in range(1, 50):
+        for j in range(1, N - 1):
+            if domain_omega[i, j] == _env.NODE_INTERIOR:
+                x = j * spacestep
+                y = i * spacestep
+
+                # Coordonnées des sources (y_train = distance latérale, x_* = hauteurs)
+                y_train = i_train * spacestep
+                x_roul  = j_roul * spacestep
+                x_aero  = j_aero * spacestep
+
+                # Profil gaussien pour le roulement
+                dist2_roul = (x - x_roul)**2 + (y - y_train)**2
+                f_roul = A_roul * numpy.exp(-dist2_roul / (2.0 * sigma**2))
+
+                # Profil gaussien pour l'aérodynamique (pantographe)
+                dist2_aero = (x - x_aero)**2 + (y - y_train)**2
+                f_aero = A_aero * numpy.exp(-dist2_aero / (2.0 * sigma**2))
+
+                # Somme des contributions
+                f[i, j] = f_roul + f_aero
 
     # -- initialize
     alpha_rob[:, :] = - wavenumber * 1j
