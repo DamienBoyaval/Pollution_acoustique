@@ -171,8 +171,8 @@ if __name__ == '__main__':
     # ----------------------------------------------------------------------
     # -- set parameters of the geometry
     MATERIAL = 'RECYCLED_RUBBER'
-    TYPE_BORD = 'resonateur_fractal'          # 'fractale', 'koch', 'resonateur', 'resonateur_fractal'
-    level = 1                       # level of the fractal
+    TYPE_BORD = 'fractale'          # 'fractale', 'koch', 'resonateur', 'resonateur_fractal'
+    level = 0                       # level of the fractal
     FREQUENCE_SOURCE = 1000.0        # fréquence de la source (Hz)
     FREQUENCE_RESONATEUR = 1000.0    # fréquence visée par le résonateur (Hz), si résonateur
 
@@ -286,6 +286,7 @@ if __name__ == '__main__':
         t0 = time.time()
         liste_sans, liste_avec = [], []
         for frequence, alpha in zip(frequences, alphas_rob):
+            print(f"Running frequence {frequence} Hz")
             u = processing.solve_helmholtz(domain_omega, spacestep, wavenumber, f, f_dir, f_neu, f_rob,
                         beta_pde, alpha_pde, alpha_dir, beta_neu, beta_rob, alpha)
             chi0 = chi.copy()
@@ -298,8 +299,8 @@ if __name__ == '__main__':
                                                 for g, nom in GRANDEURS:
                                                     print(f"  {nom:32s} {e_sans[g]:11.4e}  {e_avec[g]:11.4e}")'''
 
-            liste_sans.append(energies(domain_omega, resoudre(domain_omega, spacestep, frequence, alpha_rob_sans),
-                                       spacestep, zone_paroi))
+            #liste_sans.append(energies(domain_omega, resoudre(domain_omega, spacestep, frequence, alpha_rob_sans),
+            #                           spacestep, zone_paroi))
             liste_avec.append(energies(domain_omega, resoudre(domain_omega, spacestep, frequence, alpha),
                                        spacestep, zone_paroi))
         print(f"Balayage de {len(frequences)} fréquences : {time.time() - t0:.0f} s")
