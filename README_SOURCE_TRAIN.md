@@ -99,13 +99,21 @@ Les anciens resultats du dossier n'ont pas ete recalcules avec cette source.
 
 ## Comparaison de l'energie avant/apres suivant la frequence
 
-`python test_energie_frequence.py` trace toutes les 714 frequences disponibles des tables entre 500 et
-3000 Hz (pas voisin de 3,5 Hz), avec 30 iterations maximum par frequence, la laine de roche et une
+`python test_energie_frequence.py` selectionne 500 frequences parmi les lignes des tables entre 500 et
+3000 Hz, sans interpolation d'Alpha, avec 30 iterations maximum par frequence, la laine de roche et une
 fraction initiale de 30 %. Le maillage est choisi pour toute la plage.
 Le programme recalcule les sources du train et Alpha a chaque frequence.
 
 Test court :
-`python test_energie_frequence.py --fmax 600 --points 3 --N 50 --max-iter 8 --output resultats_energie_frequence_train_test`
+`python test_energie_frequence.py --fmax 600 --points 3 --N 50 --max-iter 8`
+
+Les figures s'affichent ensemble dans des fenetres Matplotlib a la fin du calcul.
+Aucun dossier ni fichier de resultats (CSV, NPZ, JSON, journal ou image) n'est cree.
+Ce comportement s'applique aussi a `test_energie_pic_fixe.py`,
+`test_energie_pic_fixe_koch.py`, `test_energie_pic_fixe_koch_2.py` et
+`test_energie_pic_fixe_koch_3.py`. Fermer les figures termine l'affichage.
+Les anciens resultats restent en place. `--replot --output DOSSIER` permet
+encore de les lire et d'afficher leurs graphiques, sans enregistrer de fichiers.
 
 Echantillonnage reduit pour un calcul plus court :
 `python test_energie_frequence.py --fmax 3000 --points 40`
@@ -117,9 +125,6 @@ La premiere figure affiche les energies initiale, continue optimisee, binaire
 et entierement absorbante. Chaque frequence a son propre chi optimise. L'historique normalise J/J0
 n'est pas confondu avec l'energie absolue. La quantite binaire peut changer.
 
-Le dossier de sortie contient `energie_avant_apres.png`, `energies.csv`,
-`configuration.json`, `densites.npz` et le journal `optimisation.log`.
-Les fichiers d'un meme dossier de sortie sont remplaces lors d'une relance.
 Les points traces sont les frequences exactes selectionnees dans les tables ;
 les lignes entre ces points ne prouvent pas l'absence de pics intermediaires.
 
@@ -137,14 +142,13 @@ continu optimise a cette frequence et sa version binaire. Ces deux repartitions
 restent ensuite fixes : seul le nombre d'onde, Alpha et la source changent avec
 la frequence. Aucune nouvelle optimisation n'est faite dans ce second balayage.
 
-- `energie_chi_fixe.png` : comparaison avec la repartition initiale et la paroi
-  entierement absorbante ; cible en pointilles et maxima echantillonnes en etoiles.
-- `energies_chi_fixe.csv` : energies de ce second balayage et frequence cible.
-- `chi_fixe.npz` : repartitions retenues, domaine et indice de la frequence cible.
+La seconde figure compare ce chi fixe avec la repartition initiale et la paroi
+entierement absorbante ; cible en pointilles et maxima echantillonnes en etoiles.
+Elle est affichee sans enregistrer les donnees ni l'image.
 
 `--replot` retrace aussi ce graphique si son CSV existe. `--points 5` permet un
-essai court ; sans cette option, toutes les frequences disponibles sont utilisees.
-Le calcul dense conserve jusqu'a 30 iterations pour chacune des 714 frequences
+essai court ; sans cette option, 500 frequences des tables sont utilisees.
+Le calcul dense conserve jusqu'a 30 iterations pour chacune des 500 frequences
 et peut etre long. Les traits relient les calculs, sans lissage artificiel ; des
 resonances plus etroites que le pas peuvent encore echapper a l'echantillonnage.
 Le seuillage binaire conserve sa limitation : il peut changer la quantite de

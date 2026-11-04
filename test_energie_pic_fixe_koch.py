@@ -8,6 +8,8 @@ Protocole en 4 etapes :
 3. Optimisation ciblee : optimisation de chi uniquement a cette frequence de pic (max_iter iterations).
 4. Evaluation spectrale du mur fixe : evaluation de chi fixe (continu et binaire) sur toute la bande.
 
+Les figures sont affichees a la fin du calcul, sans enregistrer de fichiers.
+
 Lancer :
     python test_energie_pic_fixe_koch.py
     python test_energie_pic_fixe_koch.py --points 50 --max-iter 25
@@ -20,8 +22,6 @@ from pathlib import Path
 import time
 os.environ.setdefault('OPENBLAS_NUM_THREADS', '1')
 
-import matplotlib
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -53,8 +53,7 @@ def plot_fixed_results(rows, out, material):
     ax.legend(fontsize=8)
     fig.suptitle(f'Source train - {material} - Paroi de Koch : un seul chi optimise au pic de {target:.1f} Hz\n'
                  'Sans reoptimisation aux autres frequences ; etoiles : maxima echantillonnes')
-    fig.savefig(out / 'energie_pic_fixe.png', dpi=160)
-    plt.close(fig)
+    return fig
 
 
 def plot_binary_comparison(rows, out, material):
@@ -76,8 +75,7 @@ def plot_binary_comparison(rows, out, material):
     ax.legend(fontsize=8.5, loc='upper right')
     fig.suptitle(f'Source train - {material} - Paroi de Koch : Comparaison Initiale vs Paroi Binaire Fixe\n'
                  f'Mur optimise a {target:.1f} Hz puis binarise (30% exact de materiau) ; etoiles : maxima echantillonnes')
-    fig.savefig(out / 'energie_pic_fixe_binaire.png', dpi=160)
-    plt.close(fig)
+    return fig
 
 
 def plot_total_energy_barchart(rows, out, material):
@@ -122,8 +120,7 @@ def plot_total_energy_barchart(rows, out, material):
                  f'Mur fixé optimisé à {target:.1f} Hz ; référence entièrement absorbante à 100%',
                  fontsize=11.5, fontweight='bold')
 
-    fig.savefig(out / 'energie_totale_barchart.png', dpi=160)
-    plt.close(fig)
+    return fig
 
 
 def replot(output='resultats_energie_pic_fixe_koch', material=None):
@@ -142,10 +139,7 @@ def replot(output='resultats_energie_pic_fixe_koch', material=None):
     plot_fixed_results(rows, out, material)
     plot_binary_comparison(rows, out, material)
     plot_total_energy_barchart(rows, out, material)
-    print(f'Graphes mis a jour dans : {out}\n'
-          f'  1. {out / "energie_pic_fixe.png"}\n'
-          f'  2. {out / "energie_pic_fixe_binaire.png"}\n'
-          f'  3. {out / "energie_totale_barchart.png"}', flush=True)
+    plt.show()
 
 
 def run(fmin=train_source.FREQUENCY_MIN_HZ, fmax=train_source.FREQUENCY_MAX_HZ, points=None, N=None,
@@ -180,7 +174,6 @@ def run(fmin=train_source.FREQUENCY_MIN_HZ, fmax=train_source.FREQUENCY_MAX_HZ, 
         raise ValueError(f'N doit etre >= {minimum} et divisible par {multiple}.')
 
     out = Path(output).resolve()
-    out.mkdir(parents=True, exist_ok=True)
     mesh_cells = N
     h = 1. / mesh_cells
     n_piece = mesh_cells // geometrie.N_MORCEAUX
@@ -323,25 +316,6 @@ def run(fmin=train_source.FREQUENCY_MIN_HZ, fmax=train_source.FREQUENCY_MAX_HZ, 
 
     print(f'   Etape 4 terminee en {time.time() - t4:.2f} s.\n', flush=True)
 
-    # -------------------------------------------------------------
-    # Sauvegarde des fichiers
-    # -------------------------------------------------------------
-    csv_file = out / 'energies_pic_fixe.csv'
-    with csv_file.open('w', newline='', encoding='utf-8') as f:
-        writer = csv.DictWriter(f, fieldnames=list(rows[0]))
-        writer.writeheader()
-        writer.writerows(rows)
-
-    np.savez_compressed(
-        out / 'chi_fixe.npz',
-        domain=d,
-        chi_initial=chi0,
-        chi_fixed=chi_opt,
-        chi_fixed_binary=chi_binary,
-        target_frequency_hz=peak_frequency,
-        target_table_index=indices[peak_idx]
-    )
-
     config = dict(
         material=material, N=mesh_cells, grid_shape=list(d.shape), spacestep=h,
         geometry='koch', pieces=geometrie.N_MORCEAUX, level=level, max_iter=max_iter,
@@ -357,7 +331,6 @@ def run(fmin=train_source.FREQUENCY_MIN_HZ, fmax=train_source.FREQUENCY_MAX_HZ, 
         source='train_source defaults; coherent',
         points=points, frequencies_hz=frequencies[indices].tolist()
     )
-    (out / 'configuration.json').write_text(json.dumps(config, indent=2), encoding='utf-8')
 
     plot_fixed_results(rows, out, material)
     plot_binary_comparison(rows, out, material)
@@ -382,8 +355,8 @@ def run(fmin=train_source.FREQUENCY_MIN_HZ, fmax=train_source.FREQUENCY_MAX_HZ, 
     print(f'3. Pic binaire fixe max   : {max_fixed_bin:.4e} (a {f_max_bin:.1f} Hz) -> Atténuation globale : -{100*(1-max_fixed_bin/max_init):.1f} %')
     print(f'4. Reference 100% absorb. : {max_full:.4e}')
     print(f'Temps total d execution   : {time.time() - t_start:.2f} s')
-    print(f'Resultats enregistres dans : {out}')
     print('=' * 65)
+    plt.show()
     return rows, config
 
 
@@ -400,7 +373,7 @@ if __name__ == '__main__':
     parser.add_argument('--quantity', type=float, help='Quantite Q=h*sum(chi), prioritaire sur --fraction (L=1 m).')
     parser.add_argument('--speed', type=float, default=300.)
     parser.add_argument('--threshold', type=float, default=.5)
-    parser.add_argument('--output', default='resultats_energie_pic_fixe_koch')
+    parser.add_argument('--output', default='resultats_energie_pic_fixe_koch', help='Dossier des anciens resultats pour --replot uniquement ; aucun fichier ecrit.')
     parser.add_argument('--solver', choices=['standard'], default='standard', help='Solveur du code d origine : processing.solve_helmholtz.')
     parser.add_argument('--replot', action='store_true', help='Re-tracer le graphe depuis le CSV existant sans recalculer.')
     args = vars(parser.parse_args())

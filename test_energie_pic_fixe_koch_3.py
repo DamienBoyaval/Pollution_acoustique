@@ -1,5 +1,7 @@
 """Koch niveau 3, avec 30 % de la paroi absorbante.
 
+Les figures sont affichees a la fin du calcul, sans enregistrer de fichiers.
+
 Lancer : python test_energie_pic_fixe_koch_3.py
 Essai court : python test_energie_pic_fixe_koch_3.py --points 3 --max-iter 1
 
@@ -40,7 +42,7 @@ if __name__ == '__main__':
     parser.add_argument('--max-iter', type=int, default=30)
     parser.add_argument('--material', choices=material_alpha.MATERIALS, default='ROCK_WOOL')
     parser.add_argument('--speed', type=float, default=300.)
-    parser.add_argument('--output', default=OUTPUT)
+    parser.add_argument('--output', default=OUTPUT, help='Dossier des anciens resultats pour --replot uniquement ; aucun fichier ecrit.')
     parser.add_argument('--solver', choices=['standard'], default='standard')
     parser.add_argument('--replot', action='store_true')
     args = vars(parser.parse_args())
