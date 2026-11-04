@@ -1,0 +1,57 @@
+{
+  "N": 72,
+  "requested_quantities": [
+    0.2,
+    0.3
+  ],
+  "quantities": [
+    0.19444444444444445,
+    0.3055555555555556
+  ],
+  "fmin": 500.0,
+  "fmax": 600.0,
+  "points": 3,
+  "max_iter": 2,
+  "material": "ROCK_WOOL",
+  "speed_kmh": 300.0,
+  "quantity_definition": "Q=h*sum(chi), L=1 m",
+  "selection": "minimum of sampled maximum energy across tested quantities",
+  "cases": [
+    {
+      "form": "plat",
+      "quantity_index": 0,
+      "quantity": 0.19444444444444445,
+      "folder": "plat_Q00"
+    },
+    {
+      "form": "koch1",
+      "quantity_index": 0,
+      "quantity": 0.19444444444444445,
+      "folder": "koch1_Q00"
+    },
+    {
+      "form": "koch2",
+      "quantity_index": 0,
+      "quantity": 0.19444444444444445,
+      "folder": "koch2_Q00"
+    },
+    {
+      "form": "plat",
+      "quantity_index": 1,
+      "quantity": 0.3055555555555556,
+      "folder": "plat_Q01"
+    },
+    {
+      "form": "koch1",
+      "quantity_index": 1,
+      "quantity": 0.3055555555555556,
+      "folder": "koch1_Q01"
+    },
+    {
+      "form": "koch2",
+      "quantity_index": 1,
+      "quantity": 0.3055555555555556,
+      "folder": "koch2_Q01"
+    }
+  ]
+}

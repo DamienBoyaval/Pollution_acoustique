@@ -14,7 +14,7 @@
   "peak_initial_energy": 0.000120560734743455,
   "peak_optimized_energy": 6.237799922092844e-07,
   "peak_binary_energy": 3.385895805797711e-05,
-  "total_time_seconds": 223.00443506240845,
+  "total_time_seconds": 151.84656429290771,
   "source": "train_source defaults; coherent",
   "points": 714,
   "frequencies_hz": [

@@ -130,22 +130,23 @@ def plot_binary_comparison(rows, out, material):
 
 
 def plot_total_energy_barchart(rows, out, material):
-    """Troisieme figure : bar chart comparant l'energie totale spectrale (Initiale vs Binaire fixe)."""
+    """Troisieme figure : bar chart comparant l'energie totale spectrale (Initiale, Binaire fixe et 100% absorbante)."""
     e_init = np.array([float(r['energy_initial']) for r in rows])
     e_bin = np.array([float(r['energy_fixed_binary']) for r in rows])
 
     total_init = float(np.sum(e_init))
     total_bin = float(np.sum(e_bin))
-    reduction_pct = 100.0 * (1.0 - total_bin / total_init)
+    total_full = float(np.sum([float(r['energy_full']) for r in rows]))
 
     target = float(rows[0]['target_frequency_hz'])
     n_pts = len(rows)
 
-    fig, ax = plt.subplots(figsize=(8, 6), layout='constrained')
+    fig, ax = plt.subplots(figsize=(10, 6), layout='constrained')
 
-    labels = ['Paroi initiale\n(30% uniforme)', 'Paroi binaire fixe\n(30% optimisé au pic)']
-    totals = [total_init, total_bin]
-    colors = ['#687386', '#be5c20']
+    labels = ['Paroi initiale\n(avant optimisation)', 'Paroi binaire fixe\n(optimisée au pic)',
+              'Paroi entièrement absorbante\n(100% de matériau)']
+    totals = [total_init, total_bin, total_full]
+    colors = ['#687386', '#be5c20', '#2b8a3e']
 
     bars = ax.bar(labels, totals, color=colors, width=0.48, edgecolor='#333333', linewidth=1.2, zorder=3)
 
@@ -160,28 +161,14 @@ def plot_total_energy_barchart(rows, out, material):
             ha='center', va='bottom', fontsize=10.5, fontweight='bold', color='#222222'
         )
 
-    # Espace superieur pour le bandeau de reduction
+    # Espace superieur pour les valeurs au-dessus des barres
     y_top = max(totals) * 1.25
     ax.set_ylim(0, y_top)
-
-    # Fleche reliant les deux barres
-    y_arrow = max(totals) * 1.12
-    ax.annotate(
-        '', xy=(1, y_arrow), xytext=(0, y_arrow),
-        arrowprops=dict(arrowstyle='->', lw=2.2, color='#2b8a3e', mutation_scale=18)
-    )
-    # Badge du pourcentage de reduction
-    ax.text(
-        0.5, y_arrow * 1.03,
-        f'Réduction globale : -{reduction_pct:.1f} %',
-        ha='center', va='bottom', fontsize=12, fontweight='bold', color='#2b8a3e',
-        bbox=dict(boxstyle='round,pad=0.45', facecolor='#e6f4ea', edgecolor='#2b8a3e', lw=1.5)
-    )
 
     ax.set_ylabel('Énergie acoustique totale cumulée (unités du modèle)', fontsize=11)
     ax.grid(axis='y', linestyle='--', alpha=0.35, zorder=0)
     fig.suptitle(f'Source train - {material} : Bilan Énergétique Global ({n_pts} fréquences)\n'
-                 f'Même quantité de matériau (30%) - Mur fixé optimisé à {target:.1f} Hz',
+                 f'Mur fixé optimisé à {target:.1f} Hz ; référence entièrement absorbante à 100%',
                  fontsize=11.5, fontweight='bold')
 
     fig.savefig(out / 'energie_totale_barchart.png', dpi=160)
@@ -212,7 +199,7 @@ def replot(output='resultats_energie_pic_fixe', material=None):
 
 def run(fmin=train_source.FREQUENCY_MIN_HZ, fmax=train_source.FREQUENCY_MAX_HZ, points=None, N=None,
         max_iter=30, material='ROCK_WOOL', level=0, fraction=.3, speed=300.,
-        threshold=.5, output='resultats_energie_pic_fixe', solver='fast'):
+        threshold=.5, output='resultats_energie_pic_fixe', solver='fast', quantity=None):
     t_start = time.time()
     omega, alpha, _ = material_alpha.load_material(material)
     frequencies = omega / (2 * np.pi)
@@ -243,6 +230,12 @@ def run(fmin=train_source.FREQUENCY_MIN_HZ, fmax=train_source.FREQUENCY_MAX_HZ, 
     fd[:] = 0.
     chi0 = demo.your_project_density(pre.set2zero(pre._set_chi(M, N, x, y), d), d, fraction)
     boundary_count = np.count_nonzero(d == _env.NODE_ROBIN)
+    if quantity is not None:
+        if not np.isfinite(quantity) or not 0 < quantity <= h * boundary_count:
+            raise ValueError('quantity doit etre positive et ne pas depasser la longueur discrete du bord.')
+        fraction = float(quantity / (h * boundary_count))
+        chi0 = demo.your_project_density(
+            pre.set2zero(pre._set_chi(M, N, x, y), d), d, fraction)
 
     chi_full = np.zeros((M, N), dtype=float)
     chi_full[d == _env.NODE_ROBIN] = 1.0
@@ -386,6 +379,8 @@ def run(fmin=train_source.FREQUENCY_MIN_HZ, fmax=train_source.FREQUENCY_MAX_HZ, 
     config = dict(
         material=material, N=N, level=level, max_iter=max_iter,
         fraction=fraction, threshold=threshold, speed_kmh=speed,
+        material_quantity=float(h * chi0.sum()),
+        binary_quantity=float(h * chi_binary.sum()),
         length_m=1., sound_speed=340., solver=solver,
         target_frequency_hz=peak_frequency, target_table_index=int(indices[peak_idx]),
         peak_initial_energy=float(peak_initial_energy),
@@ -435,6 +430,7 @@ if __name__ == '__main__':
     parser.add_argument('--material', choices=material_alpha.MATERIALS, default='ROCK_WOOL')
     parser.add_argument('--level', type=int, default=0)
     parser.add_argument('--fraction', type=float, default=.3)
+    parser.add_argument('--quantity', type=float, help='Quantite Q=h*sum(chi), prioritaire sur --fraction (L=1 m).')
     parser.add_argument('--speed', type=float, default=300.)
     parser.add_argument('--threshold', type=float, default=.5)
     parser.add_argument('--output', default='resultats_energie_pic_fixe')
