@@ -209,7 +209,7 @@ if __name__ == '__main__':
         N=None,               # None = automatique
         max_iter=30,
         material='ROCK_WOOL',  # ou 'RECYCLED_RUBBER'
-        j=0,
+        j=2,
         fraction=0.3,
         speed=300.,           # km/h
         threshold=0.5,
