@@ -1,9 +1,9 @@
-"""Experience rapide unifiee : mur plat ou paroi de von Koch quadratique.
+"""Experience rapide unifiee : mur plat ou paroi de fractale de Minkowski.
 
 Le parametre j choisit la geometrie du mur :
     j = 0 : surface plane
-    j = 1 : von Koch niveau 1
-    j = 2 : von Koch niveau 2
+    j = 1 : fractale niveau 1
+    j = 2 : fractale niveau 2
     ...
 
 Protocole en 4 etapes :
@@ -24,6 +24,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import _env
+import geometrie
 import preprocessing as pre
 import processing as pro
 import material_alpha
@@ -35,7 +36,7 @@ import demo_control_polycopie2024 as demo
 # Utilitaires lies a j
 # ---------------------------------------------------------------------------
 def wall_label(j):
-    return 'Paroi plate' if j == 0 else f'Paroi de Koch niveau {j}'
+    return 'Paroi plate' if j == 0 else f'Paroi fractale niveau {j}'
 
 # ---------------------------------------------------------------------------
 # Figures
@@ -130,26 +131,32 @@ def plot_total_energy_barchart(rows, material, label):
 
 
 # ---------------------------------------------------------------------------
-# Geometrie (entierement fournie par preprocessing.py)
+# Geometrie (fractale fournie par geometrie.py)
 # ---------------------------------------------------------------------------
-# Nombre minimal de mailles par plus petit segment de Koch (longueur N / 4**j).
+# Nombre minimal de mailles par plus petit segment de la fractale (longueur N / (geometrie.N_MORCEAUX * 4**j)).
 CELLULES_MIN_SEGMENT = 2
 
 
 def build_geometry(j, N, f_max):
     """Retourne d (domaine), x, y (chemin de la paroi), mesh_cells, M, h.
 
-    Tout passe par preprocessing._set_geometry_of_domain(M, N, j), avec M = 2N :
-    j = 0 : mur plat (ligne N) ; j >= 1 : von Koch quadratique de niveau j
-    (motif de rapport 1/4, donc N doit etre divisible par 4**j).
+    j = 0 : mur plat ; j >= 1 : fractale de Minkowski de niveau j.
+    La paroi est divisee en geometrie.N_MORCEAUX morceaux.
     """
     needed = int(np.ceil(10 * f_max / 340.))
-    minimum = max(16, needed, CELLULES_MIN_SEGMENT * 4**j)
+    multiple = geometrie.N_MORCEAUX * 4**j
+    minimum = max(16, needed, CELLULES_MIN_SEGMENT * multiple)
     if N is None:
-        multiple = max(16, 4**j)
         N = int(np.ceil(max(50, minimum) / multiple) * multiple)
-    M, h = 2 * N, 1. / N
-    d, x, y, _, _ = pre._set_geometry_of_domain(M, N, j)
+    h = 1. / N
+    n_morceau = N // geometrie.N_MORCEAUX
+    y0 = int(np.ceil(n_morceau / 3)) + geometrie.MARGE
+    M = y0 + N + 1
+    carres = geometrie.carres_entre((0, y0), (N, y0 + N))
+    for k in range(geometrie.N_MORCEAUX):
+        geometrie.minkowski_sur_segment(carres, (k * n_morceau, y0), ((k + 1) * n_morceau, y0), j)
+    d = geometrie.carres_vers_domaine(carres, N + 1, M)
+    y, x = np.where(d == _env.NODE_ROBIN)
     return d, x, y, N, M, h
 
 # ---------------------------------------------------------------------------
@@ -162,11 +169,11 @@ def run(fmin=train_source.FREQUENCY_MIN_HZ, fmax=train_source.FREQUENCY_MAX_HZ,
 
     fmin, fmax : bande de frequences (Hz), bornes incluses dans les tables du materiau.
     points     : nombre de frequences echantillonnees (None = toutes).
-    N          : mailles sur 1 m (None = automatique) ; doit etre divisible par 4**j,
-                 avec au moins CELLULES_MIN_SEGMENT * 4**j mailles. M = 2N.
+    N          : mailles sur 1 m (None = automatique) ; doit etre divisible par geometrie.N_MORCEAUX * 4**j,
+                 avec au moins CELLULES_MIN_SEGMENT * geometrie.N_MORCEAUX * 4**j mailles.
     max_iter   : iterations max de l'optimisation au pic.
     material   : un element de material_alpha.MATERIALS.
-    j          : 0 = plat, 1 = Koch 1, 2 = Koch 2, 3 = Koch 3, ...
+    j          : 0 = plat, 1 = fractale 1, 2 = fractale 2, 3 = fractale 3, ...
     fraction   : fraction de points Robin absorbants (contrainte sum(chi) = fraction * S).
     quantity   : Q = h * sum(chi) en metres ; prioritaire sur fraction (L = 1 m).
     speed      : vitesse du train (km/h).
@@ -201,7 +208,7 @@ def run(fmin=train_source.FREQUENCY_MIN_HZ, fmax=train_source.FREQUENCY_MAX_HZ,
     if j == 0:
         print(f'Paroi : plate ; pas h={h:.6g} m')
     else:
-        print(f'Paroi : von Koch quadratique, niveau {j} ; pas h={h:.6g} m')
+        print(f'Paroi : fractale de Minkowski, niveau {j} ; pas h={h:.6g} m')
     print('=' * 65)
 
     def solve_eval(k, s, A, chi, return_field=False):
@@ -309,7 +316,7 @@ def run(fmin=train_source.FREQUENCY_MIN_HZ, fmax=train_source.FREQUENCY_MAX_HZ,
 
     config = dict(
         material=material, N=mesh_cells, grid_shape=list(d.shape), spacestep=h,
-        geometry='plate' if j == 0 else 'koch', level=int(j), max_iter=max_iter,
+        geometry='plate' if j == 0 else 'fractale', level=int(j), max_iter=max_iter,
         fraction=fraction, threshold=threshold, speed_kmh=speed,
         material_quantity=float(h * chi0.sum()),
         binary_quantity=float(h * chi_binary.sum()),
@@ -354,7 +361,7 @@ def run(fmin=train_source.FREQUENCY_MIN_HZ, fmax=train_source.FREQUENCY_MAX_HZ,
 if __name__ == '__main__':
     # ----------------------------------------------------------------------
     # Modifier ici les parametres de l'experience.
-    # j : 0 = surface plane ; 1 = Koch niveau 1 ; 2 = Koch niveau 2 ; 3 = Koch niveau 3
+    # j : 0 = surface plane ; 1 = fractale niveau 1 ; 2 = fractale niveau 2 ; 3 = fractale niveau 3
     # ----------------------------------------------------------------------
     rows, config = run(
         fmin=train_source.FREQUENCY_MIN_HZ,   # Hz
@@ -363,7 +370,7 @@ if __name__ == '__main__':
         N=None,               # None = automatique
         max_iter=30,
         material='ROCK_WOOL', # ou 'RECYCLED_RUBBER' (voir material_alpha.MATERIALS)
-        j=0,
+        j=2,
         fraction=0.3,
         quantity=None,        # Q = h*sum(chi), prioritaire sur fraction
         speed=300.,           # km/h
