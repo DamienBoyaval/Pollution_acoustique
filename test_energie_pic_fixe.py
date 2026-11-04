@@ -22,8 +22,6 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy import sparse
-import scipy.sparse.linalg as spla
 
 import _env
 import preprocessing as pre
@@ -31,56 +29,6 @@ import processing as pro
 import material_alpha
 import train_source
 import demo_control_polycopie2024 as demo
-
-
-class FastHelmholtzSolver:
-    """Solveur Helmholtz accelere : pre-assemblage des termes fixes et projection sur les noeuds actifs.
-    
-    Identique numeriquement au solveur reference de processing.py a 1e-15 pres,
-    mais evite le re-assemblage lil_matrix en boucles Python a chaque appel.
-    """
-    def __init__(self, domain, spacestep, beta_pde, alpha_pde, alpha_dir, beta_neu, beta_rob, f_dir, f_neu, f_rob):
-        self.d = domain
-        self.h = spacestep
-        M, N = domain.shape
-        zero_source = np.zeros((M, N), dtype=complex)
-        A0, _ = pro.compute_stiffness_matrix(domain, spacestep, zero_source, beta_pde)
-        A0, _ = pro.compute_dirichlet_condition(domain, f_dir, alpha_dir, beta_pde, A0, np.zeros((M * N, 1), complex))
-        A0, _ = pro.compute_neumann_condition(domain, spacestep, f_neu, beta_neu, beta_pde, A0, np.zeros((M * N, 1), complex))
-        A0, _ = pro.compute_robin_condition(domain, spacestep, f_rob, np.zeros((M, N), complex), beta_rob, beta_pde, A0, np.zeros((M * N, 1), complex))
-
-        self.active = np.flatnonzero(domain.ravel() == _env.NODE_INTERIOR)
-        self.A0_active = A0.tocsr()[self.active][:, self.active].tocsc()
-        self.mass = spacestep**2 * alpha_pde.ravel()[self.active]
-
-        lookup = np.full(domain.shape, -1, dtype=int)
-        lookup.ravel()[self.active] = np.arange(len(self.active))
-        i, j = np.where(domain == _env.NODE_INTERIOR)
-        rows, aa, bb, ii, jj = [], [], [], [], []
-        for di, dj in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-            a, c = i + di, j + dj
-            use = domain[a, c] == _env.NODE_ROBIN
-            rows.extend(lookup[i[use], j[use]])
-            aa.extend(a[use]); bb.extend(c[use]); ii.extend(i[use]); jj.extend(j[use])
-        self.rows = np.array(rows, dtype=int)
-        self.a, self.b = np.array(aa, dtype=int), np.array(bb, dtype=int)
-        self.beta = beta_pde[np.array(ii, dtype=int), np.array(jj, dtype=int)]
-        self.betaR = beta_rob[self.a, self.b]
-
-    def solve(self, k, source, Alpha, chi, return_field=False):
-        ratio = Alpha * chi[self.a, self.b] * self.h / self.beta
-        denom = self.betaR - ratio
-        diag = (k**2) * self.mass.copy()
-        np.add.at(diag, self.rows, ratio / denom)
-        rhs = (self.h**2) * source.ravel()[self.active]
-        mat = self.A0_active + sparse.diags(diag, format='csc')
-        u_active = spla.spsolve(mat, rhs)
-        energy = float(self.h**2 * np.vdot(u_active, u_active).real)
-        if return_field:
-            u = np.zeros(self.d.shape, dtype=complex)
-            u.ravel()[self.active] = u_active
-            return energy, u
-        return energy
 
 
 def plot_fixed_results(rows, out, material):
@@ -199,7 +147,9 @@ def replot(output='resultats_energie_pic_fixe', material=None):
 
 def run(fmin=train_source.FREQUENCY_MIN_HZ, fmax=train_source.FREQUENCY_MAX_HZ, points=None, N=None,
         max_iter=30, material='ROCK_WOOL', level=0, fraction=.3, speed=300.,
-        threshold=.5, output='resultats_energie_pic_fixe', solver='fast', quantity=None):
+        threshold=.5, output='resultats_energie_pic_fixe', solver='standard', quantity=None):
+    if solver != 'standard':
+        raise ValueError('Seul le solveur du code d origine (standard) est disponible.')
     t_start = time.time()
     omega, alpha, _ = material_alpha.load_material(material)
     frequencies = omega / (2 * np.pi)
@@ -247,19 +197,12 @@ def run(fmin=train_source.FREQUENCY_MIN_HZ, fmax=train_source.FREQUENCY_MAX_HZ, 
     print(f'Mode solveur : {solver}')
     print('=' * 65)
 
-    if solver == 'fast':
-        t_init = time.time()
-        fast_solver = FastHelmholtzSolver(d, h, bp, ap, ad, bn, br, fd, fn, fr)
-        print(f'Pre-assemblage du solveur rapide termine en {time.time() - t_init:.2f} s.\n')
-        def solve_eval(k, s, A, chi, return_field=False):
-            return fast_solver.solve(k, s, A, chi, return_field=return_field)
-    else:
-        def solve_eval(k, s, A, chi, return_field=False):
-            u = pro.solve_helmholtz(d, h, float(k), s, fd, fn, fr, bp, ap, ad, bn, br, A * chi)
-            ene = float(demo.your_compute_objective_function(d, u, h))
-            if return_field:
-                return ene, u
-            return ene
+    def solve_eval(k, s, A, chi, return_field=False):
+        u = pro.solve_helmholtz(d, h, float(k), s, fd, fn, fr, bp, ap, ad, bn, br, A * chi)
+        ene = float(demo.your_compute_objective_function(d, u, h))
+        if return_field:
+            return ene, u
+        return ene
 
     # -------------------------------------------------------------
     # ETAPE 1 : Balayage initial sur toutes les frequences (chi0 et chi_full)
@@ -434,7 +377,7 @@ if __name__ == '__main__':
     parser.add_argument('--speed', type=float, default=300.)
     parser.add_argument('--threshold', type=float, default=.5)
     parser.add_argument('--output', default='resultats_energie_pic_fixe')
-    parser.add_argument('--solver', choices=['fast', 'standard'], default='fast', help='Solveur (fast = preassemble sans boucles lil_matrix).')
+    parser.add_argument('--solver', choices=['standard'], default='standard', help='Solveur du code d origine : processing.solve_helmholtz.')
     parser.add_argument('--replot', action='store_true', help='Re-tracer le graphe depuis le CSV existant sans recalculer.')
     args = vars(parser.parse_args())
     if args.pop('replot'):

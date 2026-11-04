@@ -1,0 +1,33 @@
+{
+  "material": "ROCK_WOOL",
+  "N": 216,
+  "grid_shape": [
+    246,
+    217
+  ],
+  "spacestep": 0.004629629629629629,
+  "geometry": "koch",
+  "pieces": 4,
+  "level": 3,
+  "max_iter": 1,
+  "fraction": 0.3,
+  "threshold": 0.5,
+  "speed_kmh": 300.0,
+  "material_quantity": 1.2874999999999999,
+  "binary_quantity": 1.287037037037037,
+  "length_m": 1.0,
+  "sound_speed": 340.0,
+  "solver": "standard",
+  "target_frequency_hz": 499.99999999999994,
+  "target_table_index": 0,
+  "peak_initial_energy": 2.3795392247392253e-07,
+  "peak_optimized_energy": 2.377006919891019e-07,
+  "peak_binary_energy": 2.3449971656721505e-07,
+  "total_time_seconds": 35.703595876693726,
+  "source": "train_source defaults; coherent",
+  "points": 2,
+  "frequencies_hz": [
+    499.99999999999994,
+    2997.997997997998
+  ]
+}

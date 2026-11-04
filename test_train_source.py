@@ -58,6 +58,6 @@ class TrainSourceTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 train.spectral_amplitudes(500., **kwargs)
 
-
 if __name__ == '__main__':
     unittest.main()
+    

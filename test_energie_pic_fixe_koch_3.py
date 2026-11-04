@@ -20,7 +20,7 @@ OUTPUT = 'resultats_energie_pic_fixe_koch_3'
 
 def run(fmin=train_source.FREQUENCY_MIN_HZ, fmax=train_source.FREQUENCY_MAX_HZ,
         points=None, N=None, max_iter=30, material='ROCK_WOOL', speed=300.,
-        output=OUTPUT, solver='fast'):
+        output=OUTPUT, solver='standard'):
     """Optimise un seul mur Koch 3, a fraction absorbante fixee a 30 %."""
     return koch.run(fmin=fmin, fmax=fmax, points=points, N=N,
                     max_iter=max_iter, material=material, level=3,
@@ -41,7 +41,7 @@ if __name__ == '__main__':
     parser.add_argument('--material', choices=material_alpha.MATERIALS, default='ROCK_WOOL')
     parser.add_argument('--speed', type=float, default=300.)
     parser.add_argument('--output', default=OUTPUT)
-    parser.add_argument('--solver', choices=['fast', 'standard'], default='fast')
+    parser.add_argument('--solver', choices=['standard'], default='standard')
     parser.add_argument('--replot', action='store_true')
     args = vars(parser.parse_args())
     if args.pop('replot'):

@@ -8,6 +8,13 @@ python test_energie_pic_fixe_koch_2.py
 python test_energie_pic_fixe_koch_3.py
 ```
 
+Les calculs du mur plat et des trois niveaux de Koch utilisent uniquement
+le solveur d'origine `processing.solve_helmholtz`, pour les balayages et
+l'optimisation. L'option `--solver standard` est facultative ; le mode
+`fast` a ete retire. Les calculs complets prennent donc davantage de temps.
+Les anciens resultats ne sont pas recalcules par `--replot` : relancer le
+script sans cette option pour produire les donnees avec le solveur d'origine.
+
 Les trois scripts utilisent par defaut une fraction absorbante de 0.3 :
 `sum(chi) = 0.3 * nombre_de_points_Robin`.
 Pour le chi binaire, le nombre de points absorbants est arrondi a l'entier
