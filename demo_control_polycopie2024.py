@@ -100,7 +100,16 @@ def your_optimization_procedure(domain_omega, spacestep, omega, f, f_dir, f_neu,
 
 def chi_binarize_1(chi, domain_omega, threshold=0.5):
     """Binarisation par seuil : 1 si chi >= threshold sur le bord de Robin."""
-    return ((domain_omega == _env.NODE_ROBIN) & (chi >= threshold)).astype(float)
+    M, N = chi.shape
+    chi_bin = numpy.zeros((M, N))
+
+    for i in range(M):
+        for j in range(N):
+            if domain_omega[i, j] == _env.NODE_ROBIN:
+                if chi[i, j] >= threshold:
+                    chi_bin[i, j] = 1.0
+
+    return chi_bin
 
 
 def chi_binarize_2(chi, domain_omega, threshold=0.5, fraction=0.3):
@@ -139,25 +148,6 @@ def chi_binarize_2(chi, domain_omega, threshold=0.5, fraction=0.3):
 # Anciens noms conserves pour les autres scripts (binarisation par tri).
 binarize_chi_threshold = chi_binarize_2
 chi_binarize = chi_binarize_2
-
-
-# # def _binarize_chi_threshold_legacy(chi, domain_omega, threshold=0.5):
-#     """
-#     Transforme chi en fonction binaire {0, 1} avec un seuil explicite.
-#     """
-#     M, N = chi.shape
-#     chi_bin = numpy.zeros((M, N), dtype=numpy.float64)
-# 
-#     for i in range(M):
-#         for j in range(N):
-#             # On ne modifie que les points situés sur la frontière de Robin
-#             if domain_omega[i, j] == _env.NODE_ROBIN:
-#                 if chi[i, j] >= threshold:
-#                     chi_bin[i, j] = 1.0
-#                 else:
-#                     chi_bin[i, j] = 0.0
-# 
-#     return chi_bin
 
 def your_compute_adjoint(domain_omega, u, spacestep, mat):
     # Discrete adjoint: A^H p = h^2 u on the interior, zero elsewhere.

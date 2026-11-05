@@ -1,0 +1,31 @@
+{
+  "configuration": {
+    "material": "ROCK_WOOL",
+    "level": 0,
+    "N": 32,
+    "spacestep": 0.03125,
+    "initial_fraction": 0.3,
+    "speed_kmh": 300.0,
+    "cycles": 1,
+    "max_iter": 2,
+    "binarisation": 1,
+    "threshold": 0.5,
+    "points": 2,
+    "elapsed_seconds": 3.8611948490142822,
+    "volume_policy": "Preserve the current binary quantity at the next optimization"
+  },
+  "cycles": [
+    {
+      "cycle": 1,
+      "target_frequency_hz": 549.049049049049,
+      "energy_before": 1.4176722313129649e-06,
+      "energy_continuous_at_target": 5.166787238488292e-07,
+      "energy_binary_at_target": 1.726232530190516e-06,
+      "next_peak_frequency_hz": 549.049049049049,
+      "max_energy_after": 1.726232530190516e-06,
+      "fraction_before": 0.30000000000000004,
+      "fraction_after": 0.2903225806451613,
+      "accepted_iterations": 2
+    }
+  ]
+}

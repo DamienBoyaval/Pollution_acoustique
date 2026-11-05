@@ -22,6 +22,57 @@
   \titlepage
 \end{frame}
 
+\begin{frame}{Le domaine acoustique et ses trois types de bords}
+\begin{columns}[T]
+\begin{column}{.43\textwidth}
+\includegraphics[width=\textwidth]{figures_presentation/geometrie_bords.png}
+\end{column}
+\begin{column}{.55\textwidth}
+\small Le domaine de référence mesure $1\,\mathrm{m}$ de large et
+$1\,\mathrm{m}$ de haut, avec une paroi inférieure modifiée.
+\begin{itemize}
+\item \textbf{En haut : Dirichlet homogène}, $u=0$.
+L'excitation sera placée à l'intérieur du domaine.
+\item \textbf{Sur les côtés : Neumann homogène},
+$\partial_nu=0$ : murs rigides.
+\item \textbf{En bas : Robin}, avec un coefficient
+$\alpha(f)\chi$ qui décrit la répartition du matériau.
+\end{itemize}
+\medskip
+$j=0$ : paroi plane ; $j\geq1$ : préfractale de Minkowski,
+construite sur quatre portions de la paroi.
+\end{column}
+\end{columns}
+\medskip
+\small À chaque niveau, un segment devient huit segments quatre fois plus courts.
+La paroi s'allonge ; la géométrie reste fixe pendant l'optimisation de $\chi$.
+\end{frame}
+
+\begin{frame}{La source du train : deux gaussiennes dans le domaine}
+\begin{columns}[T]
+\begin{column}{.43\textwidth}
+\includegraphics[width=\textwidth]{figures_presentation/source_gaussienne.png}
+\end{column}
+\begin{column}{.55\textwidth}
+\small Le second membre du problème de Helmholtz est :
+\[
+s_f(x,y)=\sum_{q\in\{r,a\}} A_q(f,V)
+\exp\!\left(-\frac{(x-x_q)^2+(y-y_q)^2}{2\sigma^2}\right).
+\]
+\begin{itemize}
+\item \textbf{Roulement :} centre $(0{,}9;\,0{,}5)$ m.
+\item \textbf{Aérodynamique :} centre $(0{,}5;\,0{,}5)$ m.
+\item Largeur commune : $\sigma=0{,}03$ m.
+\end{itemize}
+Les amplitudes $A_q$ dépendent de la fréquence et de la vitesse.
+Leurs enveloppes sont centrées sur $2250$ Hz et $1425$ Hz respectivement.
+\end{column}
+\end{columns}
+\medskip
+\small Les deux sources sont en phase et nulles hors de l'intérieur du domaine.
+Il s'agit d'un modèle simplifié non calibré ; dans les simulations, $V=300$ km/h.
+\end{frame}
+
 \begin{frame}{Optimiser la répartition continue du matériau}
 Sur la paroi, $\chi_i=0$ signifie absence de matériau et $\chi_i=1$ présence
 complète. L'optimisation autorise $0\leq\chi_i\leq1$.

@@ -1,0 +1,76 @@
+{
+  "configuration": {
+    "material": "ROCK_WOOL",
+    "level": 2,
+    "N": 128,
+    "spacestep": 0.0078125,
+    "initial_fraction": 0.3,
+    "speed_kmh": 300.0,
+    "cycles": 4,
+    "max_iter": 70,
+    "binarisation": 1,
+    "threshold": 0.5,
+    "points": 2,
+    "elapsed_seconds": 209.184467792511,
+    "volume_policy": "Preserve the current binary quantity at the next optimization"
+  },
+  "cycles": [
+    {
+      "cycle": 1,
+      "target_frequency_hz": 499.99999999999994,
+      "energy_before": 1.4327112563404202e-06,
+      "energy_continuous_at_target": 2.0135979965463657e-07,
+      "energy_binary_at_target": 2.6641783839159955e-07,
+      "next_peak_frequency_hz": 499.99999999999994,
+      "max_energy_after": 2.6641783839159955e-07,
+      "fraction_before": 0.3,
+      "fraction_after": 0.30724070450097846,
+      "accepted_iterations": 70
+    },
+    {
+      "cycle": 2,
+      "target_frequency_hz": 499.99999999999994,
+      "energy_before": 2.6641783839159955e-07,
+      "energy_continuous_at_target": 1.949766682831982e-07,
+      "energy_binary_at_target": 2.3703629108786374e-07,
+      "next_peak_frequency_hz": 499.99999999999994,
+      "max_energy_after": 2.3703629108786374e-07,
+      "fraction_before": 0.30724070450097846,
+      "fraction_after": 0.29354207436399216,
+      "accepted_iterations": 70
+    },
+    {
+      "cycle": 3,
+      "target_frequency_hz": 499.99999999999994,
+      "energy_before": 2.3703629108786374e-07,
+      "energy_continuous_at_target": 1.7253387815159604e-07,
+      "energy_binary_at_target": 2.5793369105098644e-07,
+      "next_peak_frequency_hz": 499.99999999999994,
+      "max_energy_after": 2.5793369105098644e-07,
+      "fraction_before": 0.29354207436399216,
+      "fraction_after": 0.2602739726027397,
+      "accepted_iterations": 70
+    },
+    {
+      "cycle": 4,
+      "target_frequency_hz": 499.99999999999994,
+      "energy_before": 2.5793369105098644e-07,
+      "energy_continuous_at_target": 1.7501585429489297e-07,
+      "energy_binary_at_target": 2.3037384287207193e-07,
+      "next_peak_frequency_hz": 499.99999999999994,
+      "max_energy_after": 2.3037384287207193e-07,
+      "fraction_before": 0.2602739726027397,
+      "fraction_after": 0.2172211350293542,
+      "accepted_iterations": 70
+    }
+  ],
+  "best_result": {
+    "cycle": 4,
+    "criterion": "sum of sampled energies",
+    "energy_sum": 2.720409231583252e-07,
+    "initial_energy_sum": 1.5172426078929438e-06,
+    "reduction_percent": 82.0700445833037,
+    "material_fraction": 0.2172211350293542,
+    "best_including_initial_cycle": 4
+  }
+}
