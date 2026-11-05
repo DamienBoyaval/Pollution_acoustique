@@ -13,7 +13,7 @@
 \newcommand{\code}[1]{\texttt{\detokenize{#1}}}
 \newcommand{\Alpha}{\alpha}
 \title{Optimisation d'une paroi acoustique}
-\subtitle{Descente projetée, binarisation et vérification en fréquence}
+\subtitle{Modèle, optimisation, binarisation et bilan du sujet EI}
 \author{}
 \date{}
 \begin{document}
@@ -25,7 +25,7 @@
 \begin{frame}{Le domaine acoustique et ses trois types de bords}
 \begin{columns}[T]
 \begin{column}{.43\textwidth}
-\includegraphics[width=\textwidth]{figures_presentation/geometrie_bords.png}
+\includegraphics[width=\textwidth]{images_presentation/geometrie_bords.png}
 \end{column}
 \begin{column}{.55\textwidth}
 \small Le domaine de référence mesure $1\,\mathrm{m}$ de large et
@@ -43,22 +43,20 @@ $j=0$ : paroi plane ; $j\geq1$ : préfractale de Minkowski,
 construite sur quatre portions de la paroi.
 \end{column}
 \end{columns}
-\medskip
-\small À chaque niveau, un segment devient huit segments quatre fois plus courts.
-La paroi s'allonge ; la géométrie reste fixe pendant l'optimisation de $\chi$.
+
 \end{frame}
 
 \begin{frame}{La source du train : deux gaussiennes dans le domaine}
 \begin{columns}[T]
 \begin{column}{.43\textwidth}
-\includegraphics[width=\textwidth]{figures_presentation/source_gaussienne.png}
+\includegraphics[width=\textwidth]{images_presentation/source_gaussienne.png}
 \end{column}
 \begin{column}{.55\textwidth}
 \small Le second membre du problème de Helmholtz est :
-\[
+{\scriptsize\[
 s_f(x,y)=\sum_{q\in\{r,a\}} A_q(f,V)
 \exp\!\left(-\frac{(x-x_q)^2+(y-y_q)^2}{2\sigma^2}\right).
-\]
+\]}
 \begin{itemize}
 \item \textbf{Roulement :} centre $(0{,}9;\,0{,}5)$ m.
 \item \textbf{Aérodynamique :} centre $(0{,}5;\,0{,}5)$ m.
@@ -68,9 +66,7 @@ Les amplitudes $A_q$ dépendent de la fréquence et de la vitesse.
 Leurs enveloppes sont centrées sur $2250$ Hz et $1425$ Hz respectivement.
 \end{column}
 \end{columns}
-\medskip
-\small Les deux sources sont en phase et nulles hors de l'intérieur du domaine.
-Il s'agit d'un modèle simplifié non calibré ; dans les simulations, $V=300$ km/h.
+
 \end{frame}
 
 \begin{frame}{Optimiser la répartition continue du matériau}
@@ -80,10 +76,6 @@ complète. L'optimisation autorise $0\leq\chi_i\leq1$.
  J_f(\chi)=h^2\!\sum_{(i,j)\in\Omega_h^{\mathrm{int}}}|u_{f,i,j}(\chi)|^2,
  \qquad \sum_{i\in\Gamma_R}\chi_i=vS,\quad v=0{,}30.
 \]
-\small $u_f$ : champ acoustique à la fréquence $f$ ; $h$ : pas du maillage ;
-$S$ : nombre de nœuds de la paroi $\Gamma_R$.
-\medskip
-\normalsize
 La fonction \code{your_optimization_procedure} :
 \begin{enumerate}
 \item calcule le champ et le gradient de l'énergie par la méthode adjointe ;
@@ -91,8 +83,7 @@ La fonction \code{your_optimization_procedure} :
 \item accepte le nouvel état si l'énergie diminue, sinon réduit le pas.
 \end{enumerate}
 \medskip
-\textbf{À fréquence fixée :} $J_f(\chi_{\mathrm{opt}})\leq J_f(\chi_0)$.
-L'énergie utilisée pour la descente est normalisée par $J_f(\chi_0)$.
+\textbf{À fréquence fixée, on doit avoir :} $J_f(\chi_{\mathrm{opt}})<J_f(\chi_0)$.
 \end{frame}
 
 \begin{frame}{Passer à une répartition binaire : le seuil à 0,5}
@@ -107,9 +98,7 @@ Pour obtenir une paroi avec ou sans matériau à chaque nœud,
 \item La proportion de matériau n'est plus nécessairement égale à $30\,\%$.
 \item L'énergie peut augmenter : le résultat binaire n'a pas été optimisé.
 \end{itemize}
-\medskip
-\textbf{Pour mesurer l'effet du seuil, il faut recalculer le champ acoustique}
-avec cette nouvelle répartition, puis son énergie.
+
 \end{frame}
 
 \begin{frame}{Comparer les répartitions à chaque fréquence}
@@ -122,43 +111,93 @@ avec cette nouvelle répartition, puis son énergie.
 \item Binariser le résultat et recalculer l'énergie.
 \item Recommencer à la fréquence suivante avec le même $\chi_0$.
 \end{enumerate}
-\medskip
-À chaque fréquence, les comparaisons utilisent la même géométrie,
-la même source et le même matériau. La paroi couverte à $100\,\%$
-constitue une référence supplémentaire.
+
 \medskip
 
 \textbf{Une répartition optimisée différente à chaque fréquence :}
 ces courbes ne décrivent pas les performances d'une unique paroi fixe.
 \end{frame}
 
-\begin{frame}{Sur la bande : le continu conserve davantage de gain}
+\begin{frame}{La descente réduit l’énergie à la fréquence optimisée}
+
 \centering
-\includegraphics[width=.94\textwidth,height=.67\textheight,keepaspectratio]{figures_presentation/energie_frequence_fournie.png}
+\includegraphics[width=.95\textwidth,height=.67\textheight,keepaspectratio]{images_presentation/descente_chi_binaire_05.png}
 
-\small La courbe continue optimisée (bleu) se situe généralement sous
-la courbe après binarisation (orange). La comparaison locale précise
-ce que la binarisation fait perdre.
-\medskip
+\small Sur cette figure, chaque fréquence a son propre $\chi$ optimisé.
 
-\scriptsize Figure fournie, à échelle logarithmique. La méthode exacte de la courbe
-orange n'est pas identifiée ; les calculs suivants testent explicitement le seuil à $0{,}5$.
 \end{frame}
 
 \begin{frame}{Le seuil peut annuler le gain de l'optimisation}
 \centering
-\includegraphics[width=.94\textwidth,height=.55\textheight,keepaspectratio]{figures_presentation/zoom_binarisation_seuil.png}
+\includegraphics[width=.94\textwidth,height=.55\textheight,keepaspectratio]{images_presentation/zoom_binarisation_seuil.png}
 
 \small À $1887{,}39$ Hz : \textbf{$-18{,}38\,\%$ en continu}, puis
 \textbf{$+0{,}64\,\%$ après seuillage}, par rapport à l'énergie initiale.
 
-Autre limite : à $1880{,}38$ Hz, le seuil utilise $34{,}05\,\%$
-de matériau au lieu des $30\,\%$ visés.
-\medskip
+\end{frame}
 
-\scriptsize Calculs complémentaires indépendants : laine de roche, fractale niveau 2,
-$N=128$, 30 itérations maximum, train à $300$ km/h.
-Les points sont recalculés, et non extraits de la figure précédente.
+\begin{frame}{Optimisations successives : traiter le pic qui reste}
+\small\textbf{Étapes de notre algorithme :}
+\begin{enumerate}
+\item Détecter le maximum du spectre de la répartition courante.
+\item Optimiser à cette fréquence, puis binariser.
+\item Recalculer tout le spectre et utiliser cette paroi pour le cycle suivant.
+\end{enumerate}
+\medskip
+\textbf{Ce n'est pas une optimisation simultanée multifréquence.}
+Un pic déjà traité peut réapparaître et la somme peut remonter.
+\end{frame}
+
+\begin{frame}{Première étape de l'optimisation}
+\centering
+\includegraphics[width=.96\textwidth,height=.78\textheight,keepaspectratio]{images_presentation/spectre_chi_binarize_j2_deux_courbes.png}
+\end{frame}
+
+\begin{frame}{Six cycles avec seuillage : le meilleur est le cycle 3}
+
+\centering
+\includegraphics[width=.97\textwidth,height=.78\textheight,keepaspectratio]{images_presentation/six_cycles_seuil_80_barres.png}
+
+\end{frame}
+
+\begin{frame}{Binarisation 1 : état initial}
+\centering
+\includegraphics[width=.98\textwidth,height=.82\textheight,keepaspectratio]{images_presentation/cycles_bin1_figure_1.png}
+\end{frame}
+
+\begin{frame}{Binarisation 1 : cycle 1}
+\centering
+\includegraphics[width=.98\textwidth,height=.82\textheight,keepaspectratio]{images_presentation/cycles_bin1_figure_2.png}
+\end{frame}
+
+\begin{frame}{Binarisation 1 : cycle 2}
+\centering
+\includegraphics[width=.98\textwidth,height=.82\textheight,keepaspectratio]{images_presentation/cycles_bin1_figure_3.png}
+\end{frame}
+
+\begin{frame}{Binarisation 1 : cycle 3}
+\centering
+\includegraphics[width=.98\textwidth,height=.82\textheight,keepaspectratio]{images_presentation/cycles_bin1_figure_4.png}
+\end{frame}
+
+\begin{frame}{Binarisation 1 : cycle 4}
+\centering
+\includegraphics[width=.98\textwidth,height=.82\textheight,keepaspectratio]{images_presentation/cycles_bin1_figure_5.png}
+\end{frame}
+
+\begin{frame}{Binarisation 1 : cycle 5}
+\centering
+\includegraphics[width=.98\textwidth,height=.82\textheight,keepaspectratio]{images_presentation/cycles_bin1_figure_6.png}
+\end{frame}
+
+\begin{frame}{Binarisation 1 : cycle 6}
+\centering
+\includegraphics[width=.98\textwidth,height=.82\textheight,keepaspectratio]{images_presentation/cycles_bin1_figure_7.png}
+\end{frame}
+
+\begin{frame}{Binarisation 1 : paroi retenue}
+\centering
+\includegraphics[width=.98\textwidth,height=.82\textheight,keepaspectratio]{images_presentation/cycles_bin1_figure_8.png}
 \end{frame}
 
 \begin{frame}{Introduire le tri pour respecter le budget de matériau}
@@ -175,35 +214,91 @@ Pour corriger la variation de quantité introduite par le seuil,
 \medskip
 Dans le cas étudié : $S=511$, donc $m=153$ nœuds,
 soit $29{,}94\,\%$ de matériau. L'écart à $30\,\%$ vient de l'arrondi.
-\medskip
-
-\textbf{Le tri contrôle la quantité, pas l'énergie.}
-Il reste à mesurer son effet sur les performances acoustiques.
 \end{frame}
 
-\begin{frame}{Comparer les deux méthodes : énergie et quantité}
-\small Énergies rapportées à l'énergie initiale de chaque fréquence :
-$100\,\%$ correspond à la répartition initiale ; plus bas est meilleur.
+\begin{frame}{Les cycles successifs ne s'améliorent pas de façon monotone}
+\centering
+\includegraphics[width=.96\textwidth,height=.68\textheight,keepaspectratio]{images_presentation/sommes_energies.png}
+
+\small Le cycle 4 minimise la somme parmi les six murs binaires obtenus par tri :
+$7{,}0074\,10^{-4}$, soit \textbf{$41{,}33\,\%$ de baisse} par rapport à l'état initial.
+\end{frame}
+
+\begin{frame}{Binarisation 2 : état initial}
+\centering
+\includegraphics[width=.98\textwidth,height=.82\textheight,keepaspectratio]{images_presentation/cycles_bin2_figure_1.png}
+\end{frame}
+
+\begin{frame}{Binarisation 2 : cycle 1}
+\centering
+\includegraphics[width=.98\textwidth,height=.82\textheight,keepaspectratio]{images_presentation/cycles_bin2_figure_2.png}
+\end{frame}
+
+\begin{frame}{Binarisation 2 : cycle 2}
+\centering
+\includegraphics[width=.98\textwidth,height=.82\textheight,keepaspectratio]{images_presentation/cycles_bin2_figure_3.png}
+\end{frame}
+
+\begin{frame}{Binarisation 2 : cycle 3}
+\centering
+\includegraphics[width=.98\textwidth,height=.82\textheight,keepaspectratio]{images_presentation/cycles_bin2_figure_4.png}
+\end{frame}
+
+\begin{frame}{Binarisation 2 : cycle 4}
+\centering
+\includegraphics[width=.98\textwidth,height=.82\textheight,keepaspectratio]{images_presentation/cycles_bin2_figure_5.png}
+\end{frame}
+
+\begin{frame}{Binarisation 2 : cycle 5}
+\centering
+\includegraphics[width=.98\textwidth,height=.82\textheight,keepaspectratio]{images_presentation/cycles_bin2_figure_6.png}
+\end{frame}
+
+\begin{frame}{Binarisation 2 : cycle 6}
+\centering
+\includegraphics[width=.98\textwidth,height=.82\textheight,keepaspectratio]{images_presentation/cycles_bin2_figure_7.png}
+\end{frame}
+
+\begin{frame}{Binarisation 2 : paroi retenue}
+\centering
+\includegraphics[width=.98\textwidth,height=.82\textheight,keepaspectratio]{images_presentation/cycles_bin2_figure_8.png}
+\end{frame}
+
+\begin{frame}{Le meilleur cycle dépend du critère choisi}
 \begin{center}
-\begin{tabular}{rrrrr}
-\toprule
-$f$ (Hz) & Continu & Seuil & Tri & Matériau (seuil)\\
+\begin{tabular}{rrrr}
+\toprule Cycle & Somme ($10^{-4}$) & Maximum ($10^{-5}$) & Fréquence du max. (Hz)\\
 \midrule
-1880,38 & $41,89\,\%$ & $43,56\,\%$ & $47,50\,\%$ & $34,05\,\%$\\
-1887,39 & $81,62\,\%$ & $100,64\,\%$ & $100,64\,\%$ & $29,94\,\%$\\
-1894,39 & $53,77\,\%$ & $56,40\,\%$ & $58,69\,\%$ & $32,29\,\%$\\
+0 & 11,9440 & 24,9870 & 706,7\\
+1 & 8,3237 & 13,9873 & 1719,2\\
+2 & 8,8361 & 6,4328 & 1043,0\\
+3 & 7,7248 & 3,4393 & 1719,2\\
+4 & 7,0074 & 4,6918 & 1715,7\\
+5 & 7,6753 & 9,1957 & 1719,2\\
+6 & 7,1119 & 5,0247 & 706,7\\
 \bottomrule
 \end{tabular}
 \end{center}
-\normalsize
-\begin{itemize}
-\item Le continu donne la plus faible énergie sur ces trois fréquences.
-\item Le seuil fait mieux que le tri à deux fréquences, avec davantage de matériau.
-\item À $1887{,}39$ Hz, les deux méthodes produisent le même $\chi$ binaire.
-\end{itemize}
-\medskip
-\textbf{Le tri respecte le budget : $29{,}94\,\%$ dans les trois cas.}
-Ces résultats ne démontrent pas sa supériorité énergétique sur le seuil.
+\textbf{Cycle 3 : meilleur maximum ; cycle 4 : meilleure somme.}
+\end{frame}
+
+\begin{frame}{Le mur retenu selon la somme conserve des pics résiduels}
+\centering
+\includegraphics[width=.96\textwidth,height=.68\textheight,keepaspectratio]{images_presentation/comparaison_initial_meilleur_spectre.png}
+
+\small Même répartition du cycle 4 à toutes les fréquences. Son maximum vaut
+$4{,}692\,10^{-5}$ vers $1715{,}7$ Hz : baisse d'environ $81{,}2\,\%$ par rapport au maximum initial.
+\end{frame}
+
+\begin{frame}{Somme des énergies : fractale niveau 1}
+\centering
+\includegraphics[width=.98\textwidth,height=.81\textheight,keepaspectratio]{images_presentation/somme_fractale_niveau1.jpeg}
+\end{frame}
+
+\begin{frame}{Somme des énergies : fractale niveau 2}
+\centering
+\includegraphics[width=.98\textwidth,height=.81\textheight,keepaspectratio]{images_presentation/somme_fractale_niveau2.jpeg}
 \end{frame}
 
 \end{document}
+

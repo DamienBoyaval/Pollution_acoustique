@@ -1,0 +1,358 @@
+% Complément à la trame existante. Données archivées, sans nouvelles simulations.
+\section{Réponses au sujet et résultats}
+
+\begin{frame}{Le projet : une paroi ferroviaire à quantité limitée}
+\begin{itemize}
+\item Application retenue : réduire le champ acoustique d'un train dans un tunnel réfléchissant, sur $500$--$3000$ Hz.
+\item Produit candidat : support rigide préfractal avec inclusions de laine de roche ; géométrie et placement du matériau sont deux choix distincts.
+\item Objectif calculé : $J_f=\int_\Omega |u_f|^2\,dx$, approché sur les nœuds intérieurs. Ce n'est ni la puissance dissipée ni une mesure en dB chez un riverain.
+\item Stratégie : identifier les résonances, optimiser le placement, binariser, puis vérifier le \textbf{même mur} sur toute la bande.
+\end{itemize}
+\medskip
+\small Le nom de la startup, les rôles et le coût industriel restent à définir par l'équipe. Le cas autoroutier n'a pas été simulé ici.
+\end{frame}
+
+\begin{frame}{État de l'art : géométrie, localisation et absorption}
+\begin{itemize}
+\item Le support de M. Filoche, \emph{Waves next to irregular boundaries}, relie les frontières irrégulières à la localisation des modes, à l'absorption et aux murs antibruit.
+\item Il distingue l'énergie stockée $E_n$ et les pertes par cycle $W_n$ par le facteur de qualité $Q_n=2\pi E_n/W_n$ : les pics et leur largeur renseignent sur les résonances.
+\item Notre étude exploite cette piste : modifier une géométrie et la répartition des pertes pour réduire le champ forcé. Une fractale plus longue n'est pas automatiquement meilleure.
+\item Les résonateurs constituent une autre piste étudiée localement ; les résultats à deux fréquences doivent être contrôlés hors de leurs cibles.
+\end{itemize}
+\medskip
+\small Appui local : support Filoche, pages 8--12. Cette synthèse ne remplace pas une revue bibliographique des produits, performances expérimentales et coûts.
+\end{frame}
+
+\begin{frame}{Le problème de Helmholtz et le budget de matériau}
+\small Avec la convention temporelle $e^{-i\omega t}$ et $k=\omega/c$ :
+\[
+ \Delta u+k^2u=s_f\text{ dans }\Omega,\quad
+ u=0\text{ sur }\Gamma_D,\quad \partial_nu=0\text{ sur }\Gamma_N,
+ \quad \partial_nu+\alpha(f)\chi u=0\text{ sur }\Gamma_R.
+\]
+\[
+ \min_{\chi\in\mathcal A_Q}J_f(\chi),\qquad
+ \mathcal A_Q=\{0\leq\chi\leq1,\ \int_{\Gamma_R}\chi\,ds=Q\}.
+\]
+\begin{itemize}
+\item La relaxation continue permet la descente ; le produit final demande $\chi\in\{0,1\}$.
+\item Une fraction $v=30\,\%$ impose $Q_h=h\sum\chi_i=0{,}30hS$ pour $L=1$ m.
+\item Quand la paroi s'allonge, \textbf{la même fraction n'impose pas la même quantité}. Comparer les formes exige un $Q_h$ commun.
+\item Les essais anciens à source imposée au bord utilisent $u=g\neq0$ en haut : leurs énergies ne sont pas directement comparables au scénario train.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Deux matériaux étudiés, un choix encore conditionnel}
+\small
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule Matériau & Porosité & Résistivité & Tortuosité\\
+\midrule Laine de roche & 0,96 & 32000 & 1,02\\
+Caoutchouc recyclé & 0,42 & 18000 & 1,95\\\bottomrule
+\end{tabular}
+\end{center}
+Résistivité en $\mathrm{Pa\,s\,m^{-2}}$ ; paramètres du modèle fourni.
+\begin{itemize}
+\item $\alpha(\omega)$ est complexe et dépend de la fréquence. Les tables locales contiennent 1000 pulsations correspondant à 500--4000 Hz ; $\omega=2\pi f$.
+\item Le code de référence identifie un coefficient de Robin en rapprochant les réponses des modèles volumique et surfacique. Ici, les tables sont réutilisées, sans recalibrage indépendant.
+\item À 500 Hz, paroi plane et source au bord : énergie finale $0{,}498$ pour le caoutchouc contre $0{,}658$ pour la laine ($N=128$, $Q=0{,}4$).
+\item Sur le diagnostic 500--899,4 Hz des quatre formes, les pics finaux sont plus faibles avec la laine. Sa supériorité universelle n'est pas démontrée.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Un mur fixé au pic initial : protocole des figures jointes}
+\begin{enumerate}
+\item Balayer la bande pour la répartition initiale et la couverture intégrale.
+\item Choisir le maximum initial échantillonné : $1043{,}0$ Hz pour $j=1$, $706{,}7$ Hz pour $j=2$.
+\item Optimiser une seule répartition continue à cette fréquence, puis appliquer les deux binarisations.
+\item Recalculer les spectres des trois répartitions \textbf{fixées}, sans réoptimiser ailleurs.
+\end{enumerate}
+\medskip
+\small Figures jointes : laine de roche, source train, 714 fréquences. Les métadonnées complètes de ces six PNG ne sont pas jointes : ne pas déduire le maillage ou la quantité après seuil des seules courbes.
+\medskip
+
+La couverture à $100\,\%$ signifie $\chi=1$ partout : \textbf{elle ne signifie pas une absorption acoustique parfaite}.
+\end{frame}
+
+\begin{frame}{Niveau 1 : le pic ciblé baisse, un autre devient dominant}
+\centering
+\includegraphics[width=.94\textwidth,height=.65\textheight,keepaspectratio]{figures_presentation/j1_Figure_2.png}
+
+\small Le maximum passe de $2{,}89\,10^{-4}$ à $3{,}10\,10^{-4}$ (seuil)
+ou $3{,}27\,10^{-4}$ (tri), vers $1719{,}2$ Hz : \textbf{environ $+7{,}3\,\%$ et $+13{,}1\,\%$}.
+\end{frame}
+
+\begin{frame}{Niveau 2 : le maximum spectral diminue également}
+\centering
+\includegraphics[width=.94\textwidth,height=.65\textheight,keepaspectratio]{figures_presentation/j2_Figure_2.png}
+
+\small Le maximum passe de $2{,}50\,10^{-4}$ à $8{,}39\,10^{-5}$ (seuil)
+ou $1{,}17\,10^{-4}$ (tri) : \textbf{environ $-66{,}4\,\%$ et $-53{,}2\,\%$}.
+Le maximum restant est à $1719{,}2$ Hz.
+\end{frame}
+
+\begin{frame}{La somme sur la bande baisse pour les deux niveaux}
+\small Valeurs lues sur les histogrammes joints ; unités du modèle.
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule & Initial & Seuil & Tri & Couverture 100\,\%\\
+\midrule $j=1$ & $1{,}280\,10^{-3}$ & $1{,}011\,10^{-3}$ & $1{,}040\,10^{-3}$ & $1{,}615\,10^{-3}$\\
+Variation & référence & $-21{,}0\,\%$ & $-18{,}8\,\%$ & $+26{,}2\,\%$\\
+\addlinespace
+$j=2$ & $1{,}194\,10^{-3}$ & $6{,}899\,10^{-4}$ & $8{,}108\,10^{-4}$ & $1{,}470\,10^{-3}$\\
+Variation & référence & $-42{,}2\,\%$ & $-32{,}1\,\%$ & $+23{,}1\,\%$\\\bottomrule
+\end{tabular}
+\end{center}
+\begin{itemize}
+\item Les pourcentages reprennent les annotations arrondies des figures.
+\item Le seuil donne ici la plus faible somme ; sa quantité de matériau doit être vérifiée avant de conclure à une meilleure efficacité à budget égal.
+\item Une somme $\sum_f J_f$ dépend de l'échantillonnage. Ce n'est pas une énergie acoustique totale physique ; une intégrale fréquentielle requiert des poids de quadrature.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Pourquoi couvrir toute la paroi ne minimise-t-il pas toujours $J$ ?}
+\begin{itemize}
+\item Le coefficient complexe de Robin modifie à la fois les pertes et la réponse résonante du domaine.
+\item Changer $\chi$ change le champ $u$ : davantage de matériau n'implique pas une décroissance point par point de $\int|u|^2$.
+\item Dans les deux essais joints, la couverture intégrale a une somme plus élevée que la répartition initiale. Ce constat ne prouve pas qu'elle dissipe moins de puissance.
+\item Les maxima peuvent se déplacer entre les points calculés : les étoiles désignent des \textbf{maxima échantillonnés}.
+\end{itemize}
+\medskip
+\textbf{Il faut évaluer séparément le champ, les flux dissipés et les pics.}
+L'optimisation continue monotone à une fréquence ne garantit ni le meilleur binaire, ni le meilleur mur sur la bande.
+\end{frame}
+
+\begin{frame}{Optimisations successives : traiter le pic qui reste}
+\small Archive \code{resultats_optimisation_pics_successifs} :
+$j=2$, laine de roche, $N=128$, 714 fréquences, six cycles, 80 itérations maximum par cycle, source train à 300 km/h.
+\begin{enumerate}
+\item Détecter le maximum du spectre de la répartition courante.
+\item Optimiser à cette fréquence, puis binariser.
+\item Recalculer tout le spectre et utiliser cette paroi pour le cycle suivant.
+\end{enumerate}
+\medskip
+\textbf{Ce n'est pas une optimisation simultanée multifréquence.}
+Un pic déjà traité peut réapparaître et la somme peut remonter.
+\medskip
+
+\scriptsize Traçabilité : le JSON archivé indique binarisation 1, seuil $0{,}5$ ;
+le script actuel appelle \code{chi_binarize_2}. Les résultats présentés sont ceux de l'archive, pas d'une nouvelle exécution du code actuel. La fraction archivée après binarisation vaut $29{,}941\,\%$.
+\end{frame}
+
+\begin{frame}{Les cycles successifs ne s'améliorent pas de façon monotone}
+\centering
+\includegraphics[width=.96\textwidth,height=.68\textheight,keepaspectratio]{resultats_optimisation_pics_successifs/sommes_energies.png}
+
+\small Le cycle 4 minimise la somme parmi les six murs binaires :
+$7{,}0074\,10^{-4}$, soit \textbf{$41{,}33\,\%$ de baisse} par rapport à l'état initial.
+\end{frame}
+
+\begin{frame}{Le meilleur cycle dépend du critère choisi}
+\small Valeurs recalculées depuis \code{energies.csv} ; maximum sur les 714 points.
+\begin{center}
+\input{figures_presentation/table_cycles.tex}
+\end{center}
+\textbf{Cycle 3 : meilleur maximum ; cycle 4 : meilleure somme.}
+\medskip
+
+L'essai joint $j=2$ avec seuil affiche une somme $6{,}899\,10^{-4}$, légèrement plus basse que celle du cycle 4. Les cycles ne démontrent donc pas une supériorité systématique ; les paramètres et quantités doivent d'abord être alignés.
+\end{frame}
+
+\begin{frame}{Le mur retenu selon la somme conserve des pics résiduels}
+\centering
+\includegraphics[width=.96\textwidth,height=.68\textheight,keepaspectratio]{resultats_optimisation_pics_successifs/comparaison_initial_meilleur_spectre.png}
+
+\small Même répartition du cycle 4 à toutes les fréquences. Son maximum vaut
+$4{,}692\,10^{-5}$ vers $1715{,}7$ Hz : baisse d'environ $81{,}2\,\%$ par rapport au maximum initial de cette archive.
+\end{frame}
+
+\begin{frame}{Que disent les essais antérieurs sur les formes ?}
+\small Diagnostic distinct : source plane au bord, $Q=0{,}4$, $N=128$,
+optimisation simultanée à $500$ et $612{,}112$ Hz, puis mur fixe sur 500--899,4 Hz.
+\begin{center}
+\begin{tabular}{lrr}
+\toprule Forme & Pic final laine & Pic final caoutchouc\\
+\midrule Plane & 2,886 & 21,124\\
+Fractale niveau 1 & 3,613 & 33,276\\
+Plane + résonateur & 2,543 & 22,131\\
+Fractale + résonateur & 3,921 & 18,062\\\bottomrule
+\end{tabular}
+\end{center}
+\begin{itemize}
+\item La forme plane avec résonateur en laine donne le plus faible pic de ce diagnostic, $11{,}9\,\%$ sous la référence plane en laine.
+\item Le mélange fractale + résonateur est meilleur sur les deux fréquences cibles, mais pas sur le pire pic de la sous-bande.
+\item Ne pas comparer ces valeurs absolues avec celles de la source train ; les excitations diffèrent. Le balayage large bande reste nécessaire.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Ce que l'on peut proposer comme produit}
+\begin{itemize}
+\item \textbf{Piste ferroviaire :} paroi préfractale de niveau 2 avec inclusions de laine de roche. Les résultats joints justifient de poursuivre ce candidat, sans établir un optimum de forme.
+\item Choisir le mur selon le cahier des charges : somme sur la bande ou pire résonance. Pour l'archive des cycles, ces choix donnent respectivement les cycles 4 et 3.
+\item Conserver une paroi plane et une variante à résonateur comme références à quantité totale identique.
+\item Avant fabrication : confirmer le maillage, le budget, la robustesse aux sources et les performances dans une configuration ouverte.
+\end{itemize}
+\medskip
+\small Aucun coût, gain mesuré en dB, vieillissement, comportement mécanique ou résistance aux intempéries n'est évalué. Le choix est un \textbf{candidat numérique}, pas une validation industrielle.
+\end{frame}
+
+\begin{frame}{Les calculs complémentaires les plus utiles}
+\small
+\begin{enumerate}
+\item \textbf{Optimisation simultanée des pics} : même $\chi$ à 706,7, 1043,0 et 1719,2 Hz ; ajouter les nouveaux pics détectés et comparer somme/max au meilleur cycle.
+\item \textbf{Convergence} : fixer une paroi physique, comparer $N=128,256$ et raffiner autour de 1715--1725 Hz. Valider les pics avant de classer les murs.
+\item \textbf{Quantité optimale} : tracer le compromis énergie/quantité pour plusieurs $Q$, avec tri à budget fixé et mêmes sources/fréquences pour toutes les formes.
+\item \textbf{Sources indépendantes et frontière ouverte} : séparer roulement/aérodynamique ; remplacer le bord supérieur par une condition rayonnante et comparer les flux.
+\end{enumerate}
+\medskip
+Les scripts existants couvrent une partie de ces besoins ; le fichier
+\code{CALCULS_COMPLEMENTAIRES_EI.md} précise les relances et les développements nécessaires.
+\end{frame}
+
+\begin{frame}{Couverture du sujet : bilan honnête}
+\small
+\begin{tabular}{p{.25\textwidth}p{.65\textwidth}}
+\toprule Demande & Réponse disponible et limite\\\midrule
+Jour 1 & Modèle, sources, matériau, contrainte et gradient présentés ; théorie en annexe. État de l'art local partiel ; organisation à compléter.\\[1mm]
+Jour 2 & Pics et optimisation ciblée pour $j=1,2$ ; comparaison à $\chi=1$. Étude plane intégralement couverte et comparaison exhaustive des formes encore à consolider pour la source train.\\[1mm]
+Jour 3 & Mur fixe sur la bande et cycles analysés. Multifréquence simultané réalisé dans les anciens essais à deux cibles, pas pour les pics du train. Quantité optimale non établie.\\[1mm]
+Jour 4 & Candidat proposé, limites et validations identifiées.\\[1mm]
+Jour 5 & Support complété ; sélectionner les diapositives pour 20 minutes, répartir les interventions et finaliser le rapport d'équipe.\\\bottomrule
+\end{tabular}
+\end{frame}
+
+\appendix
+\section{Annexes : théorie et vérifications}
+
+\begin{frame}{Formulation faible et propriétés de la solution}
+\small Posons $V=\{v\in H^1(\Omega):v|_{\Gamma_D}=0\}$. Pour la source volumique :
+\[
+ a_\chi(u,v)=\int_\Omega \nabla u\cdot\nabla\bar v-k^2u\bar v\,dx
+ +\int_{\Gamma_R}\alpha\chi u\bar v\,ds
+ =-\int_\Omega s_f\bar v\,dx.
+\]
+\begin{itemize}
+\item Sur les préfractales polygonales finies, les traces usuelles sont définies. La forme est continue mais non coercive en général à cause de $-k^2$.
+\item Avec absorption passive ($\operatorname{Im}\alpha<0$) sur une portion ouverte où $\chi>0$, l'identité imaginaire du problème homogène impose $u=0$ sur cette portion ; Robin impose aussi $\partial_nu=0$.
+\item Sous les hypothèses usuelles de régularité et de continuation unique, cela donne l'unicité ; l'alternative de Fredholm donne l'existence et la dépendance continue aux données.
+\item Sans absorption, des fréquences propres peuvent compromettre l'unicité. Près d'une résonance, la réponse et le conditionnement peuvent être élevés.
+\end{itemize}
+\scriptsize Pour une source de Dirichlet non homogène, effectuer un relèvement $u=u_g+w$. Aucun théorème pour une fractale limite n'est nécessaire aux géométries finies simulées ici.
+\end{frame}
+
+\begin{frame}{Dérivée de l'énergie et état adjoint}
+\small À géométrie et source fixées, pour une variation réelle $\eta$ de $\chi$ :
+\[
+ a_\chi(u',v)=-\int_{\Gamma_R}\alpha\eta u\bar v\,ds,
+ \qquad J'(\chi)\eta=2\operatorname{Re}\int_\Omega u'\bar u\,dx.
+\]
+Définir l'adjoint $p\in V$ par
+\[
+ a_\chi(v,p)=\int_\Omega v\bar u\,dx\quad\forall v\in V.
+\]
+Alors
+\[
+ \boxed{J'(\chi)\eta=-2\operatorname{Re}\int_{\Gamma_R}\alpha u\bar p\,\eta\,ds.}
+\]
+Dans le code discret, $A^Hp=h^2Mu$, avec $M$ masque des nœuds intérieurs :
+\[
+ dJ=2\operatorname{Re}\big[p^H(db-dA\,u)\big].
+\]
+\scriptsize La dérivée doit inclure l'élimination des conditions de Robin dans $A$ et $b$. Une différence finie directionnelle permet de vérifier l'implémentation. Ici, $p$ n'inclut ni le facteur 2 ni un signe moins.
+\end{frame}
+
+\begin{frame}{Frontière ouverte et réfléchissante : bilan énergétique}
+\small Pour $\Delta u+k^2u=s$, multiplier par $\bar u$, intégrer et utiliser Green :
+\[
+ \int_\Omega |\nabla u|^2-k^2|u|^2\,dx+
+ \int_{\Gamma_R}\alpha\chi|u|^2\,ds
+ -ik\int_{\Gamma_o}|u|^2\,ds=-\int_\Omega s\bar u\,dx.
+\]
+Sur $\Gamma_o$, on a utilisé $\partial_nu-iku=0$ ; les autres bords sont homogènes.
+\[
+ \underbrace{-\int_{\Gamma_R}\operatorname{Im}(\alpha)\chi|u|^2\,ds}_{\text{pertes sur la paroi}}
+ +\underbrace{k\int_{\Gamma_o}|u|^2\,ds}_{\text{flux sortant}}
+ =\operatorname{Im}\int_\Omega s\bar u\,dx.
+\]
+\begin{itemize}
+\item Bord rigide : $\partial_nu=0$, donc pas de flux sortant par ce bord.
+\item L'ouverture ajoute une évacuation d'énergie, mais le champ et le travail de la source changent : cette identité ne prouve pas $J_{\text{ouvert}}\leq J_{\text{fermé}}$ à toute fréquence.
+\end{itemize}
+\scriptsize Flux proportionnels à une puissance après normalisation physique. Sommerfeld locale est une approximation de bord transparent, surtout pour l'incidence normale ; ce n'est pas une représentation exacte de tout l'espace extérieur.
+\end{frame}
+
+\begin{frame}{Dériver par rapport à la forme : ce qui reste à faire}
+\small Le gradient précédent porte sur la \textbf{répartition du matériau à forme fixée}.
+Les comparaisons plane/fractale/résonateur ne sont pas une descente de forme.
+\medskip
+
+Pour une déformation $T_t=I+t\theta$ du domaine et un champ différentiable :
+\[
+ \frac{d}{dt}J(\Omega_t)\big|_{0}
+ =2\operatorname{Re}\int_\Omega u'\bar u\,dx
+  +\int_{\partial\Omega}|u|^2\theta\cdot n\,ds.
+\]
+\begin{itemize}
+\item $u'$ doit satisfaire l'équation et les conditions aux bords différentiées ; celles-ci diffèrent entre Robin, Neumann et Sommerfeld.
+\item Pour une vraie optimisation de forme, il faut fixer le transport de $\chi$, les bords mobiles et la conservation de $Q$, puis dériver le Lagrangien et vérifier sa dérivée.
+\item La formule de transport seule n'est pas un gradient de forme exploitable. Cette partie de la demande théorique reste \textbf{partielle}.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Optimiser plusieurs fréquences simultanément}
+\[
+ F(\chi)=\sum_{\ell=1}^m w_\ell J_{f_\ell}(\chi),\qquad
+ \nabla F=\sum_{\ell=1}^m w_\ell\nabla J_{f_\ell},\quad w_\ell\geq0.
+\]
+\begin{enumerate}
+\item Résoudre un état direct et un adjoint pour chaque fréquence.
+\item Sommer les gradients, descendre puis projeter sur $\mathcal A_Q$.
+\item Accepter selon \textbf{l'objectif total}, puis binariser et rebalayer la bande.
+\end{enumerate}
+\small Pour limiter le pire pic : minimiser $\max_f J_f$, ou une approximation lisse,
+plutôt que seulement la moyenne. Enrichir les cibles lorsque de nouveaux pics apparaissent.
+\medskip
+
+Les deux sources train sont actuellement cohérentes. Pour des sources indépendantes,
+utiliser $J=J_{\rm roul}+J_{\rm aero}$ avec deux résolutions séparées, sans terme d'interférence.
+\end{frame}
+
+\begin{frame}{Maillage, convergence et reproductibilité}
+\small Le sujet impose au moins dix points par longueur d'onde :
+\[
+ \lambda/h=\frac{c}{fh}\geq10,\qquad h=1/N.
+\]
+À 3000 Hz et $c=340$ m/s : $N\geq89$ ; $N=128$ donne $14{,}5$ points par longueur d'onde.
+\begin{itemize}
+\item Cette condition est nécessaire, mais ne valide ni les détails géométriques ni les pics étroits. Le pas spectral des tables est environ $3{,}5035$ Hz.
+\item Les essais anciens $N=64/128$ à 500 Hz présentent encore des écarts d'énergie de 2 à 19\,\%. Le contrôle hybride $N=256$ n'étudie que les états initiaux à deux fréquences.
+\item Pour chaque relance : conserver $\chi$, fréquence, $\alpha$, $N$, $Q$, graine éventuelle, historique, méthode binaire et version du code.
+\item Les 80 pas acceptés de chaque cycle archivé ne prouvent pas une convergence vers un optimum ; mesurer aussi le gradient projeté.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Figures jointes : spectre complet du niveau 1}
+\centering\includegraphics[width=.98\textwidth,height=.78\textheight,keepaspectratio]{figures_presentation/j1_Figure_1.png}
+\end{frame}
+\begin{frame}{Figures jointes : spectre complet du niveau 2}
+\centering\includegraphics[width=.98\textwidth,height=.78\textheight,keepaspectratio]{figures_presentation/j2_Figure_1.png}
+\end{frame}
+\begin{frame}{Figures jointes : somme au niveau 1}
+\centering\includegraphics[width=.98\textwidth,height=.78\textheight,keepaspectratio]{figures_presentation/j1_Figure_3.png}
+\end{frame}
+\begin{frame}{Figures jointes : somme au niveau 2}
+\centering\includegraphics[width=.98\textwidth,height=.78\textheight,keepaspectratio]{figures_presentation/j2_Figure_3.png}
+\end{frame}
+
+\begin{frame}{Sources et portée des conclusions}
+\scriptsize
+\begin{itemize}
+\item Cahier des charges : \code{Sujet-EI-EXT-2026.pdf}, deux pages.
+\item Figures jointes : \code{Downloads/resultats/j1} et \code{j2}, figures 1 à 3. Les valeurs de synthèse proviennent des annotations arrondies.
+\item Cycles : \code{resultats_optimisation_pics_successifs/energies.csv}, \code{bilan.json}, figures du même dossier. Les tableaux sont recalculés à partir du CSV.
+\item Essais antérieurs : \code{RESULTATS_NIVEAUX.md}, \code{RESULTATS_HYBRIDE.md}, \code{resultats_pics_hybrides/synthese_pics.csv}. Conditions de source distinctes.
+\item Matériaux : \code{data_alpha}, \code{references_mauri/compute_alpha.py} et \code{COMPARAISON_MATERIAUX.md}. Tables reprises, pas d'identification indépendante.
+\item Appuis théoriques locaux : \code{Dirichlet_Nonhomogene.pdf}, \code{GAllaire-OptimParam.pdf}, \code{Mur-antibruit-Filoche.pdf}. État de l'art à compléter avant remise ; aucune comparaison industrielle exhaustive n'est revendiquée.
+\item Implémentation : \code{demo_control_polycopie2024.py}, \code{processing.py}, \code{train_source.py} et les deux tests de spectre/pics.
+\end{itemize}
+\end{frame}

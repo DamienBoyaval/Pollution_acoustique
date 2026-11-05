@@ -6,7 +6,7 @@ La frequence cible est celle du maximum d'energie, pas la plus haute frequence.
 
 La premiere optimisation utilise fraction. Les suivantes conservent la
 quantite du chi binaire precedent pour ne pas modifier ce point de depart.
-Le seuil chi_binarize_1 peut donc faire evoluer la quantite de materiau.
+Le seuil chi_binarize_2 peut donc faire evoluer la quantite de materiau.
 Cette strategie ne garantit pas une diminution du maximum sur toute la bande.
 """
 import os
@@ -60,7 +60,7 @@ def plot_results(frequencies, spectra, material, j, best_cycle):
     ax.set(xlabel='Frequence (Hz)', ylabel='Energie absolue du champ')
     ax.grid(alpha=.25)
     ax.legend(fontsize=8)
-    fig.suptitle(f'{material} - {wall_label(j)} - chi_binarize_1\n'
+    fig.suptitle(f'{material} - {wall_label(j)} - chi_binarize_2\n'
                  'Une paroi fixe par courbe ; etoiles : maxima echantillonnes')
 
     fig_max, ax_max = plt.subplots(figsize=(9, 4), layout='constrained')
@@ -118,7 +118,7 @@ def run(fmin=500., fmax=3000., points=None, N=None, j=2,
         material='ROCK_WOOL', fraction=.3, speed=300.,
         cycles=3, max_iter=30, threshold=.5,
         output_dir='resultats_optimisation_pics_successifs', show=True):
-    """Binarisation par chi_binarize_1 uniquement. points=None : toute la table.
+    """Binarisation par chi_binarize_2 uniquement. points=None : toute la table.
 
     cycles fixe le nombre d'optimisations successives. Les cycles sont effectues
     meme si le maximum augmente ou si le chi binaire reste identique.
@@ -156,7 +156,7 @@ def run(fmin=500., fmax=3000., points=None, N=None, j=2,
         return np.array(energy)
 
     print(f'{wall_label(j)} ; N={mesh_cells} ; {len(frequencies)} frequences ; '
-          f'{cycles} cycles ; chi_binarize_1', flush=True)
+          f'{cycles} cycles ; chi_binarize_2', flush=True)
     def display_boundary(states, labels, title, filename):
         fig = plot_boundary(d, h, states, labels, title)
         if output_dir is not None:
@@ -186,7 +186,7 @@ def run(fmin=500., fmax=3000., points=None, N=None, j=2,
             d, h, float(ks[peak]), source_at(peak), fd, fn, fr, bp, ap, ad, bn, br,
             alphas[peak] * chi, complex(alphas[peak]), 5., chi.copy(),
             fraction_start, max_iter=max_iter)
-        chi_binary = demo.chi_binarize_1(chi_cont, d, threshold)
+        chi_binary = demo.chi_binarize_2(chi_cont, d, threshold)
         display_boundary(
             [chi, chi_cont, chi_binary],
             ['Depart du cycle', 'Apres optimisation continue', 'Apres seuil (depart suivant)'],
@@ -270,8 +270,7 @@ if __name__ == '__main__':
         material='ROCK_WOOL',
         fraction=.3,      # Quantite initiale ; ensuite, quantite du binaire precedent.
         speed=300.,
-        cycles=4,         # Nombre de pics optimises successivement.
-        max_iter=50,
+        cycles=6,         # Nombre de pics optimises successivement.
+        max_iter=80,
         threshold=.5,
     )
-
