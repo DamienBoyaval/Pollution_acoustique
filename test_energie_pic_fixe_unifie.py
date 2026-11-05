@@ -10,10 +10,10 @@ Protocole en 4 etapes :
 1. Balayage initial sur toutes les frequences : calcul de J(chi_0) et J(chi_full).
 2. Detection du pic initial : identification automatique de la frequence de resonance maximale.
 3. Optimisation ciblee : optimisation de chi uniquement a cette frequence de pic (max_iter iterations).
-4. Evaluation spectrale du mur fixe : evaluation de chi fixe (continu et binaire) sur toute la bande.
+4. Evaluation spectrale du mur fixe : evaluation de chi fixe (continu et deux binarisations) sur toute la bande.
 
 La contrainte est sum(chi) = fraction * nombre_de_points_Robin (ou quantity si
-elle est donnee). La binarisation arrondit le nombre de points absorbants a
+elle est donnee). La binarisation par tri arrondit le nombre de points absorbants a
 l'entier le plus proche. Pour j >= 1, la quantite totale de materiau augmente
 donc avec la longueur discrete du bord (utiliser quantity pour comparer les
 geometries a quantite de materiau egale).
@@ -48,10 +48,12 @@ def plot_fixed_results(rows, material, label):
     for key, name, color in [
         ('initial', 'Repartition initiale', '#687386'),
         ('fixed', 'Chi continu du pic, fixe sur toute la bande', '#1971c2'),
-        ('fixed_binary', 'Chi binaire du pic, fixe sur toute la bande', '#be5c20'),
+        ('fixed_binary_1', 'chi_binarize_1 : seuil', '#9333a8'),
+        ('fixed_binary', 'chi_binarize_2 : tri a quantite fixee', '#be5c20'),
         ('full', 'Paroi entierement absorbante (100%)', '#2b8a3e')]:
         values = np.array([float(r['energy_' + key]) for r in rows])
-        ax.semilogy(frequency, values, '-', label=name, color=color)
+        style = {'initial': ':', 'fixed_binary_1': '--', 'fixed_binary': '-.'}.get(key, '-')
+        ax.semilogy(frequency, values, style, label=name, color=color)
         peak = int(np.argmax(values))
         ax.scatter(frequency[peak], values[peak], color=color, marker='*', s=65, zorder=5)
     ax.axvline(target, color='#555555', linestyle=':', label=f'Cible initiale : {target:.1f} Hz')
@@ -64,45 +66,53 @@ def plot_fixed_results(rows, material, label):
 
 
 def plot_binary_comparison(rows, material, label):
-    """Deuxieme figure : comparaison exclusive entre la repartition initiale et la paroi binaire fixe."""
+    """Deuxieme figure : repartition initiale et les deux binarisations fixes."""
     frequency = np.array([float(r['frequency_hz']) for r in rows])
     target = float(rows[0]['target_frequency_hz'])
     fig, ax = plt.subplots(figsize=(11, 5), layout='constrained')
     for key, name, color in [
-        ('initial', 'Repartition initiale (reference 30%)', '#687386'),
-        ('fixed_binary', 'Paroi binaire fixe (optimisee au pic)', '#be5c20')]:
+        ('initial', 'Repartition initiale', '#687386'),
+        ('fixed_binary_1', 'chi_binarize_1 : seuil', '#9333a8'),
+        ('fixed_binary', 'chi_binarize_2 : tri a quantite fixee', '#be5c20')]:
         values = np.array([float(r['energy_' + key]) for r in rows])
-        ax.semilogy(frequency, values, '-', label=name, color=color, linewidth=1.5)
+        style = {'initial': ':', 'fixed_binary_1': '--', 'fixed_binary': '-.'}[key]
+        ax.semilogy(frequency, values, style, label=name, color=color, linewidth=1.5)
         peak = int(np.argmax(values))
         ax.scatter(frequency[peak], values[peak], color=color, marker='*', s=80, zorder=5,
                    label=f'Max {name.split()[0]} : {values[peak]:.2e} a {frequency[peak]:.1f} Hz')
+    same = np.allclose([r['energy_fixed_binary_1'] for r in rows],
+                       [r['energy_fixed_binary_2'] for r in rows], rtol=1e-10, atol=0.)
+    if same:
+        ax.text(.02, .03, 'Les deux binarisations donnent les memes energies (courbes superposees).',
+                transform=ax.transAxes, fontsize=9)
     ax.axvline(target, color='#2b8a3e', linestyle='--', linewidth=1.2, label=f'Pic cible optimise : {target:.1f} Hz')
     ax.set(xlabel='Frequence (Hz)', ylabel='Energie absolue du champ (unites du modele)')
     ax.grid(True, alpha=.25)
-    ax.legend(fontsize=8.5, loc='upper right')
-    fig.suptitle(f'Source train - {material} - {label} : Comparaison Initiale vs Paroi Binaire Fixe\n'
-                 f'Mur optimise a {target:.1f} Hz puis binarise (30% exact de materiau) ; etoiles : maxima echantillonnes')
+    ax.legend(fontsize=8.5, loc='best')
+    fig.suptitle(f'Source train - {material} - {label} : Comparaison des deux binarisations\n'
+                 f'Mur optimise a {target:.1f} Hz puis binarise par seuil et par tri ; etoiles : maxima echantillonnes')
     return fig
 
 
 def plot_total_energy_barchart(rows, material, label):
-    """Troisieme figure : bar chart comparant l'energie totale spectrale (Initiale, Binaire fixe et 100% absorbante)."""
+    """Troisieme figure : somme des energies aux frequences echantillonnees."""
     e_init = np.array([float(r['energy_initial']) for r in rows])
     e_bin = np.array([float(r['energy_fixed_binary']) for r in rows])
 
     total_init = float(np.sum(e_init))
     total_bin = float(np.sum(e_bin))
+    total_bin_1 = float(np.sum([r['energy_fixed_binary_1'] for r in rows]))
     total_full = float(np.sum([float(r['energy_full']) for r in rows]))
 
     target = float(rows[0]['target_frequency_hz'])
     n_pts = len(rows)
 
-    fig, ax = plt.subplots(figsize=(10, 6), layout='constrained')
+    fig, ax = plt.subplots(figsize=(13, 6), layout='constrained')
 
-    labels = ['Paroi initiale\n(avant optimisation)', 'Paroi binaire fixe\n(optimisée au pic)',
+    labels = ['Paroi initiale\n(avant optimisation)', 'chi_binarize_1\n(seuil)', 'chi_binarize_2\n(tri)',
               'Paroi entièrement absorbante\n(100% de matériau)']
-    totals = [total_init, total_bin, total_full]
-    colors = ['#687386', '#be5c20', '#2b8a3e']
+    totals = [total_init, total_bin_1, total_bin, total_full]
+    colors = ['#687386', '#9333a8', '#be5c20', '#2b8a3e']
 
     bars = ax.bar(labels, totals, color=colors, width=0.48, edgecolor='#333333', linewidth=1.2, zorder=3)
 
@@ -121,9 +131,9 @@ def plot_total_energy_barchart(rows, material, label):
     y_top = max(totals) * 1.25
     ax.set_ylim(0, y_top)
 
-    ax.set_ylabel('Énergie acoustique totale cumulée (unités du modèle)', fontsize=11)
+    ax.set_ylabel('Somme des energies echantillonnees (unites du modele)', fontsize=11)
     ax.grid(axis='y', linestyle='--', alpha=0.35, zorder=0)
-    fig.suptitle(f'Source train - {material} - {label} : Bilan Énergétique Global ({n_pts} fréquences)\n'
+    fig.suptitle(f'Source train - {material} - {label} : Somme sur {n_pts} frequences echantillonnees\n'
                  f'Mur fixé optimisé à {target:.1f} Hz ; référence entièrement absorbante à 100%',
                  fontsize=11.5, fontweight='bold')
 
@@ -177,7 +187,7 @@ def run(fmin=train_source.FREQUENCY_MIN_HZ, fmax=train_source.FREQUENCY_MAX_HZ,
     fraction   : fraction de points Robin absorbants (contrainte sum(chi) = fraction * S).
     quantity   : Q = h * sum(chi) en metres ; prioritaire sur fraction (L = 1 m).
     speed      : vitesse du train (km/h).
-    threshold  : conserve pour compatibilite (la binarisation se fait par rang).
+    threshold  : seuil utilise par chi_binarize_1 ; chi_binarize_2 utilise fraction.
     """
     label = wall_label(j)
     t_start = time.time()
@@ -271,16 +281,24 @@ def run(fmin=train_source.FREQUENCY_MIN_HZ, fmax=train_source.FREQUENCY_MAX_HZ,
         d, h, float(k_peak), source_peak, fd, fn, fr, bp, ap, ad, bn, br,
         A_peak * chi0, complex(A_peak), 5., chi0.copy(), fraction, max_iter=max_iter)
 
-    chi_binary = demo.binarize_chi_threshold(chi_opt, d, threshold, fraction=fraction)
+    chi_binary_1 = demo.chi_binarize_1(chi_opt, d, threshold)
+    chi_binary = demo.chi_binarize_2(chi_opt, d, fraction=fraction)
+    different_nodes = int(np.count_nonzero(chi_binary_1 != chi_binary))
+    print(f'   Noeuds differents entre les deux binarisations : {different_nodes}/{boundary_count}')
+    if different_nodes == 0:
+        print('   Les deux methodes produisent le meme chi : leurs energies seront identiques.')
     e_opt_peak = float(demo.your_compute_objective_function(d, u_opt, h))
     e_bin_peak = solve_eval(k_peak, source_peak, A_peak, chi_binary)
+    e_bin_1_peak = solve_eval(k_peak, source_peak, A_peak, chi_binary_1)
 
     gain_opt_peak = 100. * (1. - e_opt_peak / peak_initial_energy)
     gain_bin_peak = 100. * (1. - e_bin_peak / peak_initial_energy)
     print(f'   Iterations effectuees : {len(history) - 1}')
     print(f'   Energie initiale       : {peak_initial_energy:.4e}')
-    print(f'   Energie continue opt.  : {e_opt_peak:.4e} (attenuation : -{gain_opt_peak:.2f} %)')
-    print(f'   Energie binaire        : {e_bin_peak:.4e} (attenuation : -{gain_bin_peak:.2f} %)')
+    print(f'   Energie continue opt.  : {e_opt_peak:.4e} (reduction : {gain_opt_peak:.2f} %)')
+    print(f'   Energie chi_binarize_1  : {e_bin_1_peak:.4e}')
+    print(f'   Fraction binaire 1 / 2 : {chi_binary_1.sum()/boundary_count:.4f} / {chi_binary.sum()/boundary_count:.4f}')
+    print(f'   Energie chi_binarize_2  : {e_bin_peak:.4e} (reduction : {gain_bin_peak:.2f} %)')
     print(f'   Etape 3 terminee en {time.time() - t3:.2f} s.\n', flush=True)
 
     # -------------------------------------------------------------
@@ -295,22 +313,30 @@ def run(fmin=train_source.FREQUENCY_MIN_HZ, fmax=train_source.FREQUENCY_MAX_HZ,
         frequency = float(frequencies[index])
         e_fixed = solve_eval(k, source, A, chi_opt)
         e_fixed_bin = solve_eval(k, source, A, chi_binary)
+        e_fixed_bin_1 = solve_eval(k, source, A, chi_binary_1)
+        best_binary = ('egalite' if e_fixed_bin_1 == e_fixed_bin else
+                       'chi_binarize_1' if e_fixed_bin_1 < e_fixed_bin else 'chi_binarize_2')
 
         row = dict(
             frequency_hz=frequency,
             target_frequency_hz=peak_frequency,
             energy_initial=e_init,
             energy_fixed=e_fixed,
-            energy_fixed_binary=e_fixed_bin,
+            energy_fixed_binary=e_fixed_bin,  # ancien nom : methode 2
+            energy_fixed_binary_1=e_fixed_bin_1,
+            energy_fixed_binary_2=e_fixed_bin,
+            best_binary=best_binary,
             energy_full=e_full,
             ratio_fixed=e_fixed / e_init,
             ratio_fixed_binary=e_fixed_bin / e_init,
+            ratio_fixed_binary_1=e_fixed_bin_1 / e_init,
+            ratio_fixed_binary_2=e_fixed_bin / e_init,
             ratio_full=e_full / e_init,
         )
         rows.append(row)
 
         if idx_num == 1 or idx_num % 50 == 0 or idx_num == points:
-            print(f'   [Etape 4] {idx_num}/{points} : {frequency:.2f} Hz -> init={e_init:.3e}, fixe={e_fixed:.3e}, bin={e_fixed_bin:.3e}', flush=True)
+            print(f'   [Etape 4] {idx_num}/{points} : {frequency:.2f} Hz -> init={e_init:.3e}, fixe={e_fixed:.3e}, bin1={e_fixed_bin_1:.3e}, bin2={e_fixed_bin:.3e}, meilleur={best_binary}', flush=True)
 
     print(f'   Etape 4 terminee en {time.time() - t4:.2f} s.\n', flush=True)
 
@@ -320,11 +346,17 @@ def run(fmin=train_source.FREQUENCY_MIN_HZ, fmax=train_source.FREQUENCY_MAX_HZ,
         fraction=fraction, threshold=threshold, speed_kmh=speed,
         material_quantity=float(h * chi0.sum()),
         binary_quantity=float(h * chi_binary.sum()),
+        binary_different_nodes=different_nodes,
+        accepted_iterations=len(history) - 1,
+        binary_quantity_1=float(h * chi_binary_1.sum()),
+        binary_quantity_2=float(h * chi_binary.sum()),
         length_m=1., sound_speed=340.,
         target_frequency_hz=peak_frequency, target_table_index=int(indices[peak_idx]),
         peak_initial_energy=float(peak_initial_energy),
         peak_optimized_energy=float(e_opt_peak),
         peak_binary_energy=float(e_bin_peak),
+        peak_binary_energy_1=float(e_bin_1_peak),
+        peak_binary_energy_2=float(e_bin_peak),
         total_time_seconds=float(time.time() - t_start),
         source='train_source defaults; coherent',
         points=points, frequencies_hz=frequencies[indices].tolist()
@@ -349,14 +381,21 @@ def run(fmin=train_source.FREQUENCY_MIN_HZ, fmax=train_source.FREQUENCY_MAX_HZ,
     print('=' * 65)
     print(f'BILAN GLOBAL SUR TOUTE LA BANDE ({frequencies[indices[0]]:.0f} - {frequencies[indices[-1]]:.0f} Hz) - {label} :')
     print(f'1. Pic initial max        : {max_init:.4e} (a {f_max_init:.1f} Hz)')
-    print(f'2. Pic continu fixe max   : {max_fixed:.4e} (a {f_max_fixed:.1f} Hz) -> Atténuation globale : -{100*(1-max_fixed/max_init):.1f} %')
-    print(f'3. Pic binaire fixe max   : {max_fixed_bin:.4e} (a {f_max_bin:.1f} Hz) -> Atténuation globale : -{100*(1-max_fixed_bin/max_init):.1f} %')
+    print(f'2. Pic continu fixe max   : {max_fixed:.4e} (a {f_max_fixed:.1f} Hz) -> Reduction du maximum : {100*(1-max_fixed/max_init):.1f} %')
+    print(f'3. Pic binaire 2 max      : {max_fixed_bin:.4e} (a {f_max_bin:.1f} Hz) -> Reduction du maximum : {100*(1-max_fixed_bin/max_init):.1f} %')
     print(f'4. Reference 100% absorb. : {max_full:.4e}')
+    for method in (1, 2):
+        energies = [r[f'energy_fixed_binary_{method}'] for r in rows]
+        wins = sum(r['best_binary'] == f'chi_binarize_{method}' for r in rows)
+        print(f'chi_binarize_{method} : somme energies={sum(energies):.4e}, maximum={max(energies):.4e}, plus faible a {wins}/{points} frequences')
+    total_1 = sum(r['energy_fixed_binary_1'] for r in rows)
+    total_2 = sum(r['energy_fixed_binary_2'] for r in rows)
+    winner = 'egalite' if total_1 == total_2 else 'chi_binarize_1' if total_1 < total_2 else 'chi_binarize_2'
+    print(f'Plus faible somme des energies echantillonnees : {winner}')
     print(f'Temps total d execution   : {time.time() - t_start:.2f} s')
     print('=' * 65)
     plt.show()
     return rows, config
-
 
 if __name__ == '__main__':
     # ----------------------------------------------------------------------
@@ -366,11 +405,11 @@ if __name__ == '__main__':
     rows, config = run(
         fmin=train_source.FREQUENCY_MIN_HZ,   # Hz
         fmax=train_source.FREQUENCY_MAX_HZ,   # Hz
-        points=None,          # None = toutes les frequences des tables ; ex. 50
+        points=None,        # Toutes les frequences des tables pour resoudre les pics etroits
         N=None,               # None = automatique
         max_iter=30,
-        material='ROCK_WOOL', # ou 'RECYCLED_RUBBER' (voir material_alpha.MATERIALS)
-        j=2,
+        material='ROCK_WOOL', # (voir material_alpha.MATERIALS)
+        j=0,
         fraction=0.3,
         quantity=None,        # Q = h*sum(chi), prioritaire sur fraction
         speed=300.,           # km/h

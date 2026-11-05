@@ -3,9 +3,8 @@
 1. Balayage initial : calcul de J(chi_0) et J(chi_full).
 2. Detection du pic initial.
 3. Optimisation a chaque frequence, en repartant du meme chi initial.
-4. Evaluation sur toute la bande du chi optimise au pic initial.
 
-Les deux figures sont affichees sans enregistrer de fichiers.
+La figure est affichee sans enregistrer de fichiers.
 """
 import time
 import os
@@ -44,35 +43,13 @@ def plot_results(rows, out, material):
     return fig
 
 
-def plot_fixed_results(rows, out, material):
-    frequency = np.array([float(r['frequency_hz']) for r in rows])
-    target = float(rows[0]['target_frequency_hz'])
-    fig, ax = plt.subplots(figsize=(11, 5), layout='constrained')
-    for key, label, color in [
-        ('initial', 'Repartition initiale', '#687386'),
-        ('fixed', 'Chi continu du pic, fixe sur toute la bande', '#1971c2'),
-        ('fixed_binary', 'Chi binaire du pic, fixe sur toute la bande', '#be5c20'),
-        ('full', 'Paroi entierement absorbante (100%)', '#2b8a3e')]:
-        values = np.array([float(r['energy_' + key]) for r in rows])
-        ax.semilogy(frequency, values, '-', label=label, color=color)
-        peak = int(np.argmax(values))
-        ax.scatter(frequency[peak], values[peak], color=color, marker='*', s=65, zorder=5)
-    ax.axvline(target, color='#555555', linestyle=':', label=f'Cible initiale : {target:.1f} Hz')
-    ax.set(xlabel='Frequence (Hz)', ylabel='Energie absolue du champ (unites du modele)')
-    ax.grid(True, alpha=.25)
-    ax.legend(fontsize=8)
-    fig.suptitle(f'Source train - {material} : un seul chi optimise a {target:.1f} Hz\n'
-                 'Sans reoptimisation aux autres frequences ; etoiles : maxima echantillonnes')
-    return fig
-
-
 # ---------------------------------------------------------------------------
 # Experience
 # ---------------------------------------------------------------------------
 def run(fmin=train_source.FREQUENCY_MIN_HZ, fmax=train_source.FREQUENCY_MAX_HZ,
         points=500, N=None, max_iter=30, material='ROCK_WOOL', j=0,
         fraction=.3, speed=300., threshold=.5):
-    """Optimise chaque frequence, puis evalue le chi du pic sur toute la bande.
+    """Optimise chaque frequence independamment, avec le meme chi initial.
 
     points : nombre de frequences echantillonnees (None = toutes).
     N      : mailles sur 1 m (None = automatique).
@@ -112,7 +89,7 @@ def run(fmin=train_source.FREQUENCY_MIN_HZ, fmax=train_source.FREQUENCY_MAX_HZ,
     # -------------------------------------------------------------
     # ETAPE 1 : Balayage initial de reference
     # -------------------------------------------------------------
-    print(f'>>> ETAPE 1/4 : Balayage initial ({points} frequences)...', flush=True)
+    print(f'>>> ETAPE 1/3 : Balayage initial ({points} frequences)...', flush=True)
     initial_energies = []
     full_energies = []
     for number, index in enumerate(indices, 1):
@@ -129,12 +106,12 @@ def run(fmin=train_source.FREQUENCY_MIN_HZ, fmax=train_source.FREQUENCY_MAX_HZ,
     # -------------------------------------------------------------
     peak_idx = int(np.argmax(initial_energies))
     peak_frequency = float(frequencies[indices[peak_idx]])
-    print(f'>>> ETAPE 2/4 : Pic initial a {peak_frequency:.2f} Hz', flush=True)
+    print(f'>>> ETAPE 2/3 : Pic initial a {peak_frequency:.2f} Hz', flush=True)
 
     # -------------------------------------------------------------
     # ETAPE 3 : Optimisation independante a chaque frequence
     # -------------------------------------------------------------
-    print('>>> ETAPE 3/4 : Optimisation par frequence (meme chi initial)...', flush=True)
+    print('>>> ETAPE 3/3 : Optimisation par frequence (meme chi initial)...', flush=True)
     rows = []
     for position, index in enumerate(indices):
         frequency = float(frequencies[index])
@@ -157,43 +134,19 @@ def run(fmin=train_source.FREQUENCY_MIN_HZ, fmax=train_source.FREQUENCY_MAX_HZ,
             fraction_binary=float(chi_binary.sum() / boundary_count),
             accepted_iterations=len(history) - 1,
             amplitude_rolling=float(amplitudes[0]), amplitude_aero=float(amplitudes[1])))
-        if position == peak_idx:
-            fixed_chi = chi_opt.copy()
-            fixed_binary = chi_binary.copy()
         print(f'   [Etape 3] {position + 1}/{points} : {frequency:.2f} Hz -> '
               f'init={e_init:.3e}, opt={e_opt:.3e}, bin={e_bin:.3e}', flush=True)
-
-    # -------------------------------------------------------------
-    # ETAPE 4 : Evaluation spectrale du mur fixe optimise au pic
-    # -------------------------------------------------------------
-    print(f'>>> ETAPE 4/4 : Evaluation du chi fixe de {peak_frequency:.2f} Hz...', flush=True)
-    fixed_rows = []
-    for number, (index, reference) in enumerate(zip(indices, rows), 1):
-        frequency = float(frequencies[index])
-        k, A = material_alpha.solver_parameters(omega[index], alpha[index], 1., 340.)
-        source, _ = train_source.gaussian_train_source(d, h, frequency, speed)
-        fixed_rows.append(dict(
-            frequency_hz=frequency, target_frequency_hz=peak_frequency,
-            energy_initial=reference['energy_initial'],
-            energy_fixed=solve_eval(k, source, A, fixed_chi),
-            energy_fixed_binary=solve_eval(k, source, A, fixed_binary),
-            energy_full=reference['energy_full']))
-        if number == 1 or number % 50 == 0 or number == points:
-            print(f'   [Etape 4] {number}/{points} : {frequency:.2f} Hz', flush=True)
 
     config = dict(
         material=material, N=mesh_cells, grid_shape=list(d.shape), spacestep=h,
         geometry='plate' if j == 0 else 'fractale', level=int(j), max_iter=max_iter,
         fraction=fraction, threshold=threshold, speed_kmh=speed,
         length_m=1., sound_speed=340.,
-        fixed_chi_target_frequency_hz=peak_frequency,
-        fixed_chi_selection='Maximum sampled initial energy',
         protocol='Independent optimization at each frequency; same initial chi, no warm start',
         points=points, frequency_indices=indices.tolist(), frequencies_hz=frequencies[indices].tolist(),
         total_time_seconds=float(time.time() - t_start))
 
     plot_results(rows, None, material)
-    plot_fixed_results(fixed_rows, None, material)
     print(f'Temps total d execution : {time.time() - t_start:.2f} s')
     plt.show()
     return rows, config

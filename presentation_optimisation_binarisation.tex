@@ -1,0 +1,158 @@
+% Compiler deux fois avec pdflatex ; conserver le dossier figures_presentation.
+% Sources locales : demo_control_polycopie2024.py et test_energie_frequence.py.
+\documentclass[aspectratio=169,11pt]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern,amsmath,amssymb,booktabs}
+\usetheme{Boadilla}
+\definecolor{bleu}{RGB}{25,67,105}
+\setbeamercolor{structure}{fg=bleu}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\Alpha}{\alpha}
+\title{Optimisation d'une paroi acoustique}
+\subtitle{Descente projetée, binarisation et vérification en fréquence}
+\author{}
+\date{}
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+\begin{frame}{Optimiser la répartition continue du matériau}
+Sur la paroi, $\chi_i=0$ signifie absence de matériau et $\chi_i=1$ présence
+complète. L'optimisation autorise $0\leq\chi_i\leq1$.
+\[
+ J_f(\chi)=h^2\!\sum_{(i,j)\in\Omega_h^{\mathrm{int}}}|u_{f,i,j}(\chi)|^2,
+ \qquad \sum_{i\in\Gamma_R}\chi_i=vS,\quad v=0{,}30.
+\]
+\small $u_f$ : champ acoustique à la fréquence $f$ ; $h$ : pas du maillage ;
+$S$ : nombre de nœuds de la paroi $\Gamma_R$.
+\medskip
+\normalsize
+La fonction \code{your_optimization_procedure} :
+\begin{enumerate}
+\item calcule le champ et le gradient de l'énergie par la méthode adjointe ;
+\item effectue une descente puis projette $\chi$ sur les contraintes ;
+\item accepte le nouvel état si l'énergie diminue, sinon réduit le pas.
+\end{enumerate}
+\medskip
+\textbf{À fréquence fixée :} $J_f(\chi_{\mathrm{opt}})\leq J_f(\chi_0)$.
+L'énergie utilisée pour la descente est normalisée par $J_f(\chi_0)$.
+\end{frame}
+
+\begin{frame}{Passer à une répartition binaire : le seuil à 0,5}
+Pour obtenir une paroi avec ou sans matériau à chaque nœud,
+\code{chi_binarize_1} applique un seuil au $\chi$ continu optimisé :
+\[
+ \chi_i^{\mathrm{seuil}}=
+ \begin{cases}1&\chi_i\geq0{,}5,\\0&\chi_i<0{,}5.\end{cases}
+\]
+\begin{itemize}
+\item Les valeurs intermédiaires disparaissent.
+\item La proportion de matériau n'est plus nécessairement égale à $30\,\%$.
+\item L'énergie peut augmenter : le résultat binaire n'a pas été optimisé.
+\end{itemize}
+\medskip
+\textbf{Pour mesurer l'effet du seuil, il faut recalculer le champ acoustique}
+avec cette nouvelle répartition, puis son énergie.
+\end{frame}
+
+\begin{frame}{Comparer les répartitions à chaque fréquence}
+\small Protocole de \code{test_energie_frequence}.
+\medskip
+\normalsize
+\begin{enumerate}
+\item Choisir une fréquence et calculer l'énergie de la répartition initiale $\chi_0$.
+\item Optimiser $\chi$ à cette fréquence, en partant de $\chi_0$.
+\item Binariser le résultat et recalculer l'énergie.
+\item Recommencer à la fréquence suivante avec le même $\chi_0$.
+\end{enumerate}
+\medskip
+À chaque fréquence, les comparaisons utilisent la même géométrie,
+la même source et le même matériau. La paroi couverte à $100\,\%$
+constitue une référence supplémentaire.
+\medskip
+
+\textbf{Une répartition optimisée différente à chaque fréquence :}
+ces courbes ne décrivent pas les performances d'une unique paroi fixe.
+\end{frame}
+
+\begin{frame}{Sur la bande : le continu conserve davantage de gain}
+\centering
+\includegraphics[width=.94\textwidth,height=.67\textheight,keepaspectratio]{figures_presentation/energie_frequence_fournie.png}
+
+\small La courbe continue optimisée (bleu) se situe généralement sous
+la courbe après binarisation (orange). La comparaison locale précise
+ce que la binarisation fait perdre.
+\medskip
+
+\scriptsize Figure fournie, à échelle logarithmique. La méthode exacte de la courbe
+orange n'est pas identifiée ; les calculs suivants testent explicitement le seuil à $0{,}5$.
+\end{frame}
+
+\begin{frame}{Le seuil peut annuler le gain de l'optimisation}
+\centering
+\includegraphics[width=.94\textwidth,height=.55\textheight,keepaspectratio]{figures_presentation/zoom_binarisation_seuil.png}
+
+\small À $1887{,}39$ Hz : \textbf{$-18{,}38\,\%$ en continu}, puis
+\textbf{$+0{,}64\,\%$ après seuillage}, par rapport à l'énergie initiale.
+
+Autre limite : à $1880{,}38$ Hz, le seuil utilise $34{,}05\,\%$
+de matériau au lieu des $30\,\%$ visés.
+\medskip
+
+\scriptsize Calculs complémentaires indépendants : laine de roche, fractale niveau 2,
+$N=128$, 30 itérations maximum, train à $300$ km/h.
+Les points sont recalculés, et non extraits de la figure précédente.
+\end{frame}
+
+\begin{frame}{Introduire le tri pour respecter le budget de matériau}
+Pour corriger la variation de quantité introduite par le seuil,
+\code{chi_binarize_2} sélectionne un nombre fixé de nœuds :
+\[
+ m=\operatorname{arrondi}(vS),\qquad v=0{,}30.
+\]
+\begin{enumerate}
+\item Classer les valeurs du même $\chi$ continu par ordre décroissant.
+\item Mettre à $1$ les $m$ plus grandes et à $0$ toutes les autres.
+\item Recalculer le champ et comparer l'énergie à celle obtenue par seuil.
+\end{enumerate}
+\medskip
+Dans le cas étudié : $S=511$, donc $m=153$ nœuds,
+soit $29{,}94\,\%$ de matériau. L'écart à $30\,\%$ vient de l'arrondi.
+\medskip
+
+\textbf{Le tri contrôle la quantité, pas l'énergie.}
+Il reste à mesurer son effet sur les performances acoustiques.
+\end{frame}
+
+\begin{frame}{Comparer les deux méthodes : énergie et quantité}
+\small Énergies rapportées à l'énergie initiale de chaque fréquence :
+$100\,\%$ correspond à la répartition initiale ; plus bas est meilleur.
+\begin{center}
+\begin{tabular}{rrrrr}
+\toprule
+$f$ (Hz) & Continu & Seuil & Tri & Matériau (seuil)\\
+\midrule
+1880,38 & $41,89\,\%$ & $43,56\,\%$ & $47,50\,\%$ & $34,05\,\%$\\
+1887,39 & $81,62\,\%$ & $100,64\,\%$ & $100,64\,\%$ & $29,94\,\%$\\
+1894,39 & $53,77\,\%$ & $56,40\,\%$ & $58,69\,\%$ & $32,29\,\%$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\normalsize
+\begin{itemize}
+\item Le continu donne la plus faible énergie sur ces trois fréquences.
+\item Le seuil fait mieux que le tri à deux fréquences, avec davantage de matériau.
+\item À $1887{,}39$ Hz, les deux méthodes produisent le même $\chi$ binaire.
+\end{itemize}
+\medskip
+\textbf{Le tri respecte le budget : $29{,}94\,\%$ dans les trois cas.}
+Ces résultats ne démontrent pas sa supériorité énergétique sur le seuil.
+\end{frame}
+
+\end{document}

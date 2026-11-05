@@ -98,7 +98,12 @@ def your_optimization_procedure(domain_omega, spacestep, omega, f, f_dir, f_neu,
     # energy = historique de J/J0 (1 -> valeur finale), grad = gradient de J/J0
     return chi, energy[:k + 1], u, grad
 
-def binarize_chi_threshold(chi, domain_omega, threshold=0.5, fraction=0.3):
+def chi_binarize_1(chi, domain_omega, threshold=0.5):
+    """Binarisation par seuil : 1 si chi >= threshold sur le bord de Robin."""
+    return ((domain_omega == _env.NODE_ROBIN) & (chi >= threshold)).astype(float)
+
+
+def chi_binarize_2(chi, domain_omega, threshold=0.5, fraction=0.3):
     """
     Transforme chi en fonction binaire {0, 1} en conservant la quantite de materiau :
     on met a 1.0 les n points les plus proches de 1 (les plus absorbants)
@@ -131,8 +136,9 @@ def binarize_chi_threshold(chi, domain_omega, threshold=0.5, fraction=0.3):
     return chi_bin
 
 
-# Alias pratique
-chi_binarize = binarize_chi_threshold
+# Anciens noms conserves pour les autres scripts (binarisation par tri).
+binarize_chi_threshold = chi_binarize_2
+chi_binarize = chi_binarize_2
 
 
 # # def _binarize_chi_threshold_legacy(chi, domain_omega, threshold=0.5):

@@ -1,0 +1,88 @@
+{
+  "configuration": {
+    "material": "ROCK_WOOL",
+    "N": 128,
+    "grid_shape": [
+      142,
+      129
+    ],
+    "spacestep": 0.0078125,
+    "geometry": "fractale",
+    "level": 2,
+    "max_iter": 30,
+    "fraction": 0.3,
+    "threshold": 0.5,
+    "speed_kmh": 300.0,
+    "length_m": 1.0,
+    "sound_speed": 340.0,
+    "protocol": "Independent optimization at each frequency; same initial chi, no warm start",
+    "points": 3,
+    "frequency_indices": [
+      394,
+      396,
+      398
+    ],
+    "frequencies_hz": [
+      1880.3803803803803,
+      1887.3873873873872,
+      1894.3943943943943
+    ],
+    "total_time_seconds": 67.09039330482483
+  },
+  "rows": [
+    {
+      "frequency_hz": 1880.3803803803803,
+      "energy_initial": 1.3234697079415517e-06,
+      "energy_optimized": 5.543594732074593e-07,
+      "energy_binary": 6.286988452825115e-07,
+      "energy_full": 8.456067875456756e-07,
+      "ratio_optimized": 0.41886827471833715,
+      "ratio_binary": 0.4750383340925523,
+      "ratio_full": 0.6389317280717242,
+      "fraction_initial": 0.30000000000000004,
+      "fraction_optimized": 0.29999999999999993,
+      "fraction_binary": 0.299412915851272,
+      "accepted_iterations": 30,
+      "amplitude_rolling": 0.9833822604548631,
+      "amplitude_aero": 0.9607774065942455,
+      "energy_binary_1": 5.765605986533574e-07,
+      "fraction_binary_1": 0.3405088062622309
+    },
+    {
+      "frequency_hz": 1887.3873873873872,
+      "energy_initial": 5.641922674207746e-06,
+      "energy_optimized": 4.604828244892062e-06,
+      "energy_binary": 5.67823313371991e-06,
+      "energy_full": 0.00012230631080061845,
+      "ratio_optimized": 0.8161806729367634,
+      "ratio_binary": 1.0064358307635373,
+      "ratio_full": 21.67812603312452,
+      "fraction_initial": 0.30000000000000004,
+      "fraction_optimized": 0.3,
+      "fraction_binary": 0.299412915851272,
+      "accepted_iterations": 30,
+      "amplitude_rolling": 0.9840585050775472,
+      "amplitude_aero": 0.9597397767320759,
+      "energy_binary_1": 5.67823313371991e-06,
+      "fraction_binary_1": 0.299412915851272
+    },
+    {
+      "frequency_hz": 1894.3943943943943,
+      "energy_initial": 1.2049646736068652e-06,
+      "energy_optimized": 6.478635293879906e-07,
+      "energy_binary": 7.071775475911089e-07,
+      "energy_full": 8.274508547452087e-07,
+      "ratio_optimized": 0.5376618448478798,
+      "ratio_binary": 0.5868865395649221,
+      "ratio_full": 0.6867013389432983,
+      "fraction_initial": 0.30000000000000004,
+      "fraction_optimized": 0.29999999999999993,
+      "fraction_binary": 0.299412915851272,
+      "accepted_iterations": 30,
+      "amplitude_rolling": 0.9847186076625445,
+      "amplitude_aero": 0.9586933804597374,
+      "energy_binary_1": 6.796127748996161e-07,
+      "fraction_binary_1": 0.32289628180039137
+    }
+  ]
+}
